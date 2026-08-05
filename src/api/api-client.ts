@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from "axios";
-import Cookies from "js-cookie";
+import { createTokenRefreshManager } from "@/src/api/token-refresh";
+import { getAccessToken } from "@/src/lib/token-storage";
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
@@ -11,7 +12,7 @@ export const apiClient: AxiosInstance = axios.create({
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = Cookies.get("accessToken");
+    const token = getAccessToken();
 
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -19,17 +20,32 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
+  (error: AxiosError) => Promise.reject(error)
 );
+
+const tokenRefresh = createTokenRefreshManager(apiClient);
 
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response && error.response.status === 401) {
-      console.warn("Session expired or unauthorized. Please log in again.");
+    const original = error.config;
+    const status = error.response?.status;
+
+    if (
+      status === 401 &&
+      original &&
+      !original._retry &&
+      !tokenRefresh.isAuthUrl(original.url ?? "")
+    ) {
+      try {
+        return await tokenRefresh.handleUnauthorized(original);
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
+      }
     }
+
     return Promise.reject(error);
   }
 );
+
+export const { scheduleTokenRefresh, clearTokenRefresh } = tokenRefresh;

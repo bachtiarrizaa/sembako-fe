@@ -1,13 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import Cookies from "js-cookie";
 import { toast } from "sonner";
 import { JwtPayload } from "../types/auth";
 import { LoginRequest } from "../schemas/auth.schema";
 import { authService } from "../services/auth.service";
 import { handleApiError } from "@/src/lib/error";
 import { useAuthStore } from "@/src/stores/auth.store";
+import { scheduleTokenRefresh } from "@/src/api/api-client";
+import { setAccessToken } from "@/src/lib/token-storage";
 
 export function useLogin() {
   const router = useRouter();
@@ -18,7 +19,8 @@ export function useLogin() {
     onSuccess: (response) => {
       const { accessToken, user } = response.data;
 
-      Cookies.set("accessToken", accessToken, { path: "/" });
+      setAccessToken(accessToken);
+      scheduleTokenRefresh(accessToken);
 
       const payload = jwtDecode<JwtPayload>(accessToken);
 

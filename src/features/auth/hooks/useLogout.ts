@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/src/stores/auth.store";
 import { authService } from "@/src/features/auth/services/auth.service";
 import { handleApiError } from "@/src/lib/error";
+import { clearTokenRefresh } from "@/src/api/api-client";
 
 export function useLogout() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export function useLogout() {
     } catch (error) {
       handleApiError(error, "Failed to log out on server. Proceeding to login.");
     } finally {
+      clearTokenRefresh();
       clearSession();
       router.push("/login");
     }
