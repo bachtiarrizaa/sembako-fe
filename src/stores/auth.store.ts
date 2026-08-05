@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import Cookies from "js-cookie";
 import { User } from "../features/auth/types/auth";
+import { clearAccessToken } from "@/src/lib/token-storage";
 
 interface AuthState {
   user: User | null;
@@ -15,7 +15,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       setUser: (user: User | null) => set({ user }),
       clearAuth: () => {
-        Cookies.remove("accessToken", { path: "/" });
+        clearAccessToken();
         localStorage.removeItem("auth-storage");
         set({ user: null });
       },
