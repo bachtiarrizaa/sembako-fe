@@ -1,22 +1,16 @@
 import { apiClient } from "@/src/api/api-client";
 import { LoginRequest } from "../schemas/auth.schema";
+import { ApiResponse } from "@/src/types/api-response.type";
 import { LoginResponse } from "../types/auth";
 
 export const authService = {
-  login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const res = await apiClient.post<{
-      success: boolean
-      message: string
-      data: LoginResponse
-    }>("/auth/login", data)
-    return res.data.data
+  login: async (credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> => {
+    const res = await apiClient.post<ApiResponse<LoginResponse>>("/auth/login", credentials);
+    return res.data;
   },
 
-  logout: async () => {
-    const res = await apiClient.post<{
-      success: boolean
-      message: string
-    }>("/auth/logout")
-    return res.data
-  }
-}
+  logout: async (): Promise<ApiResponse<null>> => {
+    const res = await apiClient.post<ApiResponse<null>>("/auth/logout");
+    return res.data;
+  },
+};

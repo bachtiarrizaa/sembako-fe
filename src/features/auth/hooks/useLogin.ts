@@ -16,7 +16,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
     onSuccess: (response) => {
-      const accessToken = response.accessToken;
+      const { accessToken, user } = response.data;
 
       Cookies.set("accessToken", accessToken, { path: "/" });
 
@@ -24,26 +24,26 @@ export function useLogin() {
 
       setSession({
         id: payload.user_id,
-        name: response.user.name,
-        email: response.user.email,
-        username: response.user.username,
+        name: user.name,
+        email: user.email,
+        username: user.username,
         role: {
-          id: response.user.role.id,
-          name: response.user.role.name,
+          id: user.role.id,
+          name: user.role.name,
         },
-        isActive: response.user.isActive,
-        createdAt: response.user.createdAt,
-        updatedAt: response.user.updatedAt,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       });
 
-      const roleName = response.user.role.name.toLowerCase();
+      const roleName = user.role.name.toLowerCase();
       if (roleName === "admin") {
         router.push("/admin");
       } else {
         router.push("/cashier");
       }
 
-      toast.success("Login successful!");
+      toast.success(response.message);
     },
     onError: (error: unknown) => {
       handleApiError(error, "Failed to sign in. Please check your credentials.");
