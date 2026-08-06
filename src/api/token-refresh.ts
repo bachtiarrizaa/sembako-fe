@@ -1,9 +1,9 @@
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { jwtDecode } from "jwt-decode";
-import type { ApiResponse } from "@/src/types/api-response";
-import type { RefreshResponse } from "@/src/features/auth/types/auth";
-import { useAuthStore } from "@/src/stores/auth.store";
-import { setAccessToken, clearAccessToken } from "@/src/lib/token-storage";
+import type { ApiResponse } from "@/types/api-response";
+import type { RefreshResponse } from "@/features/auth/types/auth";
+import { useAuthStore } from "@/stores/auth.store";
+import { setAccessToken, clearAccessToken } from "@/lib/token-storage";
 
 const REFRESH_URL = "/auth/refresh";
 const REFRESH_BUFFER_MS = 60_000;

@@ -1,4 +1,4 @@
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { AxiosError } from "axios"
 
 interface NormalizedError {
@@ -21,20 +21,20 @@ export function handleApiError(error: unknown, defaultMessage = "An unexpected e
     const serverMessage = responseData?.message;
     
     if (serverMessage) {
-      toast.error(serverMessage);
+      toast.add({ title: serverMessage, type: "error" });
       return;
     }
   }
 
   if (isNormalizedError(error)) {
-    toast.error(error.message)
+    toast.add({ title: error.message, type: "error" })
     return
   }
 
   if (error instanceof Error) {
-    toast.error(error.message)
+    toast.add({ title: error.message, type: "error" })
     return
   }
 
-  toast.error(defaultMessage)
+  toast.add({ title: defaultMessage, type: "error" })
 }

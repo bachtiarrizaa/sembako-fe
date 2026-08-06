@@ -1,6 +1,6 @@
-import { apiClient } from "@/src/api/api-client";
+import { apiClient } from "@/api/api-client";
 import { LoginRequest } from "../schemas/auth.schema";
-import { ApiResponse } from "@/src/types/api-response";
+import { ApiResponse } from "@/types/api-response";
 import { LoginResponse } from "../types/auth";
 
 export const authService = {
