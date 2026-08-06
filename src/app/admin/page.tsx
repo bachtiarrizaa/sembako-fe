@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useLogout } from "@/src/features/auth/hooks/useLogout";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 
 export default function AdminDashboard() {
   const { logout } = useLogout();

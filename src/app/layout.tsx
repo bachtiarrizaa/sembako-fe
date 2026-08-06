@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toast";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
 });
 
@@ -25,12 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* 🌟 Bungkus aplikasi dengan Providers */}
+    <html lang="en" className={plusJakartaSans.variable}>
+      <body className="antialiased">
         <Providers>
           {children}
-          <Toaster richColors position="top-right" />
+          <Toaster />
         </Providers>
       </body>
     </html>

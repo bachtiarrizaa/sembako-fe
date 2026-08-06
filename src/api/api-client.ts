@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from "axios";
-import { createTokenRefreshManager } from "@/src/api/token-refresh";
-import { getAccessToken } from "@/src/lib/token-storage";
+import { createTokenRefreshManager } from "@/api/token-refresh";
+import { getAccessToken } from "@/lib/token-storage";
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",

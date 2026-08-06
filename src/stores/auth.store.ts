@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { User } from "../features/auth/types/auth";
-import { clearAccessToken } from "@/src/lib/token-storage";
+import { clearAccessToken } from "@/lib/token-storage";
 
 interface AuthState {
   user: User | null;

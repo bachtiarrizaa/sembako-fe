@@ -1,14 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 import { JwtPayload } from "../types/auth";
 import { LoginRequest } from "../schemas/auth.schema";
 import { authService } from "../services/auth.service";
-import { handleApiError } from "@/src/lib/error";
-import { useAuthStore } from "@/src/stores/auth.store";
-import { scheduleTokenRefresh } from "@/src/api/api-client";
-import { setAccessToken } from "@/src/lib/token-storage";
+import { handleApiError } from "@/lib/error";
+import { useAuthStore } from "@/stores/auth.store";
+import { scheduleTokenRefresh } from "@/api/api-client";
+import { setAccessToken } from "@/lib/token-storage";
 
 export function useLogin() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export function useLogin() {
         router.push("/cashier");
       }
 
-      toast.success(response.message);
+      toast.add({ title: response.message, type: "success" });
     },
     onError: (error: unknown) => {
       handleApiError(error, "Failed to sign in. Please check your credentials.");
