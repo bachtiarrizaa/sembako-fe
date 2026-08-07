@@ -29,10 +29,7 @@ export function useLogin() {
         name: user.name,
         email: user.email,
         username: user.username,
-        role: {
-          id: user.role.id,
-          name: user.role.name,
-        },
+        role: user.role,
         isActive: user.isActive,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,

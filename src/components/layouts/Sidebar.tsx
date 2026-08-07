@@ -75,7 +75,7 @@ const menuItems: MenuItem[] = [
     roles: ['admin'],
     children: [
       { name: 'Semua Pegawai', path: '/admin/users' },
-      { name: 'Role', path: '/users/roles' },
+      { name: 'Role', path: '/admin/users/roles' },
     ],
   },
   { name: 'Pengaturan', path: '/admin/settings', icon: Settings, roles: ['admin'] },

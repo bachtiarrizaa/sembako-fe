@@ -1,7 +1,4 @@
-export interface Role {
-  id: string
-  name: string
-}
+import { Role } from "@/features/roles/types/role"
 
 export interface UserResponse {
   id: string
