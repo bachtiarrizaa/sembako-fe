@@ -1,13 +1,10 @@
+import { Role } from "@/features/roles/types/role";
+
 export interface JwtPayload {
   user_id: string;
   role: string;
   exp: number;
   iat: number;
-}
-
-export interface Role {
-  id: string;
-  name: string;
 }
 
 export interface User {
