@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
 import { useUserMe } from "@/features/users/hooks/useUserMe";
 
-export default function AdminRoute({ children }: { children: React.ReactNode }) {
+export default function CashierRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, isError } = useUserMe();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) return;
     if (isError || !user) {
-      router.replace("/login");
+      router.replace("/cashier/login");
       return;
     }
-    if ((user.role?.name || "").toLowerCase() !== "admin") {
-      router.replace("/cashier");
+    if ((user.role?.name || "").toLowerCase() !== "cashier") {
+      router.replace("/admin/dashboard");
     }
   }, [user, isLoading, isError, router]);
 

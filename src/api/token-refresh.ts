@@ -45,10 +45,19 @@ export function createTokenRefreshManager(api: AxiosInstance): TokenRefreshManag
     clearTokenRefresh();
     clearAccessToken();
     useAuthStore.getState().clearAuth();
-    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+    if (typeof window !== "undefined") {
+      const role = (useAuthStore.getState().user?.role?.name || "").toLowerCase();
+      const section = window.location.pathname.startsWith("/cashier") ? "cashier" : "admin";
+      const loginPath =
+        role === "cashier"
+          ? "/cashier/login"
+          : role === "admin"
+            ? "/admin/login"
+            : section === "cashier"
+              ? "/cashier/login"
+              : "/admin/login";
       // Force a full page reload to reset all client state after session expiry.
-      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-      window.location.assign("/login");
+      window.location.assign(loginPath);
     }
   }
 

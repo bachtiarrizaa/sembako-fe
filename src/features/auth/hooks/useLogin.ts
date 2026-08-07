@@ -40,9 +40,9 @@ export function useLogin() {
 
       const roleName = user.role.name.toLowerCase();
       if (roleName === "admin") {
-        router.push("/admin");
+        router.push("/admin/dashboard");
       } else {
-        router.push("/cashier");
+        router.push("/cashier/dashboard");
       }
 
       toast.add({ title: response.message, type: "success" });

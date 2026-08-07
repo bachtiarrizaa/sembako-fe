@@ -1,10 +1,19 @@
+import type { ReactNode } from "react"
 import { Wheat } from "lucide-react"
 import { LoginForm } from "@/features/auth/components/LoginForm"
 
 const LOGIN_COVER =
   "https://images.unsplash.com/photo-1645331465778-eb409d112198?q=80&w=2000&auto=format&fit=crop"
 
-export default function LoginPage() {
+interface LoginPageProps {
+  title?: string
+  subtitle?: ReactNode
+}
+
+export function LoginPage({
+  title = "Selamat Datang",
+  subtitle = "Masuk dengan akun Anda untuk mengelola Toko Beras Putra Mandiri",
+}: LoginPageProps) {
   return (
     <div className="theme-teal grid min-h-screen w-full lg:grid-cols-2 bg-background">
       <div className="relative hidden bg-muted lg:block overflow-hidden">
@@ -49,15 +58,10 @@ export default function LoginPage() {
           <div className="w-full max-w-sm space-y-4 rounded-2xl border bg-card shadow-xs p-6 sm:p-8">
             <div className="space-y-3 text-center">
               <h1 className="text-xl font-bold tracking-tight text-foreground">
-                Selamat Datang
+                {title}
               </h1>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground leading-tight">
-                  Masuk dengan akun Anda untuk mengelola
-                </p>
-                <p className="text-sm text-muted-foreground leading-tight">
-                  Toko Beras Putra Mandiri
-                </p>
+              <div className="space-y-2 text-sm text-muted-foreground leading-tight">
+                {subtitle}
               </div>
             </div>
 
