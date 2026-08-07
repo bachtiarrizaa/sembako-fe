@@ -119,7 +119,10 @@ export function Navbar() {
         onOpenChange={setShowLogoutModal}
         title="Konfirmasi Keluar?"
         description="Anda perlu login kembali untuk mengakses aplikasi."
-        onConfirm={logout}
+        onConfirm={() => {
+          setShowLogoutModal(false)
+          logout()
+        }}
         isLoading={isLoggingOut}
         confirmText="Ya, Keluar"
         loadingText="Logging out..."

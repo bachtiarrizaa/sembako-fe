@@ -36,15 +36,15 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { name: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'cashier'] },
   { name: 'POS / Kasir', path: '/admin/pos', icon: ShoppingCart, roles: ['admin', 'cashier'] },
-  { name: 'Pesanan', path: '/admin/orders', icon: Receipt, roles: ['admin', 'cashier'] },
+  { name: 'Transaksi', path: '/admin/transaction', icon: Receipt, roles: ['admin', 'cashier'] },
   {
-    name: 'Menu & Produk',
+    name: 'Produk & Satuan',
     icon: Coffee,
     roles: ['admin', 'cashier'],
     children: [
       { name: 'Semua Produk', path: '/admin/products' },
+      { name: 'Satuan', path: '/admin/untis' },
       { name: 'Kategori', path: '/products/categories' },
-      { name: 'Diskon Produk', path: '/admin/products/discounts' },
     ],
   },
   {
@@ -52,8 +52,8 @@ const menuItems: MenuItem[] = [
     icon: Percent,
     roles: ['admin'],
     children: [
-      { name: 'Campaign Diskon', path: '/promotions/discounts' },
-      { name: 'Voucher', path: '/promotions/vouchers' },
+      { name: 'Semua Diskon', path: '/admin/discounts' },
+      { name: 'Diskon Produk', path: '/admin/products/discounts' },
     ],
   },
   {
@@ -66,7 +66,7 @@ const menuItems: MenuItem[] = [
       { name: 'Stok Produk', path: '/admin/inventory/product-stock' },
     ],
   },
-  { name: 'Cabang', path: '/branches', icon: Building2, roles: ['admin'] },
+  { name: 'Customer', path: '/admin/customers', icon: Building2, roles: ['admin'] },
   { name: 'Shift', path: '/admin/shifts', icon: Clock, roles: ['admin', 'cashier'] },
   { name: 'Laporan', path: '/admin/reports', icon: BarChart3, roles: ['admin'] },
   {
@@ -90,7 +90,7 @@ export function Sidebar() {
   const user = useAuthStore((state) => state.user)
 
   const userRole = (profile?.role?.name || user?.role?.name || '').toLowerCase()
-  const dashboardPath = userRole === 'admin' ? '/admin' : '/cashier'
+  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : '/cashier/dashboard'
 
   const displayedMenuItems = menuItems.filter((item) => item.roles.includes(userRole))
 

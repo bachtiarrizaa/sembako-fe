@@ -1,7 +1,6 @@
 export interface JwtPayload {
   user_id: string;
-  role_id: string;
-  role_name: string;
+  role: string;
   exp: number;
   iat: number;
 }

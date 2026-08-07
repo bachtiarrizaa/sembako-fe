@@ -20,10 +20,13 @@ export function useLogout() {
       handleApiError(error, "Failed to log out on server. Proceeding to login.");
     },
     onSettled: () => {
+      const role = (useAuthStore.getState().user?.role?.name || "").toLowerCase();
+      const loginPath = role === "cashier" ? "/cashier/login" : "/admin/login";
+
       clearTokenRefresh();
       clearSession();
       queryClient.clear();
-      router.push("/login");
+      router.push(loginPath);
     },
   });
 }
