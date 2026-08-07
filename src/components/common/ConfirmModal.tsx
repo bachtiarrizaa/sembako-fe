@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -48,20 +49,20 @@ export function ConfirmModal({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
-          <button
+          <Button
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
             className={cn(
-              "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+              "cursor-pointer",
               variant === "danger"
-                ? "bg-red-700/90 text-white hover:bg-red-700 cursor-pointer"
-                : "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                ? "bg-red-700/85 text-white border border-red-700 hover:bg-red-700 hover:text-white"
+                : "bg-primary/10 text-primary border border-primary/70 hover:bg-primary hover:text-primary-foreground"
             )}
           >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isLoading && <Loader2 className="size-4 animate-spin" />}
             {isLoading ? loadingText : confirmText}
-          </button>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

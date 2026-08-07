@@ -1,7 +1,7 @@
 import { ApiResponse, Pagination } from "@/types/api-response";
 import { Role, RoleResponse } from "../types/role";
 import { apiClient } from "@/api/api-client";
-import { RoleSearch } from "../schemas/role.schema";
+import { CreateRoleRequest, RoleSearch, UpdateRoleRequest } from "../schemas/role.schema";
 import { buildListParams } from "@/lib/utils";
 
 export const roleService = {
@@ -16,4 +16,19 @@ export const roleService = {
         pagination: res.data.pagination,
       }
     },
+
+  create: async (payload: CreateRoleRequest): Promise<ApiResponse<RoleResponse>> => {
+    const res = await apiClient.post<ApiResponse<RoleResponse>>("/roles", payload)
+    return res.data
+  },
+
+  update: async (id: string, payload: UpdateRoleRequest): Promise<ApiResponse<RoleResponse>> => {
+    const res = await apiClient.put<ApiResponse<RoleResponse>>(`/roles/${id}`, payload)
+    return res.data
+  },
+
+  delete: async (id: string): Promise<ApiResponse<null>> => {
+    const res = await apiClient.delete<ApiResponse<null>>(`/roles/${id}`)
+    return res.data
+  },
 }
