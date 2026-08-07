@@ -6,7 +6,7 @@ const LOGIN_COVER =
 
 export default function LoginPage() {
   return (
-    <div className="theme-emerald grid min-h-screen w-full lg:grid-cols-2 bg-background">
+    <div className="theme-teal grid min-h-screen w-full lg:grid-cols-2 bg-background">
       <div className="relative hidden bg-muted lg:block overflow-hidden">
         <img
           src={LOGIN_COVER}

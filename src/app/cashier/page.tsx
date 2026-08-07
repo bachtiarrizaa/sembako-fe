@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
 export default function CashierDashboard() {
-  const { logout } = useLogout();
+  const { mutate: logout } = useLogout();
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
@@ -22,7 +22,7 @@ export default function CashierDashboard() {
           <Button
             variant="destructive"
             className="w-full"
-            onClick={logout}
+            onClick={() => logout()}
           >
             Logout
           </Button>
