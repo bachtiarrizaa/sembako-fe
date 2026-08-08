@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, LogOut, Store, User, Settings } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
 import { useLogout } from '@/features/auth/hooks/useLogout'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { useUserMe } from '@/features/users/hooks/useUserMe'
@@ -37,7 +38,11 @@ export function Navbar() {
 
             <div className="text-left hidden sm:block">
               <div className="text-xs text-slate-800 font-semibold leading-tight">
-                {isLoading ? 'Loading...' : profile?.name || 'Staff'}
+                {isLoading ? (
+                  <Spinner className="size-3 text-slate-400" />
+                ) : (
+                  profile?.name || 'Staff'
+                )}
               </div>
               <div className="text-xs text-slate-500 leading-tight">
                 {profile?.role?.name || 'Kasir'}
@@ -125,7 +130,7 @@ export function Navbar() {
         }}
         isLoading={isLoggingOut}
         confirmText="Ya, Keluar"
-        loadingText="Logging out..."
+        loadingText="keluar..."
         variant="danger"
       />
     </>
