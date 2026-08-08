@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Spinner } from "@/components/ui/spinner"
 import { useCreateRole } from "../hooks/useCreateRole"
 import { useUpdateRole } from "../hooks/useUpdateRole"
 import { CreateRoleRequest, roleSchema, UpdateRoleRequest } from "../schemas/role.schema"
@@ -25,9 +26,9 @@ interface RoleFormDialogProps {
 export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps) {
   const isEdit = Boolean(role)
 
-  const createMutation = useCreateRole()
-  const updateMutation = useUpdateRole()
-  const isPending = createMutation.isPending || updateMutation.isPending
+  const createRole = useCreateRole()
+  const updateRole = useUpdateRole()
+  const isPending = createRole.isPending || updateRole.isPending
 
   const {
     register,
@@ -45,14 +46,19 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
     }
   }, [open, role, reset])
 
-  const onSubmit = (values: UpdateRoleRequest) => {
+  const onSubmit = (updateRoleRequest: UpdateRoleRequest) => {
     if (isEdit && role) {
-      updateMutation.mutate(
-        { id: role.id, payload: values },
+      updateRole.mutate(
+        { id: role.id, payload: updateRoleRequest },
         { onSuccess: () => onOpenChange(false) }
       )
     } else {
-      createMutation.mutate(values, { onSuccess: () => onOpenChange(false) })
+      createRole.mutate(
+        updateRoleRequest,
+        {
+          onSuccess: () => onOpenChange(false)
+        }
+      )
     }
   }
 
@@ -96,6 +102,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
             <Button type="submit"
               className="cursor-pointer font-medium px-3 py-4"
               disabled={isPending}>
+              {isPending && <Spinner data-icon="inline-start" className="size-4" />}
               {isPending ? "Menyimpan..." : "Simpan"}
             </Button>
           </DialogFooter>

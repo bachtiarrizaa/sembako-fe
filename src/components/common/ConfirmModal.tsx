@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -60,7 +60,7 @@ export function ConfirmModal({
                 : "bg-primary/10 text-primary border border-primary/70 hover:bg-primary hover:text-primary-foreground"
             )}
           >
-            {isLoading && <Loader2 className="size-4 animate-spin" />}
+            {isLoading && <Spinner data-icon="inline-start" className="size-4" />}
             {isLoading ? loadingText : confirmText}
           </Button>
         </AlertDialogFooter>

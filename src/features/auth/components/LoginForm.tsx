@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const { mutate: login, isPending } = useLogin();
@@ -78,6 +79,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         )}
       </div>
       <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
+        {isPending && <Spinner data-icon="inline-start" className="size-4" />}
         {isPending ? "Memproses..." : "Masuk"}
       </Button>
     </form>
