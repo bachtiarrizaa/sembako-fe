@@ -14,6 +14,7 @@ import type { Role } from "../types/role"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
+import { CustomPagination } from "@/components/common/Pagination"
 
 export function RolesPage() {
   const router = useRouter()
@@ -72,7 +73,17 @@ export function RolesPage() {
   const [deletingRole, setDeletingRole] = useState<Role | null>(null)
 
   const roles = data?.items ?? []
+  const pagination = data?.pagination
   const deleteRole = useDeleteRole()
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("page", newPage.toString())
+      router.replace(`${pathname}?${params.toString()}`)
+    },
+    [searchParams, pathname, router]
+  )
 
   const handleAdd = () => {
     setEditingRole(null)
@@ -86,7 +97,7 @@ export function RolesPage() {
 
   const handleDelete = () => {
     if (!deletingRole) return
-    
+
     deleteRole.mutate(deletingRole.id, {
       onSuccess: () => setDeletingRole(null),
     })
@@ -127,7 +138,7 @@ export function RolesPage() {
   }
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-5 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Role</h1>
@@ -135,7 +146,7 @@ export function RolesPage() {
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-          onClick={handleAdd}  
+          onClick={handleAdd}
         >
           Tambah
         </Button>
@@ -173,6 +184,10 @@ export function RolesPage() {
         page={page}
         limit={limit}
       />
+
+      {pagination && (
+        <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
+      )}
 
       <RoleFormDialog open={dialogOpen} onOpenChange={setDialogOpen} role={editingRole} />
 

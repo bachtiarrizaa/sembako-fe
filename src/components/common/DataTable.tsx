@@ -39,7 +39,7 @@ export function DataTable<T extends { id: string | number }>({
   limit = 10,
 }: DataTableProps<T>) {
   return (
-    <div className="relative bg-card border border-border rounded-xl overflow-hidden shadow-xs animate-in fade-in duration-300">
+    <div className="relative bg-card border border-border rounded-xl overflow-hidden shadow-xs">
       <Table className="table-fixed w-full">
         <TableHeader className="bg-primary">
           <TableRow className="hover:bg-primary">
@@ -60,11 +60,11 @@ export function DataTable<T extends { id: string | number }>({
           {isLoading || isFetching ? (
             Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={`skeleton-${i}`} className="hover:bg-muted/30 transition-colors">
-                <TableCell className="text-center px-3 py-2">
+                <TableCell className="h-9 text-center px-3 py-2">
                   <Skeleton className="h-4 w-5 mx-auto" />
                 </TableCell>
                 {columns.map((_, colIdx) => (
-                  <TableCell key={`skeleton-cell-${colIdx}`} className="px-3 py-2">
+                  <TableCell key={`skeleton-cell-${colIdx}`} className="h-9 px-3 py-2">
                     <Skeleton className="h-4 w-3/4" />
                   </TableCell>
                 ))}
@@ -85,13 +85,13 @@ export function DataTable<T extends { id: string | number }>({
           ) : (
             data.map((item, index) => (
               <TableRow key={item.id} className="hover:bg-muted/30 transition-colors">
-                <TableCell className="text-gray-600 text-center px-3 py-2">
+                <TableCell className="h-9 text-gray-600 text-center px-3 py-2">
                   {(page - 1) * limit + index + 1}
                 </TableCell>
                 {columns.map((col, colIdx) => (
                   <TableCell
                     key={`cell-${colIdx}`}
-                    className={`text-gray-600 px-3 py-2 ${col.className ?? ""}`}
+                    className={`h-9 text-gray-600 px-3 py-2 ${col.className ?? ""}`}
                   >
                     {col.cell
                       ? col.cell(item, index)

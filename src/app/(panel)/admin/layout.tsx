@@ -18,14 +18,14 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
     const timer = setTimeout(() => {
       setIsMounted(true);
     }, 0);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return; 
+    if (!isMounted) return;
 
-    if (isLoading || isFetching) return; 
+    if (isLoading || isFetching) return;
 
     if (isError || !user) {
       router.replace("/admin/login");
@@ -39,8 +39,8 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
 
   if (!isMounted || isLoading || isFetching || !user) {
     return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <Spinner className="size-8 text-primary" />
+      <div className="h-screen flex items-center justify-center bg-background/20 backdrop-blur-xs">
+        <Spinner className="size-6 text-primary" />
         <span className="sr-only">Memuat...</span>
       </div>
     );

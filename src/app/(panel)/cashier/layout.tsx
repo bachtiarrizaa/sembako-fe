@@ -29,8 +29,8 @@ export default function CashierRoute({ children }: { children: React.ReactNode }
 
   if (!session || isLoading || !user) {
     return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <Spinner className="size-8 text-primary" />
+      <div className="h-screen flex items-center justify-center bg-slate-50/80 backdrop-blur-xs">
+        <Spinner className="size-6 text-primary" />
         <span className="sr-only">Memuat...</span>
       </div>
     );

@@ -43,7 +43,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {isNavigating && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-xs z-50 flex items-center justify-center transition-opacity">
+        <div className="absolute inset-0 bg-background/20 backdrop-blur-xs z-50 flex items-center justify-center transition-opacity">
           <Spinner className="size-6 text-primary" />
         </div>
       )}
