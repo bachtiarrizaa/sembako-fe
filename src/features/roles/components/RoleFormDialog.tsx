@@ -81,7 +81,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
             <Input
               id="name"
               placeholder="Coffee"
-              className="bg-background w-full transition-colors hover:border-primary/50 focus-visible:border-primary focus-visible:ring-primary/20"
+              className="bg-background w-full"
               {...register("name")}
             />
             {errors.name && (
