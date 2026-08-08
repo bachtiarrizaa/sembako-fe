@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { SearchX } from "lucide-react"
+import { SearchX, Inbox } from "lucide-react"
 
 export interface Column<T> {
   header: string
@@ -23,6 +23,7 @@ interface DataTableProps<T> {
   isLoading: boolean
   isFetching?: boolean
   emptyMessage?: string
+  emptyIcon?: React.ReactNode
   page?: number
   limit?: number
 }
@@ -33,6 +34,7 @@ export function DataTable<T extends { id: string | number }>({
   isLoading,
   isFetching = false,
   emptyMessage = "Belum ada data",
+  emptyIcon,
   page = 1,
   limit = 10,
 }: DataTableProps<T>) {
@@ -75,7 +77,7 @@ export function DataTable<T extends { id: string | number }>({
                 className="h-32 text-center text-sm text-muted-foreground"
               >
                 <div className="flex flex-col items-center justify-center gap-2 py-6">
-                  <SearchX className="size-8 text-muted-foreground/60" />
+                  {emptyIcon ?? <SearchX className="size-8 text-muted-foreground/60" />}
                   <span>{emptyMessage}</span>
                 </div>
               </TableCell>
