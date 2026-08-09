@@ -43,10 +43,12 @@ export function createTokenRefreshManager(api: AxiosInstance): TokenRefreshManag
 
   function forceLogout() {
     clearTokenRefresh();
+    const currentUser = useAuthStore.getState().user;
+    const role = (currentUser?.role?.name || "").toLowerCase();
     clearAccessToken();
     useAuthStore.getState().clearAuth();
+
     if (typeof window !== "undefined") {
-      const role = (useAuthStore.getState().user?.role?.name || "").toLowerCase();
       const section = window.location.pathname.startsWith("/cashier") ? "cashier" : "admin";
       const loginPath =
         role === "cashier"
@@ -56,8 +58,10 @@ export function createTokenRefreshManager(api: AxiosInstance): TokenRefreshManag
             : section === "cashier"
               ? "/cashier/login"
               : "/admin/login";
-      // Force a full page reload to reset all client state after session expiry.
-      window.location.assign(loginPath);
+
+      if (window.location.pathname !== loginPath) {
+        window.location.assign(loginPath);
+      }
     }
   }
 

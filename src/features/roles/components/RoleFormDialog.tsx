@@ -34,6 +34,7 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
     register,
     handleSubmit,
     reset,
+    clearErrors,
     formState: { errors },
   } = useForm<CreateRoleRequest>({
     resolver: zodResolver(roleSchema),
@@ -43,8 +44,9 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
   useEffect(() => {
     if (open) {
       reset({ name: role?.name ?? "" })
+      clearErrors()
     }
-  }, [open, role, reset])
+  }, [open, role, reset, clearErrors])
 
   const onSubmit = (updateRoleRequest: UpdateRoleRequest) => {
     if (isEdit && role) {

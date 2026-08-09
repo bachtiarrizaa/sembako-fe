@@ -8,7 +8,7 @@ import { useUserMe } from "@/features/users/hooks/useUserMe";
 import { useAuthStore } from "@/stores/auth.store";
 
 export default function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, isFetching, isError } = useUserMe();
+  const { user, isLoading, isError } = useUserMe();
   const session = useAuthStore((state) => state.user);
   const router = useRouter();
 
@@ -25,19 +25,22 @@ export default function AdminRoute({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (!isMounted) return;
 
-    if (isLoading || isFetching) return;
+    if (isLoading) return;
 
     if (isError || !user) {
       router.replace("/admin/login");
       return;
     }
 
-    if ((user.role?.name || "").toLowerCase() !== "admin") {
+    const userRole = (user.role?.name || "").toLowerCase();
+    if (userRole === "cashier") {
       router.replace("/cashier/dashboard");
+    } else if (userRole !== "admin") {
+      router.replace("/admin/login");
     }
-  }, [isMounted, session, user, isLoading, isFetching, isError, router]);
+  }, [isMounted, session, user, isLoading, isError, router]);
 
-  if (!isMounted || isLoading || isFetching || !user) {
+  if (!isMounted || isLoading || !user) {
     return (
       <div className="h-screen flex items-center justify-center bg-background/20 backdrop-blur-xs">
         <Spinner className="size-6 text-primary" />

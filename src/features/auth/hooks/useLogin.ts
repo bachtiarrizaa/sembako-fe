@@ -10,6 +10,8 @@ import { useAuthStore } from "@/stores/auth.store";
 import { scheduleTokenRefresh } from "@/api/api-client";
 import { setAccessToken } from "@/lib/token-storage";
 
+import { translateMessage } from "@/lib/translator";
+
 export function useLogin() {
   const router = useRouter();
   const setSession = useAuthStore((state) => state.setUser);
@@ -42,7 +44,7 @@ export function useLogin() {
         router.push("/cashier/dashboard");
       }
 
-      toast.add({ title: response.message, type: "success" });
+      toast.add({ title: translateMessage(response.message, "Login berhasil"), type: "success" });
     },
     onError: (error: unknown) => {
       handleApiError(error, "Failed to sign in. Please check your credentials.");

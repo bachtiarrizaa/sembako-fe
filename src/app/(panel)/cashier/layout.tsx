@@ -22,8 +22,11 @@ export default function CashierRoute({ children }: { children: React.ReactNode }
       router.replace("/cashier/login");
       return;
     }
-    if ((user.role?.name || "").toLowerCase() !== "cashier") {
+    const userRole = (user.role?.name || "").toLowerCase();
+    if (userRole === "admin") {
       router.replace("/admin/dashboard");
+    } else if (userRole !== "cashier") {
+      router.replace("/cashier/login");
     }
   }, [session, user, isLoading, isError, router]);
 

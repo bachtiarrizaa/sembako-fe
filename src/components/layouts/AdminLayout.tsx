@@ -11,12 +11,26 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsNavigating(false);
-    }, 0);
-
-    return () => clearTimeout(timer);
+    setIsNavigating(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isNavigating) return;
+
+    const safetyTimer = setTimeout(() => {
+      setIsNavigating(false);
+    }, 800);
+
+    return () => clearTimeout(safetyTimer);
+  }, [isNavigating]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setIsNavigating(false);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
