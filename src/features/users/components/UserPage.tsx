@@ -5,7 +5,8 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-// import { ConfirmModal } from "@/components/common/ConfirmModal"
+import { ConfirmModal } from "@/components/common/ConfirmModal"
+import { useDeleteUser } from "../hooks/useDeleteUser"
 import { Pencil, Trash2, SearchX, Inbox } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
@@ -71,9 +72,11 @@ export function UserPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserResponse | null>(null)
+  const [deletingUser, setDeletingUser] = useState<UserResponse | null>(null)
 
   const users = data?.items ?? []
   const pagination = data?.pagination
+  const deleteUser = useDeleteUser()
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -92,6 +95,19 @@ export function UserPage() {
   const handleEdit = (user: UserResponse) => {
     setEditingUser(user)
     setDialogOpen(true)
+  }
+
+  const handleDelete = () => {
+    if (!deletingUser) return
+
+    deleteUser.mutate(deletingUser.id, {
+      onSuccess: () => {
+        setDeletingUser(null)
+        if (users.length === 1 && page > 1) {
+          handlePageChange(page - 1)
+        }
+      },
+    })
   }
 
   const columns: Column<UserResponse>[] = [
@@ -127,7 +143,7 @@ export function UserPage() {
             size="icon"
             title="Hapus Pegawai"
             className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-            // onClick={() => setDeletingUser(item)}
+            onClick={() => setDeletingUser(item)}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -193,6 +209,23 @@ export function UserPage() {
       )}
 
       <UserFormDialog open={dialogOpen} onOpenChange={setDialogOpen} user={editingUser} />
+
+      <ConfirmModal
+        open={!!deletingUser}
+        onOpenChange={(open) => !open && setDeletingUser(null)}
+        title="Hapus Pegawai"
+        description={
+          <>
+            Anda yakin ingin menghapus pegawai{" "}
+            <strong className="font-semibold">{deletingUser?.name}</strong>? Tindakan ini tidak
+            dapat dibatalkan.
+          </>
+        }
+        confirmText="Hapus"
+        variant="danger"
+        isLoading={deleteUser.isPending}
+        onConfirm={handleDelete}
+      />
     </div>
   )
 }
