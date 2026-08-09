@@ -9,13 +9,17 @@ export const userSchema = z.object({
     .max(20, "Maksimal 20 karakter")
     .regex(/^[a-zA-Z0-9_]+$/, "Username hanya boleh huruf, angka, dan underscore"),
   password: z.string().min(8, "Password minimal 8 karakter"),
-  roleId: z.uuid("Role tidak valid"),
+  roleId: z.uuid("Role wajib dipilih"),
   isActive: z.boolean(),
 })
 
 export type CreateUserRequest = z.infer<typeof userSchema>
 
-export type UpdateUserRequest = CreateUserRequest
+export const updateUserSchema = userSchema.omit({ password: true })
+
+export type UpdateUserRequest = z.infer<typeof updateUserSchema>
+
+export type UserFormValues = Omit<CreateUserRequest, "password"> & { password?: string }
 
 export const userSearchSchema = z.object({
   page: z.coerce.number().catch(1),

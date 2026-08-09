@@ -28,7 +28,7 @@ export function LimitSelect({
 
   return (
     <Select value={value.toString()} onValueChange={handleChange}>
-      <SelectTrigger className="h-9 w-16 cursor-pointer border-border bg-background transition-colors hover:border-primary/50 focus-visible:border-primary focus-visible:ring-primary/20 dark:bg-input/30 dark:hover:bg-input/50">
+      <SelectTrigger className="h-9 w-16 cursor-pointer border-border bg-background transition-colors focus-visible:border-primary focus-visible:ring-0 dark:bg-input/30 dark:hover:bg-input/50">
         <SelectValue placeholder={value.toString()}/>
       </SelectTrigger>
       <SelectContent>

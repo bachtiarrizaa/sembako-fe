@@ -14,6 +14,7 @@ import { CustomPagination } from "@/components/common/Pagination"
 import { useUsers } from "../hooks/useUsers"
 import { UserResponse } from "../types/user"
 import { Switch } from "@/components/ui/switch"
+import { UserFormDialog } from "./UserFormDialog"
 
 export function UserPage() {
   const router = useRouter()
@@ -68,6 +69,9 @@ export function UserPage() {
     handleSearchChange(searchInput.trim() || undefined)
   }
 
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<UserResponse | null>(null)
+
   const users = data?.items ?? []
   const pagination = data?.pagination
 
@@ -79,6 +83,16 @@ export function UserPage() {
     },
     [searchParams, pathname, router]
   )
+
+  const handleAdd = () => {
+    setEditingUser(null)
+    setDialogOpen(true)
+  }
+
+  const handleEdit = (user: UserResponse) => {
+    setEditingUser(user)
+    setDialogOpen(true)
+  }
 
   const columns: Column<UserResponse>[] = [
     { header: "Nama Pegawai", accessorKey: "name" },
@@ -97,14 +111,14 @@ export function UserPage() {
     {
       header: "Aksi",
       className: "w-28 text-center",
-      cell: () => (
+      cell: (item) => (
         <div className="flex justify-center gap-1">
           <Button
             variant="ghost"
             size="icon"
             title="Edit Pegawai"
             className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-            // onClick={() => handleEdit(item)}
+            onClick={() => handleEdit(item)}
           >
             <Pencil className="size-4" />
           </Button>
@@ -113,7 +127,7 @@ export function UserPage() {
             size="icon"
             title="Hapus Pegawai"
             className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-            // onClick={() => setDeletingRole(item)}
+            // onClick={() => setDeletingUser(item)}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -135,7 +149,7 @@ export function UserPage() {
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-          // onClick={handleAdd}
+          onClick={handleAdd}
         >
           Tambah
         </Button>
@@ -177,6 +191,8 @@ export function UserPage() {
       {pagination && (
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
       )}
+
+      <UserFormDialog open={dialogOpen} onOpenChange={setDialogOpen} user={editingUser} />
     </div>
   )
 }
