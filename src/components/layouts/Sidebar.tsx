@@ -75,7 +75,7 @@ const menuItems: MenuItem[] = [
     roles: ['admin'],
     children: [
       { name: 'Semua Pegawai', path: '/admin/users' },
-      { name: 'Role', path: '/admin/users/roles' },
+      { name: 'Role', path: '/admin/roles' },
     ],
   },
   { name: 'Pengaturan', path: '/admin/settings', icon: Settings, roles: ['admin'] },
@@ -86,10 +86,10 @@ export function Sidebar() {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const pathname = usePathname()
 
-  const { user: profile } = useUserMe()
+  const { data } = useUserMe()
   const user = useAuthStore((state) => state.user)
 
-  const userRole = (profile?.role?.name || user?.role?.name || '').toLowerCase()
+  const userRole = (data?.data.role?.name || user?.role?.name || '').toLowerCase()
   const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : '/cashier/dashboard'
 
   const displayedMenuItems = menuItems.filter((item) => item.roles.includes(userRole))

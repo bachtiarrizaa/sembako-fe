@@ -11,14 +11,14 @@ export const userService = {
   },
 
   getUsers: async (
-  filters: UserSearch = { page: 1, limit: 10 }
-): Promise<{ items: UserResponse[]; pagination?: Pagination }> => {
-  const res = await apiClient.get<ApiResponse<UserResponse[]>>("/users", {
-    params: buildListParams({ page: 1, limit: 10 }, filters),
-  })
-  return {
-    items: res.data.data,
-    pagination: res.data.pagination,
+    filters: UserSearch = { page: 1, limit: 10 }
+  ): Promise<{ items: UserResponse[]; pagination?: Pagination }> => {
+    const res = await apiClient.get<ApiResponse<UserResponse[]>>("/users", {
+      params: buildListParams({ page: 1, limit: 10 }, filters),
+    })
+    return {
+      items: res.data.data,
+      pagination: res.data.pagination,
+    }
   }
-}
 }

@@ -10,7 +10,7 @@ export function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
-  const { user: profile, isLoading } = useUserMe()
+  const { data, isLoading } = useUserMe()
   const { mutate: logout, isPending: isLoggingOut } = useLogout()
 
   return (
@@ -41,11 +41,11 @@ export function Navbar() {
                 {isLoading ? (
                   <Spinner className="size-3 text-slate-400" />
                 ) : (
-                  profile?.name || 'Staff'
+                  data?.data.name || 'Staff'
                 )}
               </div>
               <div className="text-xs text-slate-500 leading-tight">
-                {profile?.role?.name || 'Kasir'}
+                {data?.data.role?.name || 'Kasir'}
               </div>
             </div>
 
@@ -71,10 +71,10 @@ export function Navbar() {
               {/* Header Info User */}
               <div className="px-4 py-2.5 border-b border-slate-100">
                 <p className="text-xs font-bold text-slate-900 truncate">
-                  {profile?.name || 'Staff'}
+                  {data?.data.name || 'Staff'}
                 </p>
                 <p className="text-xs text-slate-500 truncate mt-0.5">
-                  {profile?.email || 'staff@toko.com'}
+                  {data?.data.email || 'staff@toko.com'}
                 </p>
               </div>
 
