@@ -1,0 +1,26 @@
+import { z } from "zod"
+
+export const userSchema = z.object({
+  name: z.string().min(1, "Nama wajib diisi").max(25, "Maksimal 25 karakter"),
+  email: z.email("Email tidak valid"),
+  username: z
+    .string()
+    .min(3, "Username minimal 3 karakter")
+    .max(20, "Maksimal 20 karakter")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username hanya boleh huruf, angka, dan underscore"),
+  password: z.string().min(8, "Password minimal 8 karakter"),
+  roleId: z.uuid("Role tidak valid"),
+  isActive: z.boolean(),
+})
+
+export type CreateUserRequest = z.infer<typeof userSchema>
+
+export type UpdateUserRequest = CreateUserRequest
+
+export const userSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+  limit: z.coerce.number().catch(10),
+  search: z.string().optional(),
+})
+
+export type UserSearch = z.infer<typeof userSearchSchema>
