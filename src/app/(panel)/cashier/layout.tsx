@@ -8,7 +8,9 @@ import { useUserMe } from "@/features/users/hooks/useUserMe";
 import { useAuthStore } from "@/stores/auth.store";
 
 export default function CashierRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, isError } = useUserMe();
+  const { data, isLoading, isError } = useUserMe();
+  const user = data?.data;
+  
   const session = useAuthStore((state) => state.user);
   const router = useRouter();
 
