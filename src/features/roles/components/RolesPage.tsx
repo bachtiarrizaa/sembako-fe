@@ -99,7 +99,12 @@ export function RolesPage() {
     if (!deletingRole) return
 
     deleteRole.mutate(deletingRole.id, {
-      onSuccess: () => setDeletingRole(null),
+      onSuccess: () => {
+        setDeletingRole(null)
+        if (roles.length === 1 && page > 1) {
+          handlePageChange(page - 1)
+        }
+      },
     })
   }
 

@@ -6,6 +6,8 @@ import { handleApiError } from "@/lib/error";
 import { clearTokenRefresh } from "@/api/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { translateMessage } from "@/lib/translator";
+
 export function useLogout() {
   const router = useRouter();
   const clearSession = useAuthStore((state) => state.clearAuth);
@@ -14,7 +16,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: (response) => {
-      toast.add({ title: response.message, type: "success" });
+      toast.add({ title: translateMessage(response.message, "Berhasil keluar dari akun"), type: "success" });
     },
     onError: (error) => {
       handleApiError(error, "Failed to log out on server. Proceeding to login.");
