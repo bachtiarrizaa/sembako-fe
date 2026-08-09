@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -34,6 +35,7 @@ interface UserFormDialogProps {
 
 export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps) {
   const isEdit = Boolean(user)
+  const [showPassword, setShowPassword] = useState(false)
 
   const createUser = useCreateUser()
   const updateUser = useUpdateUser()
@@ -185,13 +187,23 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
                 <Label htmlFor="password" className="text-sm font-semibold text-foreground">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="bg-background w-full"
-                  {...register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="bg-background w-full pr-9"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="cursor-pointer absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-sm font-medium text-destructive">
                     {errors.password.message}
