@@ -44,7 +44,7 @@ const menuItems: MenuItem[] = [
     children: [
       { name: 'Semua Produk', path: '/admin/products' },
       { name: 'Satuan', path: '/admin/untis' },
-      { name: 'Kategori', path: '/products/categories' },
+      { name: 'Kategori', path: '/admin/categories' },
     ],
   },
   {

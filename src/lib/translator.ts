@@ -19,6 +19,13 @@ const messageMap: Record<string, string> = {
   "Role not found": "Role tidak ditemukan",
   "Cannot delete role assigned to users": "Role tidak dapat dihapus karena masih digunakan oleh pengguna",
 
+  // Category messages
+  "Category created successfully": "Kategori berhasil ditambahkan",
+  "Category updated successfully": "Kategori berhasil diperbarui",
+  "Category deleted successfully": "Kategori berhasil dihapus",
+  "Category name already exists": "Nama kategori sudah digunakan",
+  "Category not found": "Kategori tidak ditemukan",
+
   // Generic error messages
   "An unexpected error occurred": "Terjadi kesalahan yang tidak terduga",
   "Internal server error": "Terjadi kesalahan pada server",
