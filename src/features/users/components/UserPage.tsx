@@ -16,6 +16,7 @@ import { useUsers } from "../hooks/useUsers"
 import { UserResponse } from "../types/user"
 import { Switch } from "@/components/ui/switch"
 import { UserFormDialog } from "./UserFormDialog"
+import { useUpdateUserStatus } from "../hooks/useUpdateUserStatus"
 
 export function UserPage() {
   const router = useRouter()
@@ -76,6 +77,7 @@ export function UserPage() {
 
   const users = data?.items ?? []
   const pagination = data?.pagination
+  const updateStatus = useUpdateUserStatus()
   const deleteUser = useDeleteUser()
 
   const handlePageChange = useCallback(
@@ -95,6 +97,13 @@ export function UserPage() {
   const handleEdit = (user: UserResponse) => {
     setEditingUser(user)
     setDialogOpen(true)
+  }
+
+  const handleStatusChange = (user: UserResponse, newStatus: boolean) => {
+    updateStatus.mutate({
+      id: user.id,
+      payload: { isActive: newStatus },
+    })
   }
 
   const handleDelete = () => {
@@ -121,7 +130,12 @@ export function UserPage() {
     {
       header: "Status",
       cell: (item) => (
-        <Switch checked={item.isActive} className="cursor-not-allowed" />
+        <Switch 
+          checked={item.isActive} 
+          onCheckedChange={(checked) => handleStatusChange(item, checked)}
+          disabled={updateStatus.isPending && updateStatus.variables?.id === item.id}
+          className="cursor-pointer" 
+        />
       ),
     },
     {
@@ -161,7 +175,7 @@ export function UserPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Pegawai</h1>
-          <p className="text-sm text-muted-foreground">Kelola pegwai dan hak akses pengguna</p>
+          <p className="text-sm text-muted-foreground">Kelola pegawai dan hak akses pengguna</p>
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
