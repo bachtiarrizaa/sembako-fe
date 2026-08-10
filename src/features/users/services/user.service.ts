@@ -1,7 +1,7 @@
 import { ApiResponse, Pagination } from "@/types/api-response";
 import { apiClient } from "@/api/api-client";
 import { UserResponse } from "../types/user";
-import { CreateUserRequest, UpdateUserRequest, UserSearch } from "../schemas/user.schema";
+import { CreateUserRequest, UpdateUserRequest, UpdateUserStatusRequest, UserSearch } from "../schemas/user.schema";
 import { buildListParams } from "@/lib/utils";
 
 export const userService = {
@@ -31,6 +31,11 @@ export const userService = {
     const res = await apiClient.put<ApiResponse<UserResponse>>(`/users/${id}`, payload)
     return res.data
   },
+
+  updateStatus: async (id: string, payload: UpdateUserStatusRequest): Promise<ApiResponse<UserResponse>> => {
+    const res = await apiClient.patch<ApiResponse<UserResponse>>(`/users/${id}/status`, payload)
+    return res.data
+  },  
 
   delete: async (id: string): Promise<ApiResponse<null>> => {
     const res = await apiClient.delete<ApiResponse<null>>(`/users/${id}`)

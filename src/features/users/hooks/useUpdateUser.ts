@@ -10,11 +10,16 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UserFormValues }) => {
-      const { password, ...updatePayload } = payload
-      return userService.update(id, updatePayload as UpdateUserRequest)
+      const updatePayload: UpdateUserRequest = {
+        name: payload.name,
+        email: payload.email,
+        username: payload.username,
+        roleId: payload.roleId,
+      }
+      return userService.update(id, updatePayload)
     },
     onSuccess: (response) => {
-      toast.add({ title: translateMessage(response.message, "User berhasil diubah"), type: "success" })
+      toast.add({ title: translateMessage(response.message, "Pegawai berhasil diubah"), type: "success" })
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },
     onError: (error) => handleApiError(error),

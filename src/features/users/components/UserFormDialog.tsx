@@ -59,7 +59,6 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
       username: "",
       password: "",
       roleId: "",
-      isActive: true,
     },
   })
 
@@ -70,7 +69,6 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
         email: user?.email ?? "",
         username: user?.username ?? "",
         roleId: user?.role.id ?? "",
-        isActive: user?.isActive ?? true,
       }
 
       if (!isEdit) {
