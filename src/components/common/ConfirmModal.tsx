@@ -60,8 +60,11 @@ export function ConfirmModal({
                 : "bg-primary/10 text-primary border border-primary/70 hover:bg-primary hover:text-primary-foreground"
             )}
           >
-            {isLoading && <Spinner data-icon="inline-start" className="size-4" />}
-            {isLoading ? loadingText : confirmText}
+            {isLoading ? (
+              <Spinner data-icon="inline-start" className="size-4" />
+            ) : (
+              confirmText
+            )}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
