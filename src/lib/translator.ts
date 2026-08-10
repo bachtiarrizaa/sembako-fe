@@ -19,8 +19,6 @@ const messageMap: Record<string, string> = {
   "Role not found": "Role tidak ditemukan",
   "Cannot delete role assigned to users": "Role tidak dapat dihapus karena masih digunakan oleh pengguna",
 
-<<<<<<< Updated upstream
-=======
   // Category messages
   "Category created successfully": "Kategori berhasil ditambahkan",
   "Category updated successfully": "Kategori berhasil diperbarui",
@@ -38,7 +36,6 @@ const messageMap: Record<string, string> = {
   "Cannot delete yourself": "Tidak dapat menghapus akun sendiri",
   "Cannot deactivate yourself": "Tidak dapat menonaktifkan akun sendiri",
 
->>>>>>> Stashed changes
   // Generic error messages
   "An unexpected error occurred": "Terjadi kesalahan yang tidak terduga",
   "Internal server error": "Terjadi kesalahan pada server",
