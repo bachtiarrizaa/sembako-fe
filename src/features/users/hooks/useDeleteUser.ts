@@ -3,6 +3,7 @@ import { handleApiError } from "@/lib/error"
 import { userService } from "../services/user.service"
 import { toast } from "@/components/ui/toast"
 import { translateMessage } from "@/lib/translator"
+import { userKeys } from "./user.keys"
 
 export function useDeleteUser() {
   const queryClient = useQueryClient()
@@ -11,7 +12,7 @@ export function useDeleteUser() {
     mutationFn: userService.delete,
     onSuccess: (response) => {
       toast.add({ title: translateMessage(response.message, "Pegawai berhasil dihapus"), type: "success" })
-      queryClient.invalidateQueries({ queryKey: ["users"] })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
     onError: (error) => handleApiError(error),
   })

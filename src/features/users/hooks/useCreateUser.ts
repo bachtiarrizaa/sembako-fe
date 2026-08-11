@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/toast"
 import { translateMessage } from "@/lib/translator"
 import { CreateUserRequest } from "../schemas/user.schema"
 import { userService } from "../services/user.service"
+import { userKeys } from "./user.keys"
 
 export function useCreateUser() {
   const queryClient = useQueryClient()
@@ -14,7 +15,7 @@ export function useCreateUser() {
       userService.create(payload),
     onSuccess: (response) => {
       toast.add({ title: translateMessage(response.message, "Pegawai berhasil ditambahkan"), type: "success"})
-      queryClient.invalidateQueries({ queryKey: ["users"] })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
     onError: (error) => handleApiError(error),
   })
