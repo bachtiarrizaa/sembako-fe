@@ -17,8 +17,7 @@ import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { ComboboxSelect } from "@/components/common/ComboboxSelect"
 import { UserResponse } from "../types/user"
-import { useCreateUser } from "../hooks/useCreateUser"
-import { useUpdateUser } from "../hooks/useUpdateUser"
+import { useCreateUser, useUpdateUser } from "../hooks"
 import {
   CreateUserRequest,
   userSchema,
@@ -68,7 +67,7 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
         name: user?.name ?? "",
         email: user?.email ?? "",
         username: user?.username ?? "",
-        roleId: user?.role.id ?? "",
+        roleId: user?.role?.id ?? "",
       }
 
       if (!isEdit) {
@@ -95,7 +94,7 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:max-w-[520px] sm:rounded-xl">
+      <DialogContent className="gap-0 p-0 sm:max-w-xl sm:rounded-xl">
         <button type="button" className="sr-only" />
 
         <DialogHeader className="border-b border-border px-6 py-4">
@@ -226,8 +225,11 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
               className="cursor-pointer font-medium px-3 py-4"
               disabled={isPending}
             >
-              {isPending && <Spinner data-icon="inline-start" className="size-4" />}
-              {isPending ? "Menyimpan..." : "Simpan"}
+              {isPending ? (
+                <Spinner data-icon="inline-start" className="size-4" />
+              ) : (
+                "Simpan"
+              )}
             </Button>
           </DialogFooter>
         </form>

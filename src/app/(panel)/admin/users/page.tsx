@@ -1,5 +1,5 @@
-import { UserPage } from "@/features/users/components/UserPage"
+import { UserPage } from "@/features/users"
 
-export default function RolePage() {
+export default function UsersPage() {
   return <UserPage />
 }

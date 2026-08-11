@@ -6,22 +6,23 @@ import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
-import { useDeleteUser } from "../hooks/useDeleteUser"
+import { useUsers, useDeleteUser, useUpdateUserStatus } from "../hooks"
 import { Pencil, Trash2, SearchX, Inbox } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
-import { useUsers } from "../hooks/useUsers"
 import { UserResponse } from "../types/user"
 import { Switch } from "@/components/ui/switch"
 import { UserFormDialog } from "./UserFormDialog"
-import { useUpdateUserStatus } from "../hooks/useUpdateUserStatus"
+
+import { useAuthStore } from "@/stores/auth.store"
 
 export function UserPage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const currentUser = useAuthStore((state) => state.user)
 
   const page = Number(searchParams.get("page") ?? 1)
   const limit = Number(searchParams.get("limit") ?? 10)
@@ -53,12 +54,10 @@ export function UserPage() {
   )
 
   const [searchInput, setSearchInput] = useState(search)
-  const [prevSearch, setPrevSearch] = useState(search)
 
-  if (search !== prevSearch) {
-    setPrevSearch(search)
+  useEffect(() => {
     setSearchInput(search)
-  }
+  }, [search])
 
   const debouncedSearch = useDebouncedValue(searchInput, 300)
 
@@ -129,40 +128,50 @@ export function UserPage() {
     },
     {
       header: "Status",
-      cell: (item) => (
-        <Switch 
-          checked={item.isActive} 
-          onCheckedChange={(checked) => handleStatusChange(item, checked)}
-          disabled={updateStatus.isPending && updateStatus.variables?.id === item.id}
-          className="cursor-pointer" 
-        />
-      ),
+      cell: (item) => {
+        const isSelf = Boolean(currentUser && (item.id === currentUser.id || item.email === currentUser.email))
+        const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
+        return (
+          <div title={isSelf ? "Tidak dapat menonaktifkan akun sendiri" : undefined}>
+            <Switch 
+              checked={item.isActive} 
+              onCheckedChange={(checked) => handleStatusChange(item, checked)}
+              disabled={isPendingThis || isSelf}
+              className="cursor-pointer disabled:cursor-not-allowed" 
+            />
+          </div>
+        )
+      },
     },
     {
       header: "Aksi",
       className: "w-28 text-center",
-      cell: (item) => (
-        <div className="flex justify-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Edit Pegawai"
-            className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-            onClick={() => handleEdit(item)}
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Hapus Pegawai"
-            className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-            onClick={() => setDeletingUser(item)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
-      ),
+      cell: (item) => {
+        const isSelf = Boolean(currentUser && (item.id === currentUser.id || item.email === currentUser.email))
+        return (
+          <div className="flex justify-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Edit Pegawai"
+              className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
+              onClick={() => handleEdit(item)}
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              title={isSelf ? "Tidak dapat menghapus akun sendiri" : "Hapus Pegawai"}
+              disabled={isSelf}
+              className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setDeletingUser(item)}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        )
+      },
     },
   ]
 
