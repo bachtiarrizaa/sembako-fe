@@ -43,6 +43,14 @@ const messageMap: Record<string, string> = {
   "Cannot delete yourself": "Tidak dapat menghapus akun sendiri",
   "Cannot deactivate yourself": "Tidak dapat menonaktifkan akun sendiri",
 
+  // Supplier messages
+  "Supplier created successfully": "Supplier berhasil ditambahkan",
+  "Supplier updated successfully": "Supplier berhasil diperbarui",
+  "Supplier deleted successfully": "Supplier berhasil dihapus",
+  "Supplier status updated successfully": "Status supplier berhasil diubah",
+  "Supplier name already exists": "Nama supplier sudah digunakan",
+  "Supplier not found": "Supplier tidak ditemukan",
+
   // Generic error messages
   "An unexpected error occurred": "Terjadi kesalahan yang tidak terduga",
   "Internal server error": "Terjadi kesalahan pada server",
