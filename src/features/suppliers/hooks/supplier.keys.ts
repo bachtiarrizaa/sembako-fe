@@ -1,7 +1,7 @@
-import { SupplierSearch } from "../schemas/supplier.schemas";
+import { SupplierSearch } from "../schemas/supplier.schema";
 
 export const supplierKeys = {
-  all: ["users"] as const,
+  all: ["suppliers"] as const,
   lists: () => [...supplierKeys.all, "list"] as const,
   list: (filters: SupplierSearch) => [...supplierKeys.lists(), filters] as const,
   details: () => [...supplierKeys.all, "detail"] as const,

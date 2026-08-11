@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { SupplierSearch } from "../schemas/supplier.schemas";
+import { SupplierSearch } from "../schemas/supplier.schema";
 import { supplierKeys } from "./supplier.keys";
 import { supplierService } from "../services/supplier.service";
 

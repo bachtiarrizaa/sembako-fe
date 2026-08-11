@@ -1,5 +1,5 @@
-import { SuppliersPage } from "@/features/suppliers/components/SuppliersPage";
+import { SuppliersPage } from "@/features/suppliers";
 
-export default function SupplierPage() {
+export default function AdminSuppliersPage() {
   return <SuppliersPage />
 }

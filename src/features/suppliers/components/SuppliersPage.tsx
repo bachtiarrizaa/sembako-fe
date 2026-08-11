@@ -11,9 +11,14 @@ import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
-import { useSuppliers } from "../hooks/useSuppliers"
+import {
+  useSuppliers,
+  useUpdateSupplierStatus,
+  useDeleteSupplier,
+} from "../hooks"
 import { SupplierResponse } from "../types/supplier"
 import { Switch } from "@/components/ui/switch"
+import { SupplierFormDialog } from "./SupplierFormDialog"
 
 export function SuppliersPage() {
   const router = useRouter()
@@ -72,7 +77,8 @@ export function SuppliersPage() {
 
   const suppliers = data?.items ?? []
   const pagination = data?.pagination
-  // const deleteSupplier = useDeleteSupplier()
+  const updateStatus = useUpdateSupplierStatus()
+  const deleteSupplier = useDeleteSupplier()
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -83,52 +89,61 @@ export function SuppliersPage() {
     [searchParams, pathname, router]
   )
 
-  // const handleAdd = () => {
-  //   setEditingSupplier(null)
-  //   setDialogOpen(true)
-  // }
+  const handleAdd = () => {
+    setEditingSupplier(null)
+    setDialogOpen(true)
+  }
 
-  // const handleEdit = (supplier: SupplierResponse) => {
-  //   setEditingSupplier(supplier)
-  //   setDialogOpen(true)
-  // }
+  const handleEdit = (supplier: SupplierResponse) => {
+    setEditingSupplier(supplier)
+    setDialogOpen(true)
+  }
 
-  // const handleDelete = () => {
-  //   if (!deletingSupplier) return
+  const handleStatusChange = (supplier: SupplierResponse, newStatus: boolean) => {
+    updateStatus.mutate({
+      id: supplier.id,
+      payload: { isActive: newStatus },
+    })
+  }
 
-  // const handleStatusChange = (supplier: SupplierResponse, newStatus: boolean) => {
-  //   updateStatus.mutate({
-  //     id: user.id,
-  //     payload: { isActive: newStatus },
-  //   })
-  // }
+  const handleDelete = () => {
+    if (!deletingSupplier) return
 
-  //   deleteSupplier.mutate(deletingSupplier.id, {
-  //     onSuccess: () => {
-  //       setDeletingSupplier(null)
-  //       if (units.length === 1 && page > 1) {
-  //         handlePageChange(page - 1)
-  //       }
-  //     },
-  //   })
-  // }
+    deleteSupplier.mutate(deletingSupplier.id, {
+      onSuccess: () => {
+        setDeletingSupplier(null)
+        if (suppliers.length === 1 && page > 1) {
+          handlePageChange(page - 1)
+        }
+      },
+    })
+  }
 
   const columns: Column<SupplierResponse>[] = [
     { header: "Nama Supplier", accessorKey: "name" },
-    { header: "Kontak Supplier", accessorKey: "contactName" },
-    { header: "No Telp/Hp", accessorKey: "phone" },
-    { header: "Alamat", accessorKey: "address" },
+    {
+      header: "Kontak Supplier",
+      cell: (item) => item.contactName || "-",
+    },
+    {
+      header: "No Telp/Hp",
+      cell: (item) => item.phone || "-",
+    },
+    {
+      header: "Alamat",
+      cell: (item) => item.address || "-",
+    },
     {
       header: "Status",
       cell: (item) => {
-        // const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
+        const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
         return (
           <div>
-            <Switch 
-              checked={item.isActive} 
-              // onCheckedChange={(checked) => handleStatusChange(item, checked)}
-              // disabled={isPendingThis || isSelf}
-              className="cursor-pointer disabled:cursor-not-allowed" 
+            <Switch
+              checked={item.isActive}
+              onCheckedChange={(checked) => handleStatusChange(item, checked)}
+              disabled={isPendingThis}
+              className="cursor-pointer disabled:cursor-not-allowed"
             />
           </div>
         )
@@ -142,18 +157,18 @@ export function SuppliersPage() {
           <Button
             variant="ghost"
             size="icon"
-            title="Edit Satuan"
+            title="Edit Supplier"
             className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-            // onClick={() => handleEdit(item)}
+            onClick={() => handleEdit(item)}
           >
             <Pencil className="size-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            title="Hapus Satuan"
+            title="Hapus Supplier"
             className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-            // onClick={() => setDeletingUnit(item)}
+            onClick={() => setDeletingSupplier(item)}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -163,19 +178,19 @@ export function SuppliersPage() {
   ]
 
   if (isError) {
-    return <p className="text-sm text-destructive">Gagal memuat satuan.</p>
+    return <p className="text-sm text-destructive">Gagal memuat supplier.</p>
   }
 
   return (
     <div className="space-y-5 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Satuan</h1>
-          <p className="text-sm text-muted-foreground">Kelola data satuan produk</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Supplier</h1>
+          <p className="text-sm text-muted-foreground">Kelola data supplier & pemasok barang</p>
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-          // onClick={handleAdd}
+          onClick={handleAdd}
         >
           Tambah
         </Button>
@@ -191,7 +206,7 @@ export function SuppliersPage() {
             value={searchInput}
             onChange={setSearchInput}
             onSubmit={handleSearchSubmit}
-            placeholder="Cari satuan..."
+            placeholder="Cari supplier..."
             isFetching={isFetching}
           />
         </div>
@@ -202,7 +217,7 @@ export function SuppliersPage() {
         data={suppliers}
         isLoading={isLoading}
         isFetching={isFetching}
-        emptyMessage={search ? "Data tidak ditemukan" : "Belum ada satuan"}
+        emptyMessage={search ? "Data tidak ditemukan" : "Belum ada supplier"}
         emptyIcon={
           search ? (
             <SearchX className="size-8 text-muted-foreground/60" />
@@ -218,24 +233,28 @@ export function SuppliersPage() {
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
       )}
 
-      {/* <UnitFormDialog open={dialogOpen} onOpenChange={setDialogOpen} unit={editingUnit} /> */}
+      <SupplierFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        supplier={editingSupplier}
+      />
 
-      {/* <ConfirmModal
-        open={!!deletingUnit}
-        onOpenChange={(open) => !open && setDeletingUnit(null)}
-        title="Hapus Satuan"
+      <ConfirmModal
+        open={!!deletingSupplier}
+        onOpenChange={(open) => !open && setDeletingSupplier(null)}
+        title="Hapus Supplier"
         description={
           <>
-            Anda yakin ingin menghapus satuan{" "}
-            <strong className="font-bold">{deletingUnit?.name}</strong>? Tindakan ini tidak
+            Anda yakin ingin menghapus supplier{" "}
+            <strong className="font-bold">{deletingSupplier?.name}</strong>? Tindakan ini tidak
             dapat dibatalkan.
           </>
         }
         confirmText="Hapus"
         variant="danger"
-        isLoading={deleteUnit.isPending}
+        isLoading={deleteSupplier.isPending}
         onConfirm={handleDelete}
-      /> */}
+      />
     </div>
   )
 }

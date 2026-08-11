@@ -11,6 +11,8 @@ export type CreateSupplierRequest = z.infer<typeof supplierSchema>
 
 export type UpdateSupplierRequest = z.infer<typeof supplierSchema>
 
+export type SupplierFormValues = CreateSupplierRequest
+
 export const updateSupplierStatusRequest = z.object({
   isActive: z.boolean()
 })
