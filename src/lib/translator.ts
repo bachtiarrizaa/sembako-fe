@@ -26,6 +26,13 @@ const messageMap: Record<string, string> = {
   "Category name already exists": "Nama kategori sudah digunakan",
   "Category not found": "Kategori tidak ditemukan",
 
+  // Unit messages
+  "Unit created successfully": "Satuan berhasil ditambahkan",
+  "Unit updated successfully": "Satuan berhasil diperbarui",
+  "Unit deleted successfully": "Satuan berhasil dihapus",
+  "Unit name already exists": "Nama Satuan sudah digunakan",
+  "Unit not found": "Satuan tidak ditemukan",
+
   // User messages
   "User created successfully": "Pegawai berhasil ditambahkan",
   "User updated successfully": "Pegawai berhasil diperbarui",

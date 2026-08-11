@@ -11,8 +11,9 @@ import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
-import { useUnits } from "../hooks"
+import { useDeleteUnit, useUnits } from "../hooks"
 import { UnitResponse } from "../types/unit"
+import { UnitFormDialog } from "./UnitFormDialog"
 
 export function UnitsPage() {
   const router = useRouter()
@@ -66,12 +67,12 @@ export function UnitsPage() {
   }
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  // const [editingCategory, setEditingCategory] = useState<CategoryResponse | null>(null)
-  // const [deletingCategory, setDeletingCategory] = useState<CategoryResponse | null>(null)
+  const [editingUnit, setEditingUnit] = useState<UnitResponse | null>(null)
+  const [deletingUnit, setDeletingUnit] = useState<UnitResponse | null>(null)
 
-  const categories = data?.items ?? []
+  const units = data?.items ?? []
   const pagination = data?.pagination
-  // const deleteCategory = useDeleteCategory()
+  const deleteUnit = useDeleteUnit()
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -82,28 +83,28 @@ export function UnitsPage() {
     [searchParams, pathname, router]
   )
 
-  // const handleAdd = () => {
-  //   setEditingCategory(null)
-  //   setDialogOpen(true)
-  // }
+  const handleAdd = () => {
+    setEditingUnit(null)
+    setDialogOpen(true)
+  }
 
-  // const handleEdit = (category: CategoryResponse) => {
-  //   setEditingCategory(category)
-  //   setDialogOpen(true)
-  // }
+  const handleEdit = (unit: UnitResponse) => {
+    setEditingUnit(unit)
+    setDialogOpen(true)
+  }
 
-  // const handleDelete = () => {
-  //   if (!deletingCategory) return
+  const handleDelete = () => {
+    if (!deletingUnit) return
 
-  //   deleteCategory.mutate(deletingCategory.id, {
-  //     onSuccess: () => {
-  //       setDeletingCategory(null)
-  //       if (categories.length === 1 && page > 1) {
-  //         handlePageChange(page - 1)
-  //       }
-  //     },
-  //   })
-  // }
+    deleteUnit.mutate(deletingUnit.id, {
+      onSuccess: () => {
+        setDeletingUnit(null)
+        if (units.length === 1 && page > 1) {
+          handlePageChange(page - 1)
+        }
+      },
+    })
+  }
 
   const columns: Column<UnitResponse>[] = [
     { header: "Nama Satuan", accessorKey: "name" },
@@ -117,7 +118,7 @@ export function UnitsPage() {
             size="icon"
             title="Edit Satuan"
             className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-            // onClick={() => handleEdit(item)}
+            onClick={() => handleEdit(item)}
           >
             <Pencil className="size-4" />
           </Button>
@@ -126,7 +127,7 @@ export function UnitsPage() {
             size="icon"
             title="Hapus Satuan"
             className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-            // onClick={() => setDeletingCategory(item)}
+            onClick={() => setDeletingUnit(item)}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -144,11 +145,11 @@ export function UnitsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Satuan</h1>
-          <p className="text-sm text-muted-foreground">Kelola data satyan produk</p>
+          <p className="text-sm text-muted-foreground">Kelola data satuan produk</p>
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-          // onClick={handleAdd}
+          onClick={handleAdd}
         >
           Tambah
         </Button>
@@ -172,7 +173,7 @@ export function UnitsPage() {
 
       <DataTable
         columns={columns}
-        data={categories}
+        data={units}
         isLoading={isLoading}
         isFetching={isFetching}
         emptyMessage={search ? "Data tidak ditemukan" : "Belum ada satuan"}
@@ -191,24 +192,24 @@ export function UnitsPage() {
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
       )}
 
-      {/* <CategoryFormDialog open={dialogOpen} onOpenChange={setDialogOpen} category={editingCategory} /> */}
+      <UnitFormDialog open={dialogOpen} onOpenChange={setDialogOpen} unit={editingUnit} />
 
-      {/* <ConfirmModal
-        open={!!deletingCategory}
-        onOpenChange={(open) => !open && setDeletingCategory(null)}
-        title="Hapus Kategori"
+      <ConfirmModal
+        open={!!deletingUnit}
+        onOpenChange={(open) => !open && setDeletingUnit(null)}
+        title="Hapus Satuan"
         description={
           <>
-            Anda yakin ingin menghapus kategori{" "}
-            <strong className="font-bold">{deletingCategory?.name}</strong>? Tindakan ini tidak
+            Anda yakin ingin menghapus satuan{" "}
+            <strong className="font-bold">{deletingUnit?.name}</strong>? Tindakan ini tidak
             dapat dibatalkan.
           </>
         }
         confirmText="Hapus"
         variant="danger"
-        isLoading={deleteCategory.isPending}
+        isLoading={deleteUnit.isPending}
         onConfirm={handleDelete}
-      /> */}
+      />
     </div>
   )
 }
