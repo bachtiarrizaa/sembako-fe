@@ -67,6 +67,7 @@ const menuItems: MenuItem[] = [
     ],
   },
   { name: 'Customer', path: '/admin/customers', icon: Building2, roles: ['admin'] },
+  { name: 'Data Supplier', path: '/admin/suppliers', icon: Clock, roles: ['admin', 'cashier'] },
   { name: 'Shift', path: '/admin/shifts', icon: Clock, roles: ['admin', 'cashier'] },
   { name: 'Laporan', path: '/admin/reports', icon: BarChart3, roles: ['admin'] },
   {

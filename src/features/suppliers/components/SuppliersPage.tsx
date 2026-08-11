@@ -5,32 +5,26 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-import { ConfirmModal } from "@/components/common/ConfirmModal"
-import { useUsers, useDeleteUser, useUpdateUserStatus } from "../hooks"
 import { Pencil, Trash2, SearchX, Inbox } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
-import { UserResponse } from "../types/user"
+import { ConfirmModal } from "@/components/common/ConfirmModal"
+import { useSuppliers } from "../hooks/useSuppliers"
+import { SupplierResponse } from "../types/supplier"
 import { Switch } from "@/components/ui/switch"
-import { UserFormDialog } from "./UserFormDialog"
 
-import { useAuthStore } from "@/stores/auth.store"
-
-export function UserPage() {
+export function SuppliersPage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const currentUser = useAuthStore((state) => state.user)
 
   const page = Number(searchParams.get("page") ?? 1)
   const limit = Number(searchParams.get("limit") ?? 10)
   const search = searchParams.get("search") ?? ""
 
-  const { data, isLoading, isFetching, isError } = useUsers({
-    page, limit, search
-  })
+  const { data, isLoading, isFetching, isError } = useSuppliers({ page, limit, search })
 
   const handleLimitChange = useCallback(
     (newLimit: number) => {
@@ -73,13 +67,12 @@ export function UserPage() {
   }
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<UserResponse | null>(null)
-  const [deletingUser, setDeletingUser] = useState<UserResponse | null>(null)
+  const [editingSupplier, setEditingSupplier] = useState<SupplierResponse | null>(null)
+  const [deletingSupplier, setDeletingSupplier] = useState<SupplierResponse | null>(null)
 
-  const users = data?.items ?? []
+  const suppliers = data?.items ?? []
   const pagination = data?.pagination
-  const updateStatus = useUpdateUserStatus()
-  const deleteUser = useDeleteUser()
+  // const deleteSupplier = useDeleteSupplier()
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -90,55 +83,51 @@ export function UserPage() {
     [searchParams, pathname, router]
   )
 
-  const handleAdd = () => {
-    setEditingUser(null)
-    setDialogOpen(true)
-  }
+  // const handleAdd = () => {
+  //   setEditingSupplier(null)
+  //   setDialogOpen(true)
+  // }
 
-  const handleEdit = (user: UserResponse) => {
-    setEditingUser(user)
-    setDialogOpen(true)
-  }
+  // const handleEdit = (supplier: SupplierResponse) => {
+  //   setEditingSupplier(supplier)
+  //   setDialogOpen(true)
+  // }
 
-  const handleStatusChange = (user: UserResponse, newStatus: boolean) => {
-    updateStatus.mutate({
-      id: user.id,
-      payload: { isActive: newStatus },
-    })
-  }
+  // const handleDelete = () => {
+  //   if (!deletingSupplier) return
 
-  const handleDelete = () => {
-    if (!deletingUser) return
+  // const handleStatusChange = (supplier: SupplierResponse, newStatus: boolean) => {
+  //   updateStatus.mutate({
+  //     id: user.id,
+  //     payload: { isActive: newStatus },
+  //   })
+  // }
 
-    deleteUser.mutate(deletingUser.id, {
-      onSuccess: () => {
-        setDeletingUser(null)
-        if (users.length === 1 && page > 1) {
-          handlePageChange(page - 1)
-        }
-      },
-    })
-  }
+  //   deleteSupplier.mutate(deletingSupplier.id, {
+  //     onSuccess: () => {
+  //       setDeletingSupplier(null)
+  //       if (units.length === 1 && page > 1) {
+  //         handlePageChange(page - 1)
+  //       }
+  //     },
+  //   })
+  // }
 
-  const columns: Column<UserResponse>[] = [
-    { header: "Nama Pegawai", accessorKey: "name" },
-    { header: "Email", accessorKey: "email" },
-    { header: "Username", accessorKey: "username" },
-    {
-      header: "Role",
-      cell: (item) => item.role.name,
-    },
+  const columns: Column<SupplierResponse>[] = [
+    { header: "Nama Supplier", accessorKey: "name" },
+    { header: "Kontak Supplier", accessorKey: "contactName" },
+    { header: "No Telp/Hp", accessorKey: "phone" },
+    { header: "Alamat", accessorKey: "address" },
     {
       header: "Status",
       cell: (item) => {
-        const isSelf = Boolean(currentUser && (item.id === currentUser.id || item.email === currentUser.email))
-        const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
+        // const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
         return (
-          <div title={isSelf ? "Tidak dapat menonaktifkan akun sendiri" : undefined}>
+          <div>
             <Switch 
               checked={item.isActive} 
-              onCheckedChange={(checked) => handleStatusChange(item, checked)}
-              disabled={isPendingThis || isSelf}
+              // onCheckedChange={(checked) => handleStatusChange(item, checked)}
+              // disabled={isPendingThis || isSelf}
               className="cursor-pointer disabled:cursor-not-allowed" 
             />
           </div>
@@ -148,49 +137,45 @@ export function UserPage() {
     {
       header: "Aksi",
       className: "w-28 text-center",
-      cell: (item) => {
-        const isSelf = Boolean(currentUser && (item.id === currentUser.id || item.email === currentUser.email))
-        return (
-          <div className="flex justify-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              title="Edit Pegawai"
-              className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-              onClick={() => handleEdit(item)}
-            >
-              <Pencil className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              title={isSelf ? "Tidak dapat menghapus akun sendiri" : "Hapus Pegawai"}
-              disabled={isSelf}
-              className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => setDeletingUser(item)}
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
-        )
-      },
+      cell: (item) => (
+        <div className="flex justify-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Edit Satuan"
+            className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
+            // onClick={() => handleEdit(item)}
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Hapus Satuan"
+            className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
+            // onClick={() => setDeletingUnit(item)}
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ),
     },
   ]
 
   if (isError) {
-    return <p className="text-sm text-destructive">Gagal memuat pegawai.</p>
+    return <p className="text-sm text-destructive">Gagal memuat satuan.</p>
   }
 
   return (
     <div className="space-y-5 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Pegawai</h1>
-          <p className="text-sm text-muted-foreground">Kelola pegawai dan hak akses pengguna</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Satuan</h1>
+          <p className="text-sm text-muted-foreground">Kelola data satuan produk</p>
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-          onClick={handleAdd}
+          // onClick={handleAdd}
         >
           Tambah
         </Button>
@@ -206,7 +191,7 @@ export function UserPage() {
             value={searchInput}
             onChange={setSearchInput}
             onSubmit={handleSearchSubmit}
-            placeholder="Cari pegawai..."
+            placeholder="Cari satuan..."
             isFetching={isFetching}
           />
         </div>
@@ -214,10 +199,10 @@ export function UserPage() {
 
       <DataTable
         columns={columns}
-        data={users}
+        data={suppliers}
         isLoading={isLoading}
         isFetching={isFetching}
-        emptyMessage={search ? "Data tidak ditemukan" : "Belum ada pegawai"}
+        emptyMessage={search ? "Data tidak ditemukan" : "Belum ada satuan"}
         emptyIcon={
           search ? (
             <SearchX className="size-8 text-muted-foreground/60" />
@@ -233,24 +218,24 @@ export function UserPage() {
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
       )}
 
-      <UserFormDialog open={dialogOpen} onOpenChange={setDialogOpen} user={editingUser} />
+      {/* <UnitFormDialog open={dialogOpen} onOpenChange={setDialogOpen} unit={editingUnit} /> */}
 
-      <ConfirmModal
-        open={!!deletingUser}
-        onOpenChange={(open) => !open && setDeletingUser(null)}
-        title="Hapus Pegawai"
+      {/* <ConfirmModal
+        open={!!deletingUnit}
+        onOpenChange={(open) => !open && setDeletingUnit(null)}
+        title="Hapus Satuan"
         description={
           <>
-            Anda yakin ingin menghapus pegawai{" "}
-            <strong className="font-semibold">{deletingUser?.name}</strong>? Tindakan ini tidak
+            Anda yakin ingin menghapus satuan{" "}
+            <strong className="font-bold">{deletingUnit?.name}</strong>? Tindakan ini tidak
             dapat dibatalkan.
           </>
         }
         confirmText="Hapus"
         variant="danger"
-        isLoading={deleteUser.isPending}
+        isLoading={deleteUnit.isPending}
         onConfirm={handleDelete}
-      />
+      /> */}
     </div>
   )
 }
