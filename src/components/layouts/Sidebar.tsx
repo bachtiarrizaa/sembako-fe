@@ -43,7 +43,7 @@ const menuItems: MenuItem[] = [
     roles: ['admin', 'cashier'],
     children: [
       { name: 'Semua Produk', path: '/admin/products' },
-      { name: 'Satuan', path: '/admin/untis' },
+      { name: 'Satuan', path: '/admin/units' },
       { name: 'Kategori', path: '/admin/categories' },
     ],
   },
