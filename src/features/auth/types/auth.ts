@@ -18,9 +18,20 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  parentId: string | null;
+  type: "menu" | "action";
+  path: string | null;
+  children: Permission[] | null;
+}
+
 export interface LoginResponse {
   accessToken: string;
   user: User;
+  permissions: Permission[];
 }
 
 export interface RefreshResponse {

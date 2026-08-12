@@ -5,114 +5,99 @@ import {
   LayoutDashboard,
   ShoppingCart,
   Receipt,
+  Clock,
   Coffee,
   Percent,
   Boxes,
   Building2,
-  Clock,
-  BarChart3,
   Users,
+  BarChart3,
   Settings,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  HelpCircle,
+  LucideIcon
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth.store'
-import { useUserMe } from '@/features/users/hooks/useUserMe'
+import { Permission } from '@/features/auth/types/auth'
 
-interface SubMenuItem {
-  name: string
-  path: string
-}
+const iconMap: Record<string, LucideIcon> = {
+  'dashboard': LayoutDashboard,
+  'pos:create': ShoppingCart,
+  'transactions:read': Receipt,
+  'shifts:read': Clock,
+  'products': Coffee,
+  'discounts': Percent,
+  'inventory': Boxes,
+  'suppliers-purchases': Building2,
+  'customers-loyalty': Users,
+  'reports': BarChart3,
+  'employees': Users,
+  'settings:read': Settings,
+};
 
-interface MenuItem {
-  name: string
-  path?: string
-  icon: typeof LayoutDashboard
-  roles: string[]
-  children?: SubMenuItem[]
-}
+const getIcon = (name: string): LucideIcon => {
+  return iconMap[name] || HelpCircle;
+};
 
-const menuItems: MenuItem[] = [
-  { name: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'cashier'] },
-  { name: 'POS / Kasir', path: '/admin/pos', icon: ShoppingCart, roles: ['admin', 'cashier'] },
-  { name: 'Transaksi', path: '/admin/transaction', icon: Receipt, roles: ['admin', 'cashier'] },
-  {
-    name: 'Produk & Satuan',
-    icon: Coffee,
-    roles: ['admin', 'cashier'],
-    children: [
-      { name: 'Semua Produk', path: '/admin/products' },
-      { name: 'Satuan', path: '/admin/units' },
-      { name: 'Kategori', path: '/admin/categories' },
-    ],
-  },
-  {
-    name: 'Promosi',
-    icon: Percent,
-    roles: ['admin'],
-    children: [
-      { name: 'Semua Diskon', path: '/admin/discounts' },
-      { name: 'Diskon Produk', path: '/admin/products/discounts' },
-    ],
-  },
-  {
-    name: 'Stok & Bahan',
-    icon: Boxes,
-    roles: ['admin', 'cashier'],
-    children: [
-      { name: 'Bahan Baku', path: '/admin/inventory/ingredients' },
-      { name: 'Stok Bahan', path: '/admin/inventory/ingredient-stock' },
-      { name: 'Stok Produk', path: '/admin/inventory/product-stock' },
-    ],
-  },
-  { name: 'Customer', path: '/admin/customers', icon: Building2, roles: ['admin'] },
-  { name: 'Data Supplier', path: '/admin/suppliers', icon: Clock, roles: ['admin', 'cashier'] },
-  { name: 'Shift', path: '/admin/shifts', icon: Clock, roles: ['admin', 'cashier'] },
-  { name: 'Laporan', path: '/admin/reports', icon: BarChart3, roles: ['admin'] },
-  {
-    name: 'Pegawai',
-    icon: Users,
-    roles: ['admin'],
-    children: [
-      { name: 'Semua Pegawai', path: '/admin/users' },
-      { name: 'Role', path: '/admin/roles' },
-    ],
-  },
-  { name: 'Pengaturan', path: '/admin/settings', icon: Settings, roles: ['admin'] },
-]
+const routeMap: Record<string, string> = {
+  '/dashboard': '/admin/dashboard',
+  '/pos': '/admin/pos',
+  '/transactions': '/admin/transaction',
+  '/shifts': '/admin/shifts',
+  '/products/list': '/admin/products',
+  '/products/units': '/admin/units',
+  '/products/categories': '/admin/categories',
+  '/discounts': '/admin/discounts',
+  '/discounts/products': '/admin/products/discounts',
+  '/inventory/stock': '/admin/inventory/product-stock',
+  '/inventory/opname': '/admin/inventory/opname',
+  '/suppliers': '/admin/suppliers',
+  '/purchases': '/admin/purchases',
+  '/customers': '/admin/customers',
+  '/loyalty-settings': '/admin/loyalty-settings',
+  '/reports': '/admin/reports',
+  '/users': '/admin/users',
+  '/roles': '/admin/roles',
+  '/settings': '/admin/settings',
+};
+
+const getFePath = (bePath: string | null): string => {
+  if (!bePath) return '#';
+  return routeMap[bePath] || `/admin${bePath}`;
+};
+
+const cleanLabel = (desc: string): string => {
+  let label = desc.startsWith('Menu ') ? desc.slice(5) : desc;
+  if (label.toLowerCase().endsWith(' group')) {
+    label = label.slice(0, -6);
+  }
+  return label;
+};
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const pathname = usePathname()
 
-  const { data } = useUserMe()
-  const user = useAuthStore((state) => state.user)
+  const permissions = useAuthStore((state) => state.permissions) || []
 
-  const userRole = (data?.data.role?.name || user?.role?.name || '').toLowerCase()
-  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : '/cashier/dashboard'
-
-  const displayedMenuItems = menuItems.filter((item) => item.roles.includes(userRole))
+  // Hanya ambil menu utama di root level (level 1)
+  const allowedMenus = permissions.filter(
+    (item) => item.parentId === null && item.type === 'menu'
+  )
 
   const isPathActive = (path: string) => {
-    if (pathname === path) return true
-    if (pathname.startsWith(path + '/')) {
-      const isMoreSpecificMatchExist = menuItems.some((item) => {
-        if (item.path && item.path !== path && item.path.startsWith(path) && pathname.startsWith(item.path)) {
-          return true
-        }
-        return item.children?.some((child) => 
-          child.path !== path && child.path.startsWith(path) && pathname.startsWith(child.path)
-        )
-      })
-      return !isMoreSpecificMatchExist
-    }
-    return false
+    if (path === '#') return false
+    return pathname === path || pathname.startsWith(path + '/')
   }
 
-  const isGroupActive = (item: MenuItem) =>
-    item.children?.some((child) => isPathActive(child.path)) ?? false
+  const isGroupActive = (item: Permission) =>
+    item.children?.some((child) => {
+      const path = getFePath(child.path)
+      return path !== '#' && isPathActive(path)
+    }) ?? false
 
   const toggleGroup = (name: string) => {
     setOpenGroups((prev) => ({ ...prev, [name]: !prev[name] }))
@@ -124,20 +109,31 @@ export function Sidebar() {
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto overflow-x-hidden">
-        {displayedMenuItems.map((item, index) => {
-          const Icon = item.icon
+      <nav className={`flex-1 py-4 space-y-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar transition-[padding] duration-300 ease-in-out ${
+        isCollapsed ? 'pl-[18px] pr-[14px]' : 'px-4'
+      }`}>
+        {allowedMenus.map((item, index) => {
+          const Icon = getIcon(item.name)
 
-          if (!item.children) {
-            const leafPath = item.path ?? dashboardPath
+          // Hanya ambil child item bertipe menu (level 2)
+          const menuChildren = (item.children || []).filter(
+            (child) => child.type === 'menu'
+          )
+
+          const hasSingleChildMenu = menuChildren.length === 1;
+
+          if (menuChildren.length === 0 || hasSingleChildMenu) {
+            const leafPath = getFePath(hasSingleChildMenu ? menuChildren[0].path : item.path)
             const active = isPathActive(leafPath)
             return (
-              <div key={item.name}>
+              <div key={item.id}>
                 {/* Leaf item */}
                 <Link
                   href={leafPath}
-                  title={isCollapsed ? item.name : undefined}
-                  className={`flex items-center py-3 px-4 gap-3 rounded-xl transition-colors duration-200 ${
+                  title={isCollapsed ? cleanLabel(item.description) : undefined}
+                  className={`flex items-center rounded-xl transition-all duration-300 ease-in-out ${
+                    isCollapsed ? 'py-3 px-[14px] gap-0' : 'py-3 px-4 gap-3'
+                  } ${
                     active
                       ? 'bg-primary/10 text-primary font-semibold hover:bg-primary/15'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -149,7 +145,7 @@ export function Sidebar() {
                       isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100'
                     }`}
                   >
-                    {item.name}
+                    {cleanLabel(item.description)}
                   </span>
                 </Link>
                 {index === 0 && <hr className="border-slate-200 my-2" />}
@@ -161,11 +157,13 @@ export function Sidebar() {
           const isOpen = !isCollapsed && (openGroups[item.name] ?? groupActive)
 
           return (
-            <div key={item.name}>
+            <div key={item.id}>
               <button
                 onClick={() => !isCollapsed && toggleGroup(item.name)}
-                title={isCollapsed ? item.name : undefined}
-                className={`w-full flex items-center py-3 px-4 gap-3 rounded-xl transition-colors duration-200 cursor-pointer ${
+                title={isCollapsed ? cleanLabel(item.description) : undefined}
+                className={`w-full flex items-center rounded-xl transition-all duration-300 ease-in-out cursor-pointer ${
+                  isCollapsed ? 'py-3 px-[14px] gap-0' : 'py-3 px-4 gap-3'
+                } ${
                   groupActive
                     ? 'bg-primary/10 text-primary font-semibold hover:bg-primary/15'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -177,7 +175,7 @@ export function Sidebar() {
                     isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100'
                   }`}
                 >
-                  {item.name}
+                  {cleanLabel(item.description)}
                 </span>
                 <ChevronDown
                   className={`w-4 h-4 shrink-0 transition-all duration-300 ease-out ${
@@ -194,19 +192,20 @@ export function Sidebar() {
               >
                 <div className="overflow-hidden">
                   <div className="ml-4 pl-4 border-l border-slate-200 mt-1 space-y-1 pb-1">
-                    {item.children.map((child) => {
-                      const active = isPathActive(child.path)
+                    {menuChildren.map((child) => {
+                      const childPath = getFePath(child.path)
+                      const active = isPathActive(childPath)
                       return (
                         <Link
-                          key={child.path}
-                          href={child.path}
+                          key={child.id}
+                          href={childPath}
                           className={`block py-2 px-3 rounded-lg text-sm transition-colors duration-200 ${
                             active
                               ? 'bg-primary/10 text-primary font-semibold'
                               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                           }`}
                         >
-                          {child.name}
+                          {cleanLabel(child.description)}
                         </Link>
                       )
                     })}
