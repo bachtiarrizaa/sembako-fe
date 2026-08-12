@@ -14,19 +14,19 @@ import { translateMessage } from "@/lib/translator";
 
 export function useLogin() {
   const router = useRouter();
-  const setSession = useAuthStore((state) => state.setUser);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
     onSuccess: (response) => {
-      const { accessToken, user } = response.data;
+      const { accessToken, user, permissions } = response.data;
 
       setAccessToken(accessToken);
       scheduleTokenRefresh(accessToken);
 
       const payload = jwtDecode<JwtPayload>(accessToken);
 
-      setSession({
+      setAuth({
         id: payload.user_id,
         name: user.name,
         email: user.email,
@@ -35,7 +35,7 @@ export function useLogin() {
         isActive: user.isActive,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-      });
+      }, permissions);
 
       const roleName = user.role.name.toLowerCase();
       if (roleName === "admin") {
