@@ -1,6 +1,6 @@
 import { ApiResponse, Pagination } from "@/types/api-response";
 import { apiClient } from "@/api/api-client";
-import { buildListParams } from "@/lib/utils";
+import { buildListParams } from "@/utils/list-params";
 import { CategorySearch, CreateCategoryRequest, UpdateCategoryRequest } from "../schemas/category.schema";
 import { CategoryResponse } from "../types/category";
 

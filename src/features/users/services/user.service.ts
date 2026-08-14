@@ -2,7 +2,7 @@ import { ApiResponse, Pagination } from "@/types/api-response";
 import { apiClient } from "@/api/api-client";
 import { UserResponse } from "../types/user";
 import { CreateUserRequest, UpdateUserRequest, UpdateUserStatusRequest, UserSearch } from "../schemas/user.schema";
-import { buildListParams } from "@/lib/utils";
+import { buildListParams } from "@/utils/list-params";
 
 export const userService = {
   getMe: async (): Promise<ApiResponse<UserResponse>> => {

@@ -2,7 +2,7 @@ import { ApiResponse, Pagination } from "@/types/api-response";
 import { CreateUnitRequest, UnitSearch, UpdateUnitRequest } from "../schemas/unit.schema";
 import { UnitResponse } from "../types/unit";
 import { apiClient } from "@/api/api-client";
-import { buildListParams } from "@/lib/utils";
+import { buildListParams } from "@/utils/list-params";
 
 export const unitService = {
   getUnits: async (
