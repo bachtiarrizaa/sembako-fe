@@ -51,6 +51,14 @@ const messageMap: Record<string, string> = {
   "Supplier name already exists": "Nama supplier sudah digunakan",
   "Supplier not found": "Supplier tidak ditemukan",
 
+  // Discount messages
+  "Discount created successfully": "Diskon berhasil ditambahkan",
+  "Discount updated successfully": "Diskon berhasil diperbarui",
+  "Discount deleted successfully": "Diskon berhasil dihapus",
+  "Discount status updated successfully": "Status diskon berhasil diubah",
+  "Discount name already exists": "Nama diskon sudah digunakan",
+  "Discount not found": "Diskon tidak ditemukan",
+
   // Generic error messages
   "An unexpected error occurred": "Terjadi kesalahan yang tidak terduga",
   "Internal server error": "Terjadi kesalahan pada server",

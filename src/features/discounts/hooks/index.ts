@@ -1,2 +1,6 @@
 export * from "./discount.keys"
 export * from "./useDiscounts"
+export * from "./useCreateDiscount"
+export * from "./useUpdateDiscount"
+export * from "./useUpdateDiscountStatus"
+export * from "./useDeleteDiscount"
