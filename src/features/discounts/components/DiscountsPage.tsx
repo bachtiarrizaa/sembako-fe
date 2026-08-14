@@ -10,13 +10,14 @@ import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
-// import { ConfirmModal } from "@/components/common/ConfirmModal"
+import { ConfirmModal } from "@/components/common/ConfirmModal"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/utils/format"
 import { DISCOUNT_TYPES, DISCOUNT_TYPE_LABELS } from "../constants/discount.constant"
-import { useDiscounts } from "../hooks"
+import { useDiscounts, useUpdateDiscountStatus, useDeleteDiscount } from "../hooks"
 import { DiscountResponse } from "../types/discount"
+import { DiscountFormDialog } from "./DiscountFormDialog"
 
 export function DiscountsPage() {
   const router = useRouter()
@@ -70,13 +71,13 @@ export function DiscountsPage() {
   }
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingSupplier, setEditingSupplier] = useState<DiscountResponse | null>(null)
-  const [deletingSupplier, setDeletingSupplier] = useState<DiscountResponse | null>(null)
+  const [editingDiscount, setEditingDiscount] = useState<DiscountResponse | null>(null)
+  const [deletingDiscount, setDeletingDiscount] = useState<DiscountResponse | null>(null)
 
-  const suppliers = data?.items ?? []
+  const discounts = data?.items ?? []
   const pagination = data?.pagination
-  // const updateStatus = useUpdateSupplierStatus()
-  // const deleteSupplier = useDeleteSupplier()
+  const updateStatus = useUpdateDiscountStatus()
+  const deleteDiscount = useDeleteDiscount()
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -87,38 +88,39 @@ export function DiscountsPage() {
     [searchParams, pathname, router]
   )
 
-  // const handleAdd = () => {
-  //   setEditingSupplier(null)
-  //   setDialogOpen(true)
-  // }
+  const handleAdd = () => {
+    setEditingDiscount(null)
+    setDialogOpen(true)
+  }
 
-  // const handleEdit = (supplier: DiscountResponse) => {
-  //   setEditingSupplier(supplier)
-  //   setDialogOpen(true)
-  // }
+  const handleEdit = (discount: DiscountResponse) => {
+    setEditingDiscount(discount)
+    setDialogOpen(true)
+  }
 
-  // const handleStatusChange = (supplier: DiscountResponse, newStatus: boolean) => {
-  //   updateStatus.mutate({
-  //     id: supplier.id,
-  //     payload: { isActive: newStatus },
-  //   })
-  // }
+  const handleStatusChange = (discount: DiscountResponse, newStatus: boolean) => {
+    updateStatus.mutate({
+      id: discount.id,
+      payload: { isActive: newStatus },
+    })
+  }
 
-  // const handleDelete = () => {
-  //   if (!deletingSupplier) return
+  const handleDelete = () => {
+    if (!deletingDiscount) return
 
-  //   deleteSupplier.mutate(deletingSupplier.id, {
-  //     onSuccess: () => {
-  //       setDeletingSupplier(null)
-  //       if (suppliers.length === 1 && page > 1) {
-  //         handlePageChange(page - 1)
-  //       }
-  //     },
-  //   })
-  // }
+    deleteDiscount.mutate(deletingDiscount.id, {
+      onSuccess: () => {
+        setDeletingDiscount(null)
+        if (discounts.length === 1 && page > 1) {
+          handlePageChange(page - 1)
+        }
+      },
+    })
+  }
 
   const columns: Column<DiscountResponse>[] = [
-    { header: "Nama",
+    {
+      header: "Nama",
       cell: (item) => item.name || "-"
     },
     {
@@ -153,13 +155,13 @@ export function DiscountsPage() {
     {
       header: "Status",
       cell: (item) => {
-        // const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
+        const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
         return (
           <div>
             <Switch
               checked={item.isActive}
-              // onCheckedChange={(checked) => handleStatusChange(item, checked)}
-              // disabled={isPendingThis}
+              onCheckedChange={(checked) => handleStatusChange(item, checked)}
+              disabled={isPendingThis}
               className="cursor-pointer disabled:cursor-not-allowed"
             />
           </div>
@@ -174,18 +176,18 @@ export function DiscountsPage() {
           <Button
             variant="ghost"
             size="icon"
-            title="Edit Supplier"
+            title="Edit Diskon"
             className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-            // onClick={() => handleEdit(item)}
+            onClick={() => handleEdit(item)}
           >
             <Pencil className="size-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            title="Hapus Supplier"
+            title="Hapus Diskon"
             className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-            // onClick={() => setDeletingSupplier(item)}
+            onClick={() => setDeletingDiscount(item)}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -207,7 +209,7 @@ export function DiscountsPage() {
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-          // onClick={handleAdd}
+          onClick={handleAdd}
         >
           Tambah
         </Button>
@@ -223,7 +225,7 @@ export function DiscountsPage() {
             value={searchInput}
             onChange={setSearchInput}
             onSubmit={handleSearchSubmit}
-            placeholder="Cari supplier..."
+            placeholder="Cari diskon..."
             isFetching={isFetching}
           />
         </div>
@@ -231,7 +233,7 @@ export function DiscountsPage() {
 
       <DataTable
         columns={columns}
-        data={suppliers}
+        data={discounts}
         isLoading={isLoading}
         isFetching={isFetching}
         emptyMessage={search ? "Data tidak ditemukan" : "Belum ada diskon"}
@@ -250,28 +252,28 @@ export function DiscountsPage() {
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
       )}
 
-      {/* <SupplierFormDialog
+      <DiscountFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        supplier={editingSupplier}
-      /> */}
+        discount={editingDiscount}
+      />
 
-      {/* <ConfirmModal
-        open={!!deletingSupplier}
-        onOpenChange={(open) => !open && setDeletingSupplier(null)}
-        title="Hapus Supplier"
+      <ConfirmModal
+        open={!!deletingDiscount}
+        onOpenChange={(open) => !open && setDeletingDiscount(null)}
+        title="Hapus Diskon"
         description={
           <>
-            Anda yakin ingin menghapus supplier{" "}
-            <strong className="font-bold">{deletingSupplier?.name}</strong>? Tindakan ini tidak
+            Anda yakin ingin menghapus diskon{" "}
+            <strong className="font-bold">{deletingDiscount?.name}</strong>? Tindakan ini tidak
             dapat dibatalkan.
           </>
         }
         confirmText="Hapus"
         variant="danger"
-        isLoading={deleteSupplier.isPending}
+        isLoading={deleteDiscount.isPending}
         onConfirm={handleDelete}
-      /> */}
+      />
     </div>
   )
 }

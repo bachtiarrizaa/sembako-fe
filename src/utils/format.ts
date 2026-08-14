@@ -22,3 +22,17 @@ export function formatCurrency(
     maximumFractionDigits: 0,
   }).format(number)
 }
+
+export function formatStartDate(date: Date): string {
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, "0")
+  const dd = String(date.getDate()).padStart(2, "0")
+  return `${yyyy}-${mm}-${dd}T00:00:00Z`
+}
+
+export function formatEndDate(date: Date): string {
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, "0")
+  const dd = String(date.getDate()).padStart(2, "0")
+  return `${yyyy}-${mm}-${dd}T23:59:59Z`
+}

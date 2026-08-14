@@ -1,4 +1,4 @@
-import { DiscountSearch } from "../schemas/discount.schema";
+import { CreateDiscountRequest, DiscountSearch, UpdateDiscountRequest, UpdateDiscountStatusRequest } from "../schemas/discount.schema";
 import { DiscountResponse } from "../types/discount";
 import { apiClient } from "@/api/api-client";
 import { ApiResponse, Pagination } from "@/types/api-response";
@@ -15,5 +15,35 @@ export const discountService = {
       items: res.data.data,
       pagination: res.data.pagination
     }
-  }
+  },
+
+  create: async (
+    payload: CreateDiscountRequest
+  ): Promise<ApiResponse<DiscountResponse>> => {
+    const res = await apiClient.post<ApiResponse<DiscountResponse>>("/discounts", payload)
+    return res.data
+  },
+
+  update: async (
+    id: string,
+    payload: UpdateDiscountRequest
+  ): Promise<ApiResponse<DiscountResponse>> => {
+    const res = await apiClient.put<ApiResponse<DiscountResponse>>(`/discounts/${id}`, payload)
+    return res.data
+  },
+
+  updateStatus: async (
+    id: string,
+    payload: UpdateDiscountStatusRequest
+  ): Promise<ApiResponse<DiscountResponse>> => {
+    const res = await apiClient.patch<ApiResponse<DiscountResponse>>(`/discounts/${id}/status`, payload)
+    return res.data
+  },
+
+  delete: async (
+    id: string
+  ): Promise<ApiResponse<null>> => {
+    const res = await apiClient.delete<ApiResponse<null>>(`/discounts/${id}`)
+    return res.data
+  },
 }
