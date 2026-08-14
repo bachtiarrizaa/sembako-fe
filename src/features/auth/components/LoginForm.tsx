@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginRequest } from "../schemas/auth.schema";
 import { useLogin } from "../hooks/useLogin";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

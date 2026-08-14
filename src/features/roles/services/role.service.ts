@@ -2,7 +2,7 @@ import { ApiResponse, Pagination } from "@/types/api-response";
 import { Role, RoleResponse } from "../types/role";
 import { apiClient } from "@/api/api-client";
 import { CreateRoleRequest, RoleSearch, UpdateRoleRequest } from "../schemas/role.schema";
-import { buildListParams } from "@/lib/utils";
+import { buildListParams } from "@/utils/list-params";
 
 export const roleService = {
   getRoles: async (

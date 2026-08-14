@@ -2,7 +2,7 @@ import { DiscountSearch } from "../schemas/discount.schema";
 import { DiscountResponse } from "../types/discount";
 import { apiClient } from "@/api/api-client";
 import { ApiResponse, Pagination } from "@/types/api-response";
-import { buildListParams } from "@/lib/utils";
+import { buildListParams } from "@/utils/list-params";
 
 export const discountService = {
   getDiscounts: async (

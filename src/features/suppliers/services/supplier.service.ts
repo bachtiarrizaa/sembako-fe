@@ -2,7 +2,7 @@ import { ApiResponse, Pagination } from "@/types/api-response";
 import { CreateSupplierRequest, SupplierSearch, UpdateSupplierRequest, UpdateSupplierStatusRequest } from "../schemas/supplier.schema";
 import { SupplierResponse } from "../types/supplier";
 import { apiClient } from "@/api/api-client";
-import { buildListParams } from "@/lib/utils";
+import { buildListParams } from "@/utils/list-params";
 
 export const supplierService = {
   getSuppliers: async (

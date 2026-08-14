@@ -10,7 +10,7 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox"
 import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/cn"
 
 interface ComboboxSelectProps<T> {
   items: T[]
