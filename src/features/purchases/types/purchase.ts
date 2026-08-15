@@ -17,6 +17,9 @@ export interface Purchase {
   id: string
   product: PurchaseProduct
   supplier: PurchaseSupplier
+  unit: { id: string; name: string } | null
+  unitPrice: number | null
+  baseUnit: { id: string; name: string } | null
   initialQuantity: number
   remainingQuantity: number
   purchasePrice: number
@@ -26,4 +29,11 @@ export interface Purchase {
   createdAt: string
 }
 
-export interface PurchaseResponse extends Purchase {}
+export type PurchaseResponse = Purchase
+
+export interface PurchaseItemFormValues {
+  productId: string
+  unitId: string
+  quantity?: number
+  purchasePrice?: number
+}

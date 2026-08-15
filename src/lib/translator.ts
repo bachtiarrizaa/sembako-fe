@@ -67,6 +67,13 @@ const messageMap: Record<string, string> = {
   "Discount name already exists": "Nama diskon sudah digunakan",
   "Discount not found": "Diskon tidak ditemukan",
 
+  // Purchase messages
+  "purchase recorded successfully": "Pembelian berhasil dicatat",
+  "purchase batch updated successfully": "Pembelian berhasil diperbarui",
+  "purchase batch deleted successfully": "Pembelian berhasil dihapus",
+  "cannot update quantity or price of a purchase batch that has been partially sold": "Stok telah terjual sebagian, jumlah stok dan harga beli tidak dapat diubah",
+  "cannot delete a purchase batch that has been partially sold": "Batch tidak dapat dihapus karena stok telah terjual sebagian",
+
   // Generic error messages
   "An unexpected error occurred": "Terjadi kesalahan yang tidak terduga",
   "Internal server error": "Terjadi kesalahan pada server",
