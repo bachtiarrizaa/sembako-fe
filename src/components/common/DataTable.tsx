@@ -39,7 +39,7 @@ export function DataTable<T extends { id: string | number }>({
   limit = 10,
 }: DataTableProps<T>) {
   return (
-    <div className="relative bg-card border border-border rounded-xl overflow-hidden shadow-xs">
+    <div className="relative bg-card border border-border rounded-xl overflow-x-auto shadow-xs">
       <Table className="table-fixed w-full">
         <TableHeader className="bg-primary">
           <TableRow className="hover:bg-primary">
