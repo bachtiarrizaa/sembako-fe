@@ -12,7 +12,7 @@ import { CustomPagination } from "@/components/common/Pagination"
 import { Button } from "@/components/ui/button"
 import { usePurchases, useDeletePurchase } from "../hooks"
 import { PurchaseResponse } from "../types/purchase"
-import { formatCurrency, formatDate, formatQuantity } from "@/utils/format"
+import { formatCurrency, formatDate, formatPurchasedQuantity } from "@/utils/format"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
 import { PurchaseFormDialog } from "./PurchaseFormDialog"
 import { PurchaseDetailDialog } from "./PurchaseDetailDialog"
@@ -127,13 +127,13 @@ export function PurchasesPage() {
     },
     {
       header: "Stok Awal",
-      className: "w-28 text-right",
-      cell: (item) => formatQuantity(item.initialQuantity, item.baseUnit),
+      className: "w-32 text-right",
+      cell: (item) => formatPurchasedQuantity(item.initialQuantity, item, true),
     },
     {
       header: "Stok Sisa",
-      className: "w-28 text-right",
-      cell: (item) => formatQuantity(item.remainingQuantity, item.baseUnit),
+      className: "w-32 text-right",
+      cell: (item) => formatPurchasedQuantity(item.remainingQuantity, item, true),
     },
     {
       header: "Harga Beli",
@@ -142,11 +142,6 @@ export function PurchasesPage() {
         item.unit && item.unitPrice != null
           ? `${formatCurrency(item.unitPrice)}/${item.unit.name}`
           : formatCurrency(item.purchasePrice),
-    },
-    {
-      header: "Total Beli",
-      className: "w-32 text-right",
-      cell: (item) => formatCurrency(item.initialQuantity * item.purchasePrice),
     },
     {
       header: "Aksi",

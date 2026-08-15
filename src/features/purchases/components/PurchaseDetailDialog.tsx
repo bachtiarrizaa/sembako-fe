@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { formatCurrency, formatDate, formatDateTime, formatQuantity } from "@/utils/format"
+import { formatCurrency, formatDate, formatDateTime, formatPurchasedQuantity } from "@/utils/format"
 import { usePurchaseDetail } from "../hooks/usePurchaseDetail"
 
 interface PurchaseDetailDialogProps {
@@ -85,8 +85,8 @@ export function PurchaseDetailDialog({ open, onOpenChange, purchaseId }: Purchas
                 <h3 className="text-sm font-bold text-foreground">Detail Produk</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <DetailItem label="Nama Produk" value={purchase.product?.name || "-"} />
-                  <DetailItem label="Stok Awal" value={formatQuantity(purchase.initialQuantity, purchase.baseUnit)} />
-                  <DetailItem label="Stok Sisa" value={formatQuantity(purchase.remainingQuantity, purchase.baseUnit)} />
+                  <DetailItem label="Stok Awal" value={formatPurchasedQuantity(purchase.initialQuantity, purchase)} />
+                  <DetailItem label="Stok Sisa" value={formatPurchasedQuantity(purchase.remainingQuantity, purchase)} />
                   <DetailItem
                     label="Harga Beli"
                     value={

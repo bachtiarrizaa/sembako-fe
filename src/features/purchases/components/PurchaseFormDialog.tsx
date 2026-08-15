@@ -107,25 +107,35 @@ export function PurchaseFormDialog({ open, onOpenChange, purchase }: PurchaseFor
   useEffect(() => {
     if (open) {
       if (isEdit && purchase) {
-        // Find selected product to load its units
+        // Find the product in loaded products list to load its units & current conversion
+        const matchedProduct = products.find((p) => p.id === purchase.product?.id)
+        const purchasedUnit = matchedProduct?.units.find((u) => u.unit.id === purchase.unit?.id)
+        const baseUnit = matchedProduct?.units.find((u) => u.isBaseUnit)
+
+        // Prefer the purchased unit (e.g. karung) so edit matches the original entry.
+        // Legacy data (unit null) falls back to the base unit.
+        const targetUnitId = purchasedUnit?.unit.id ?? baseUnit?.unit.id ?? purchase.unit?.id ?? ""
+
+        // Backend normalizes quantity with the CURRENT conversion from product_units,
+        // so prefill uses that same current conversion. Fall back to the
+        // unitPrice/purchasePrice ratio only if the unit isn't found in the loaded list.
+        let conversion = purchasedUnit?.conversionToBase
+        if (!conversion && purchase.unit && purchase.unitPrice != null && purchase.purchasePrice > 0) {
+          conversion = purchase.unitPrice / purchase.purchasePrice
+        }
+
         reset({
           supplierId: purchase.supplier?.id ?? "",
           invoiceNumber: purchase.invoiceNumber ?? "",
           purchaseDate: formatDateToYYYYMMDD(purchase.purchaseDate),
           productId: purchase.product?.id ?? "",
-          quantity: purchase.initialQuantity,
+          quantity:
+            purchase.unit && conversion && conversion > 0
+              ? Math.round((purchase.initialQuantity / conversion) * 100) / 100
+              : purchase.initialQuantity,
           purchasePrice: purchase.unitPrice ?? purchase.purchasePrice,
-          unitId: "", // will be set below
+          unitId: targetUnitId,
         })
-
-        // Find the product in loaded products list to default to base unit (since GET does not return unitId)
-        const matchedProduct = products.find((p) => p.id === purchase.product?.id)
-        if (matchedProduct) {
-          const baseUnit = matchedProduct.units.find((u) => u.isBaseUnit)
-          if (baseUnit) {
-            setValue("unitId", baseUnit.unit.id)
-          }
-        }
       } else {
         // Add Mode
         reset({
@@ -137,7 +147,7 @@ export function PurchaseFormDialog({ open, onOpenChange, purchase }: PurchaseFor
       }
       clearErrors()
     }
-  }, [open, purchase, isEdit, reset, clearErrors, products, setValue])
+  }, [open, purchase, isEdit, reset, clearErrors, products])
 
   const onSubmit = (values: PurchaseFormValues) => {
     if (isEdit && purchase) {

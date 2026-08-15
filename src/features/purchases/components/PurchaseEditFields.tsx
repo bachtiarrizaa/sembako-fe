@@ -57,6 +57,7 @@ export function PurchaseEditFields({
                 items={editProductUnits}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={isPartiallySold}
                 getOptionValue={(u) => u.unit.id}
                 getOptionLabel={(u) => u.unit.name}
                 placeholder="Pilih satuan..."
@@ -74,7 +75,7 @@ export function PurchaseEditFields({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="quantity" className="text-sm font-semibold text-foreground">
-            Stok Awal <span className="text-destructive">*</span>
+            Jumlah <span className="text-destructive">*</span>
           </Label>
           <Input
             id="quantity"

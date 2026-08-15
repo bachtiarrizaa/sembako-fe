@@ -41,6 +41,37 @@ export function formatQuantity(value?: number | null, unit?: { name: string } | 
   return unit?.name ? `${qty} ${unit.name}` : String(qty)
 }
 
+export function formatPurchasedQuantity(
+  baseQuantity?: number | null,
+  opts?: {
+    unit?: { name: string } | null
+    unitPrice?: number | null
+    purchasePrice?: number
+    baseUnit?: { name: string } | null
+  } | null,
+  compact = false
+): string {
+  const qty = baseQuantity ?? 0
+  const unit = opts?.unit
+  const unitPrice = opts?.unitPrice
+  const purchasePrice = opts?.purchasePrice
+  const baseUnit = opts?.baseUnit
+
+  const conversion =
+    unit && unitPrice != null && purchasePrice != null && purchasePrice > 0
+      ? unitPrice / purchasePrice
+      : null
+
+  if (unit && conversion && conversion > 0) {
+    const converted = Math.round((qty / conversion) * 100) / 100
+    if (compact) return `${converted} ${unit.name}`
+    return baseUnit?.name
+      ? `${converted} ${unit.name} (${qty} ${baseUnit.name})`
+      : `${converted} ${unit.name}`
+  }
+  return baseUnit?.name ? `${qty} ${baseUnit.name}` : String(qty)
+}
+
 export function formatStartDate(date: Date): string {
   return `${toDateOnly(date)}T00:00:00Z`
 }
