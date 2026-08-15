@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import {
   Combobox,
   ComboboxContent,
@@ -25,6 +25,7 @@ interface ComboboxSelectProps<T> {
   loadingText?: string
   disabled?: boolean
   className?: string
+  portalContainer?: HTMLElement | null
 }
 
 export function ComboboxSelect<T>({
@@ -40,20 +41,15 @@ export function ComboboxSelect<T>({
   loadingText = "Memuat...",
   disabled = false,
   className,
+  portalContainer,
 }: ComboboxSelectProps<T>) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const selected = items.find((item) => getOptionValue(item) === value) ?? null
 
-  const [inputValue, setInputValue] = useState(selected ? getOptionLabel(selected) : "")
+  const [, setInputValue] = useState("")
 
-  const [dialogContainer, setDialogContainer] = useState<HTMLElement | null>(null)
-  useEffect(() => {
-    if (wrapperRef.current) {
-      const dialog = wrapperRef.current.closest<HTMLElement>('[role="dialog"]')
-      setDialogContainer(dialog)
-    }
-  }, [])
+  const [dialogContainer, setDialogContainer] = useState<HTMLElement | undefined>(undefined)
 
   return (
     <div ref={wrapperRef}>
@@ -61,10 +57,18 @@ export function ComboboxSelect<T>({
         items={items}
         value={selected}
         onValueChange={(next) => onChange(next ? getOptionValue(next) : "")}
-        onInputValueChange={(input) => setInputValue(input)}
+        onInputValueChange={setInputValue}
         onOpenChange={(next) => {
           setOpen(next)
-          if (!next) setInputValue(selected ? getOptionLabel(selected) : "")
+          if (next) {
+            setDialogContainer(
+              portalContainer !== undefined
+                ? portalContainer ?? undefined
+                : wrapperRef.current?.closest<HTMLElement>('[role="dialog"]') ?? undefined
+            )
+          } else {
+            setInputValue(selected ? getOptionLabel(selected) : "")
+          }
         }}
         itemToStringLabel={(item) => getOptionLabel(item)}
         itemToStringValue={(item) => getOptionValue(item)}
