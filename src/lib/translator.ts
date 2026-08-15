@@ -51,6 +51,14 @@ const messageMap: Record<string, string> = {
   "Supplier name already exists": "Nama supplier sudah digunakan",
   "Supplier not found": "Supplier tidak ditemukan",
 
+  // Customer messages
+  "Customer created successfully": "Customer berhasil ditambahkan",
+  "Customer updated successfully": "Customer berhasil diperbarui",
+  "Customer deleted successfully": "Customer berhasil dihapus",
+  "Customer status updated successfully": "Status customer berhasil diubah",
+  "Customer name already exists": "Nama customer sudah digunakan",
+  "Customer not found": "Customer tidak ditemukan",
+
   // Discount messages
   "Discount created successfully": "Diskon berhasil ditambahkan",
   "Discount updated successfully": "Diskon berhasil diperbarui",

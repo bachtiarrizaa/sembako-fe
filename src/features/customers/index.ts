@@ -1,0 +1,5 @@
+export * from "./components/CustomersPage"
+export * from "./hooks"
+export * from "./services/customer.service"
+export * from "./schemas/customer.schema"
+export * from "./types/customer"
