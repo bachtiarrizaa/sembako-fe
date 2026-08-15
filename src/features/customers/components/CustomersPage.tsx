@@ -120,22 +120,28 @@ export function CustomersPage() {
   const columns: Column<CustomerResponse>[] = [
     {
       header: "Nama Customer",
+      className: "w-[20%]",
       cell: (item) => item.name || "-",
     },
     {
       header: "No Telp/Hp",
+      className: "w-[18%]",
       cell: (item) => item.phoneNumber || "-",
     },
     {
       header: "Alamat",
-      cell: (item) => item.address || "-",
+      className: "w-[32%]",
+      cell: (item) => (
+        <div className="whitespace-normal break-words leading-snug">{item.address || "-"}</div>
+      ),
     },
     {
       header: "Status",
+      className: "w-[14%] text-center",
       cell: (item) => {
         const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
         return (
-          <div>
+          <div className="flex justify-center">
             <Switch
               checked={item.isActive}
               onCheckedChange={(checked) => handleStatusChange(item, checked)}
