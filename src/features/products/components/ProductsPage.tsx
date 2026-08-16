@@ -89,26 +89,45 @@ export function ProductsPage() {
   const columns: Column<ProductResponse>[] = [
     {
       header: "Nama",
+      className: "min-w-48",
       cell: (item) => item.name || "-"
     },
     {
       header: "Kategori",
+      className: "w-40",
       cell: (item) => item.category?.name || "-"
     },
     {
       header: "Base Unit",
+      className: "w-24 text-center",
       cell: (item) => item.baseUnit?.name || "-"
     },
     {
       header: "Stok Minimal",
+      className: "w-24 text-center",
       cell: (item) => (item.minimumStock !== undefined && item.minimumStock !== null ? item.minimumStock : "-")
     },
     {
+      header: "Stok",
+      className: "w-28 text-center",
+      cell: (item) => {
+        if (item.stock === undefined || item.stock === null) return "-"
+        const low = item.minimumStock !== undefined && item.stock < item.minimumStock
+        return (
+          <span className={`font-semibold ${low ? "text-destructive" : "text-foreground"}`}>
+            {item.stock} {item.baseUnit?.name ?? ""}
+          </span>
+        )
+      },
+    },
+    {
       header: "Margin Threshold",
+      className: "w-28 text-center",
       cell: (item) => (item.marginThresholdPercent !== undefined && item.marginThresholdPercent !== null ? `${item.marginThresholdPercent}%` : "-")
     },
     {
       header: "Status",
+      className: "w-24 text-center",
       cell: (item) => {
         const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
         return (
