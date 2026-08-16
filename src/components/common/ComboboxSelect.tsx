@@ -78,7 +78,7 @@ export function ComboboxSelect<T>({
           placeholder={open ? searchPlaceholder : placeholder}
           disabled={disabled}
           showClear={Boolean(selected) && !disabled}
-          className={cn("w-full", className)}
+          className={cn("w-full bg-background dark:bg-input/30", className)}
         />
         <ComboboxContent container={dialogContainer}>
           {isLoading ? (

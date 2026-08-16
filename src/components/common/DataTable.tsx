@@ -40,7 +40,7 @@ export function DataTable<T extends { id: string | number }>({
 }: DataTableProps<T>) {
   return (
     <div className="relative bg-card border border-border rounded-xl overflow-x-auto shadow-xs">
-      <Table className="table-fixed w-full">
+      <Table className="w-full min-w-[800px]">
         <TableHeader className="bg-primary">
           <TableRow className="hover:bg-primary">
             <TableHead className="w-12 font-bold text-center text-primary-foreground px-3 py-2">

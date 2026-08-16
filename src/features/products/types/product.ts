@@ -26,9 +26,10 @@ export interface Product {
   minimumStock: number
   marginThresholdPercent: number
   isActive: boolean
+  stock?: number
   units: ProductUnit[]
   createdAt: string
   updatedAt: string
 }
 
-export interface ProductResponse extends Product {}
+export type ProductResponse = Product

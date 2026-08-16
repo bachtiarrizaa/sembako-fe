@@ -22,6 +22,22 @@ export function formatDateTime(value?: string | null, fallback = "-"): string {
   }).format(date)
 }
 
+export function formatShortDateTime(value?: string | null, fallback = "-"): string {
+  if (!value) return fallback
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return fallback
+  const datePart = new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date)
+  const timePart = new Intl.DateTimeFormat("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date)
+  return `${datePart} / ${timePart}`
+}
+
 export function formatCurrency(
   value?: string | number | null,
   fallback = "-"
