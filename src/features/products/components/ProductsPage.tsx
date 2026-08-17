@@ -5,27 +5,46 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-import { Pencil, Trash2, SearchX, Inbox } from "lucide-react"
+import { Pencil, Trash2, SearchX, Inbox, Plus, Eye } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
-import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { useProducts, useUpdateProductStatus } from "../hooks"
+import { ConfirmModal } from "@/components/common/ConfirmModal"
+import { usePermission } from "@/hooks/usePermission"
+import { useProducts, useUpdateProductStatus, useDeleteProduct } from "../hooks"
 import { ProductResponse } from "../types/product"
+import { ProductFormDialog } from "./ProductFormDialog"
+import { ProductDetailDialog } from "./ProductDetailDialog"
 
 export function ProductsPage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
+  const { hasPermission } = usePermission()
+
   const page = Number(searchParams.get("page") ?? 1)
   const limit = Number(searchParams.get("limit") ?? 10)
   const search = searchParams.get("search") ?? ""
 
+  // Queries & Mutations
   const { data, isLoading, isFetching, isError } = useProducts({ page, limit, search })
+  const updateStatus = useUpdateProductStatus()
+  const deleteProduct = useDeleteProduct()
 
+  // State
+  const [formDialogOpen, setFormDialogOpen] = useState(false)
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
+
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false)
+  const [detailProductId, setDetailProductId] = useState<string | null>(null)
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null)
+
+  // Search logic
   const handleLimitChange = useCallback(
     (newLimit: number) => {
       const params = new URLSearchParams(searchParams.toString())
@@ -68,7 +87,6 @@ export function ProductsPage() {
 
   const products = data?.items ?? []
   const pagination = data?.pagination
-  const updateStatus = useUpdateProductStatus()
 
   const handleStatusChange = (product: ProductResponse, newStatus: boolean) => {
     updateStatus.mutate({
@@ -85,6 +103,36 @@ export function ProductsPage() {
     },
     [searchParams, pathname, router]
   )
+
+  const handleAddClick = () => {
+    setSelectedProductId(null)
+    setFormDialogOpen(true)
+  }
+
+  const handleDetailClick = (id: string) => {
+    setDetailProductId(id)
+    setDetailDialogOpen(true)
+  }
+
+  const handleEditClick = (id: string) => {
+    setSelectedProductId(id)
+    setFormDialogOpen(true)
+  }
+
+  const handleDeleteClick = (id: string, name: string) => {
+    setProductToDelete({ id, name })
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (!productToDelete) return
+    deleteProduct.mutate(productToDelete.id, {
+      onSuccess: () => {
+        setDeleteDialogOpen(false)
+        setProductToDelete(null)
+      },
+    })
+  }
 
   const columns: Column<ProductResponse>[] = [
     {
@@ -130,13 +178,14 @@ export function ProductsPage() {
       className: "w-24 text-center",
       cell: (item) => {
         const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
+        const canUpdate = hasPermission("products:update")
         return (
           <div>
             <Switch
               checked={item.isActive}
               onCheckedChange={(checked) => handleStatusChange(item, checked)}
-              disabled={isPendingThis}
-              className="cursor-pointer disabled:cursor-not-allowed"
+              disabled={isPendingThis || !canUpdate}
+              className="cursor-pointer disabled:cursor-not-allowed scale-90"
             />
           </div>
         )
@@ -144,25 +193,40 @@ export function ProductsPage() {
     },
     {
       header: "Aksi",
-      className: "w-28 text-center",
-      cell: () => (
+      className: "w-32 text-center",
+      cell: (item) => (
         <div className="flex justify-center gap-1">
+          {hasPermission("products:update") && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Edit Produk"
+              onClick={() => handleEditClick(item.id)}
+              className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
+            >
+              <Pencil className="size-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
-            title="Edit Produk"
-            className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
+            title="Lihat Detail"
+            onClick={() => handleDetailClick(item.id)}
+            className="text-blue-500 hover:text-blue-500/80 hover:bg-muted cursor-pointer"
           >
-            <Pencil className="size-4" />
+            <Eye className="size-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Hapus Produk"
-            className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {hasPermission("products:delete") && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Hapus Produk"
+              onClick={() => handleDeleteClick(item.id, item.name)}
+              className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -177,13 +241,16 @@ export function ProductsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Produk</h1>
-          <p className="text-sm text-muted-foreground">Kelola data produk Anda</p>
+          <p className="text-sm text-muted-foreground">Kelola data katalog produk Anda</p>
         </div>
-        <Button
-          className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-        >
-          Tambah
-        </Button>
+        {hasPermission("products:create") && (
+          <Button
+            onClick={handleAddClick}
+            className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4 gap-1.5"
+          >
+            <Plus className="size-4" /> Tambah Produk
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -222,6 +289,38 @@ export function ProductsPage() {
       {pagination && (
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
       )}
+
+      {/* Product detail view dialog */}
+      <ProductDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        productId={detailProductId}
+      />
+
+      {/* Main product form dialog (Add/Edit) */}
+      <ProductFormDialog
+        open={formDialogOpen}
+        onOpenChange={setFormDialogOpen}
+        productId={selectedProductId}
+      />
+
+      {/* Product deletion confirmation dialog */}
+      <ConfirmModal
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Hapus Produk"
+        description={
+          productToDelete ? (
+            <>
+              Apakah Anda yakin ingin menghapus produk <strong className="font-bold">{productToDelete.name}</strong>? Tindakan ini tidak dapat dibatalkan dan akan ditolak jika produk telah memiliki riwayat transaksi/stok.
+            </>
+          ) : ""
+        }
+        confirmText="Hapus"
+        variant="danger"
+        isLoading={deleteProduct.isPending}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   )
 }
