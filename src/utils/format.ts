@@ -57,6 +57,14 @@ export function formatQuantity(value?: number | null, unit?: { name: string } | 
   return unit?.name ? `${qty} ${unit.name}` : String(qty)
 }
 
+export function resolveStaticUrl(path?: string | null): string | null {
+  if (!path) return null
+  if (path.startsWith("http")) return path
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "/api"
+  const staticBaseUrl = baseUrl.replace(/\/api\/?$/, "")
+  return `${staticBaseUrl}${path}`
+}
+
 export function formatPurchasedQuantity(
   baseQuantity?: number | null,
   opts?: {

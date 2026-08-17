@@ -8,6 +8,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -82,8 +83,11 @@ export function PurchaseItemsTable({
                 <TableHead className="w-[14%] font-bold text-primary-foreground px-3 py-2 text-right">
                   Jumlah
                 </TableHead>
-                <TableHead className="w-[18%] font-bold text-primary-foreground px-3 py-2 text-right">
+                <TableHead className="w-[14%] font-bold text-primary-foreground px-3 py-2 text-right">
                   Harga
+                </TableHead>
+                <TableHead className="w-[16%] font-bold text-primary-foreground px-3 py-2 text-right">
+                  Total
                 </TableHead>
                 <TableHead className="w-24 font-bold text-primary-foreground px-3 py-2 text-center">
                   Aksi
@@ -95,11 +99,7 @@ export function PurchaseItemsTable({
                 const item = safeWatchedItems[idx]
                 const product = products.find((p) => p.id === item?.productId)
                 const unit = product?.units.find((u) => u.unit.id === item?.unitId)
-                const unitLabel = unit
-                  ? unit.conversionToBase !== 1
-                    ? `${unit.unit.name} (×${unit.conversionToBase})`
-                    : unit.unit.name
-                  : "-"
+                const unitLabel = unit?.unit.name ?? "-"
 
                 return (
                   <TableRow key={field.id} className="hover:bg-muted/30 transition-colors">
@@ -114,6 +114,11 @@ export function PurchaseItemsTable({
                     </TableCell>
                     <TableCell className="h-9 text-gray-600 px-3 py-2 text-right">
                       {formatCurrency(item?.purchasePrice)}
+                    </TableCell>
+                    <TableCell className="h-9 font-medium text-gray-800 px-3 py-2 text-right">
+                      {formatCurrency(
+                        Number(item?.quantity ?? 0) * Number(item?.purchasePrice ?? 0)
+                      )}
                     </TableCell>
                     <TableCell className="h-9 text-gray-600 px-3 py-2">
                       <div className="flex justify-center gap-1">
@@ -149,6 +154,27 @@ export function PurchaseItemsTable({
                 )
               })}
             </TableBody>
+            <TableFooter className="bg-muted/50">
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="font-semibold text-foreground px-3 py-2.5"
+                >
+                  Total
+                </TableCell>
+                <TableCell className="font-bold text-foreground px-3 py-2.5 text-right">
+                  {formatCurrency(
+                    safeWatchedItems.reduce(
+                      (sum, item) =>
+                        sum +
+                        Number(item?.quantity ?? 0) * Number(item?.purchasePrice ?? 0),
+                      0
+                    )
+                  )}
+                </TableCell>
+                <TableCell className="px-3 py-2.5" />
+              </TableRow>
+            </TableFooter>
           </Table>
         </div>
       )}
