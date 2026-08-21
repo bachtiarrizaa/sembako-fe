@@ -23,6 +23,7 @@ export interface Purchase {
   initialQuantity: number
   remainingQuantity: number
   purchasePrice: number
+  total?: number
   invoiceNumber: string | null
   purchaseDate: string
   creator: PurchaseCreator
@@ -30,6 +31,29 @@ export interface Purchase {
 }
 
 export type PurchaseResponse = Purchase
+
+export interface PurchaseSummary {
+  id: string
+  invoiceNumber: string | null
+  purchaseDate: string
+  supplier: PurchaseSupplier
+  products: string[]
+  itemCount: number
+  totalAmount: number
+  creator: PurchaseCreator
+  createdAt: string
+}
+
+export interface PurchaseDetail {
+  id: string
+  invoiceNumber: string | null
+  purchaseDate: string
+  supplier: PurchaseSupplier
+  totalAmount: number
+  creator: PurchaseCreator
+  createdAt: string
+  items: Purchase[]
+}
 
 export interface PurchaseItemFormValues {
   productId: string
