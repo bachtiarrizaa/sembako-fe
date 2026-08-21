@@ -4,15 +4,15 @@ import { useState, useEffect, useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-import { SearchX, Inbox, Eye, Pencil, Trash2 } from "lucide-react"
+import { SearchX, Inbox, Eye, Trash2 } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
 import { Button } from "@/components/ui/button"
 import { usePurchases, useDeletePurchase } from "../hooks"
-import { PurchaseResponse } from "../types/purchase"
-import { formatCurrency, formatDate, formatPurchasedQuantity } from "@/utils/format"
+import { PurchaseSummary } from "../types/purchase"
+import { formatCurrency, formatDate } from "@/utils/format"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
 import { PurchaseFormDialog } from "./PurchaseFormDialog"
 import { PurchaseDetailDialog } from "./PurchaseDetailDialog"
@@ -72,19 +72,12 @@ export function PurchasesPage() {
   const pagination = data?.pagination
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingPurchase, setEditingPurchase] = useState<PurchaseResponse | null>(null)
-  const [deletingPurchase, setDeletingPurchase] = useState<PurchaseResponse | null>(null)
+  const [deletingPurchase, setDeletingPurchase] = useState<PurchaseSummary | null>(null)
   const [detailId, setDetailId] = useState<string | null>(null)
 
   const deletePurchase = useDeletePurchase()
 
   const handleAdd = () => {
-    setEditingPurchase(null)
-    setDialogOpen(true)
-  }
-
-  const handleEdit = (purchase: PurchaseResponse) => {
-    setEditingPurchase(purchase)
     setDialogOpen(true)
   }
 
@@ -109,16 +102,16 @@ export function PurchasesPage() {
     [searchParams, pathname, router]
   )
 
-  const columns: Column<PurchaseResponse>[] = [
+  const columns: Column<PurchaseSummary>[] = [
     {
       header: "Tanggal Beli",
       className: "w-32",
       cell: (item) => formatDate(item.purchaseDate),
     },
     {
-      header: "Produk",
-      className: "w-56",
-      cell: (item) => item.product?.name || "-",
+      header: "No. Invoice",
+      className: "w-36",
+      cell: (item) => item.invoiceNumber || "-",
     },
     {
       header: "Supplier",
@@ -126,37 +119,24 @@ export function PurchasesPage() {
       cell: (item) => item.supplier?.name || "-",
     },
     {
-      header: "Stok Awal",
-      className: "w-32 text-right",
-      cell: (item) => formatPurchasedQuantity(item.initialQuantity, item, true),
+      header: "Produk",
+      className: "min-w-56",
+      cell: (item) => (
+        <span className="whitespace-normal break-words">
+          {item.products?.length ? item.products.join(", ") : "-"}
+        </span>
+      ),
     },
     {
-      header: "Stok Sisa",
-      className: "w-32 text-right",
-      cell: (item) => formatPurchasedQuantity(item.remainingQuantity, item, true),
-    },
-    {
-      header: "Harga Beli",
+      header: "Total",
       className: "w-40 text-right",
-      cell: (item) =>
-        item.unit && item.unitPrice != null
-          ? `${formatCurrency(item.unitPrice)}/${item.unit.name}`
-          : formatCurrency(item.purchasePrice),
+      cell: (item) => formatCurrency(item.totalAmount),
     },
     {
       header: "Aksi",
       className: "w-28 text-center",
       cell: (item) => (
         <div className="flex justify-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Edit Pembelian"
-            className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-            onClick={() => handleEdit(item)}
-          >
-            <Pencil className="size-4" />
-          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -189,7 +169,7 @@ export function PurchasesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Riwayat Pembelian</h1>
-          <p className="text-sm text-muted-foreground">Lihat dan kelola riwayat batch pembelian produk</p>
+          <p className="text-sm text-muted-foreground">Lihat dan kelola riwayat pembelian per invoice</p>
         </div>
         <Button
           className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
@@ -239,7 +219,7 @@ export function PurchasesPage() {
       <PurchaseFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        purchase={editingPurchase}
+        purchase={null}
       />
 
       <PurchaseDetailDialog
@@ -254,10 +234,10 @@ export function PurchasesPage() {
         title="Hapus Pembelian"
         description={
           <>
-            Anda yakin ingin menghapus batch pembelian produk{" "}
-            <strong className="font-bold">{deletingPurchase?.product?.name}</strong> dari supplier{" "}
-            <strong className="font-bold">{deletingPurchase?.supplier?.name}</strong>? Tindakan ini tidak
-            dapat dibatalkan.
+            Anda yakin ingin menghapus pembelian dengan invoice{" "}
+            <strong className="font-bold">{deletingPurchase?.invoiceNumber || "tanpa invoice"}</strong> dari
+            supplier <strong className="font-bold">{deletingPurchase?.supplier?.name}</strong>? Seluruh
+            item pada pembelian ini akan dihapus dan tidak dapat dibatalkan.
           </>
         }
         confirmText="Hapus"

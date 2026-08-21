@@ -106,7 +106,7 @@ export function PurchaseItemsTable({
                     <TableCell className="h-9 text-gray-600 px-3 py-2 whitespace-normal break-words">
                       {product?.name || "-"}
                     </TableCell>
-                    <TableCell className="h-9 text-gray-600 px-3 py-2">
+                    <TableCell className="h-9 text-gray-600 px-3 py-2 whitespace-normal break-words">
                       {unitLabel}
                     </TableCell>
                     <TableCell className="h-9 text-gray-600 px-3 py-2 text-right">

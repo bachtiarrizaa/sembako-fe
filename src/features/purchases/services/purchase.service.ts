@@ -1,14 +1,14 @@
 import { ApiResponse, Pagination } from "@/types/api-response";
 import { CreatePurchaseRequest, PurchaseSearch, UpdatePurchaseRequest } from "../schemas/purchase.schema";
-import { PurchaseResponse } from "../types/purchase";
+import { Purchase, PurchaseDetail, PurchaseSummary } from "../types/purchase";
 import { apiClient } from "@/api/api-client";
 import { buildListParams } from "@/utils/list-params";
 
 export const purchaseService = {
   getPurchases: async (
     filters: PurchaseSearch = { page: 1, limit: 10 }
-  ): Promise<{ items: PurchaseResponse[]; pagination?: Pagination }> => {
-    const res = await apiClient.get<ApiResponse<PurchaseResponse[]>>("/purchases", {
+  ): Promise<{ items: PurchaseSummary[]; pagination?: Pagination }> => {
+    const res = await apiClient.get<ApiResponse<PurchaseSummary[]>>("/purchases", {
       params: buildListParams({ page: 1, limit: 10 }, filters)
     })
     return {
@@ -19,23 +19,23 @@ export const purchaseService = {
 
   getById: async (
     id: string
-  ): Promise<ApiResponse<PurchaseResponse>> => {
-    const res = await apiClient.get<ApiResponse<PurchaseResponse>>(`/purchases/${id}`)
+  ): Promise<ApiResponse<PurchaseDetail>> => {
+    const res = await apiClient.get<ApiResponse<PurchaseDetail>>(`/purchases/${id}`)
     return res.data
   },
 
   create: async (
     payload: CreatePurchaseRequest
-  ): Promise<ApiResponse<PurchaseResponse[]>> => {
-    const res = await apiClient.post<ApiResponse<PurchaseResponse[]>>("/purchases", payload)
+  ): Promise<ApiResponse<PurchaseDetail>> => {
+    const res = await apiClient.post<ApiResponse<PurchaseDetail>>("/purchases", payload)
     return res.data
   },
 
-  update: async (
+  updateItem: async (
     id: string,
     payload: UpdatePurchaseRequest
-  ): Promise<ApiResponse<PurchaseResponse>> => {
-    const res = await apiClient.put<ApiResponse<PurchaseResponse>>(`/purchases/${id}`, payload)
+  ): Promise<ApiResponse<Purchase>> => {
+    const res = await apiClient.put<ApiResponse<Purchase>>(`/purchases/items/${id}`, payload)
     return res.data
   },
 
@@ -43,6 +43,13 @@ export const purchaseService = {
     id: string
   ): Promise<ApiResponse<null>> => {
     const res = await apiClient.delete<ApiResponse<null>>(`/purchases/${id}`)
+    return res.data
+  },
+
+  deleteItem: async (
+    id: string
+  ): Promise<ApiResponse<null>> => {
+    const res = await apiClient.delete<ApiResponse<null>>(`/purchases/items/${id}`)
     return res.data
   },
 }

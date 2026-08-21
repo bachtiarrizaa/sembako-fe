@@ -57,6 +57,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
   const isEdit = Boolean(productId)
   const [step, setStep] = useState<1 | 2>(1)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const lastSyncedProductIdRef = useRef<string | null>(null)
 
   // Mutations
   const createProduct = useCreateProduct()
@@ -124,25 +125,18 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
 
   // Sync data when opening modal or detail loaded
   useEffect(() => {
-    if (open) {
-      clearErrors()
-      setStep(1)
-      setSelectedFile(null)
-      setImagePreview(null)
+    if (!open) {
+      lastSyncedProductIdRef.current = null
+      return
+    }
 
-      if (isEdit && product) {
-        reset({
-          name: product.name,
-          categoryId: product.category.id,
-          minimumStock: String(product.minimumStock),
-          marginThresholdPercent: String(product.marginThresholdPercent),
-          image: undefined,
-          units: [],
-        })
-        if (product.image) {
-          setImagePreview(resolveStaticUrl(product.image))
-        }
-      } else if (!isEdit) {
+    clearErrors()
+
+    if (!isEdit) {
+      if (lastSyncedProductIdRef.current !== "create") {
+        setStep(1)
+        setSelectedFile(null)
+        setImagePreview(null)
         reset({
           name: "",
           categoryId: "",
@@ -158,9 +152,28 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
             },
           ],
         })
+        lastSyncedProductIdRef.current = "create"
+      }
+    } else {
+      if (product && lastSyncedProductIdRef.current !== productId) {
+        setStep(1)
+        setSelectedFile(null)
+        setImagePreview(null)
+        reset({
+          name: product.name,
+          categoryId: product.category.id,
+          minimumStock: String(product.minimumStock),
+          marginThresholdPercent: String(product.marginThresholdPercent),
+          image: undefined,
+          units: [],
+        })
+        if (product.image) {
+          setImagePreview(resolveStaticUrl(product.image))
+        }
+        lastSyncedProductIdRef.current = productId ?? null
       }
     }
-  }, [open, isEdit, product, reset, clearErrors])
+  }, [open, isEdit, productId, product, reset, clearErrors])
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
