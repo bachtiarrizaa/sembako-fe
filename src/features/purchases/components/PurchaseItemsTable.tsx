@@ -1,7 +1,7 @@
 "use client"
 
 import { FieldArrayWithId } from "react-hook-form"
-import { Trash2, Pencil } from "lucide-react"
+import { Trash2, Pencil, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
@@ -49,11 +49,10 @@ export function PurchaseItemsTable({
           trigger={
             <Button
               type="button"
-              variant="outline"
               size="sm"
-              className="h-8 cursor-pointer"
+              className="h-8 cursor-pointer gap-1"
             >
-              Tambah Item
+              <Plus className="size-3.5" /> Tambah Item
             </Button>
           }
           products={products}
@@ -74,22 +73,22 @@ export function PurchaseItemsTable({
           <Table className="table-fixed w-full">
             <TableHeader className="bg-primary">
               <TableRow className="bg-primary border-0 hover:bg-primary">
-                <TableHead className="w-[30%] font-bold text-primary-foreground px-3 py-2">
+                <TableHead className="w-[25%] font-bold text-primary-foreground px-3 py-2">
                   Nama Produk
                 </TableHead>
-                <TableHead className="w-[18%] font-bold text-primary-foreground px-3 py-2">
+                <TableHead className="w-[15%] font-bold text-primary-foreground px-3 py-2">
                   Satuan
                 </TableHead>
-                <TableHead className="w-[14%] font-bold text-primary-foreground px-3 py-2 text-right">
+                <TableHead className="w-[10%] font-bold text-primary-foreground px-3 py-2 text-right">
                   Jumlah
                 </TableHead>
-                <TableHead className="w-[14%] font-bold text-primary-foreground px-3 py-2 text-right">
+                <TableHead className="w-[20%] font-bold text-primary-foreground px-3 py-2 text-right">
                   Harga
                 </TableHead>
-                <TableHead className="w-[16%] font-bold text-primary-foreground px-3 py-2 text-right">
+                <TableHead className="w-[20%] font-bold text-primary-foreground px-3 py-2 text-right">
                   Total
                 </TableHead>
-                <TableHead className="w-24 font-bold text-primary-foreground px-3 py-2 text-center">
+                <TableHead className="w-[10%] font-bold text-primary-foreground px-3 py-2 text-center">
                   Aksi
                 </TableHead>
               </TableRow>

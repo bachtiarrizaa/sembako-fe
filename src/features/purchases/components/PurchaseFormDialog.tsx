@@ -18,7 +18,7 @@ import { PurchaseResponse, PurchaseItemFormValues } from "../types/purchase"
 import { useCreatePurchase, useUpdatePurchase } from "../hooks"
 import { createPurchaseSchema, updatePurchaseSchema, CreatePurchaseRequest, UpdatePurchaseRequest } from "../schemas/purchase.schema"
 import { useSuppliers } from "@/features/suppliers/hooks/useSuppliers"
-import { useProducts } from "@/features/products/hooks/useProducts"
+import { useProducts, useProductDetails } from "@/features/products/hooks"
 import { PurchaseHeaderFields } from "./PurchaseHeaderFields"
 import { PurchaseEditFields } from "./PurchaseEditFields"
 import { PurchaseItemsTable } from "./PurchaseItemsTable"
@@ -56,7 +56,7 @@ export function PurchaseFormDialog({ open, onOpenChange, purchase }: PurchaseFor
   const { data: suppliersData, isLoading: isSuppliersLoading } = useSuppliers({ page: 1, limit: 100 })
   const suppliers = suppliersData?.items ?? []
 
-  const { data: productsData } = useProducts({ page: 1, limit: 100 })
+  const { data: productsData } = useProducts({ page: 1, limit: 100, include: "units" })
   const products = productsData?.items ?? []
 
   // Check if current batch is partially sold (Edit Mode only)
@@ -98,19 +98,17 @@ export function PurchaseFormDialog({ open, onOpenChange, purchase }: PurchaseFor
   // Watch items to dynamically look up units for each product
   const watchedItems = watch("items") ?? []
 
-  // In edit mode, watch the product ID to list its units
-  const watchedProductId = watch("productId")
-  const selectedEditProduct = products.find((p) => p.id === watchedProductId)
-  const editProductUnits = selectedEditProduct?.units ?? []
+  // In edit mode, fetch details of the product being edited to get its units list
+  const { data: editProductDetailResponse } = useProductDetails(isEdit && purchase ? purchase.product?.id : undefined)
+  const editProduct = editProductDetailResponse?.data
+  const editProductUnits = editProduct?.units ?? []
 
   // Load purchase values on edit mode
   useEffect(() => {
     if (open) {
       if (isEdit && purchase) {
-        // Find the product in loaded products list to load its units & current conversion
-        const matchedProduct = products.find((p) => p.id === purchase.product?.id)
-        const purchasedUnit = matchedProduct?.units.find((u) => u.unit.id === purchase.unit?.id)
-        const baseUnit = matchedProduct?.units.find((u) => u.isBaseUnit)
+        const purchasedUnit = editProduct?.units.find((u) => u.unit.id === purchase.unit?.id)
+        const baseUnit = editProduct?.units.find((u) => u.isBaseUnit)
 
         // Prefer the purchased unit (e.g. karung) so edit matches the original entry.
         // Legacy data (unit null) falls back to the base unit.
@@ -147,7 +145,7 @@ export function PurchaseFormDialog({ open, onOpenChange, purchase }: PurchaseFor
       }
       clearErrors()
     }
-  }, [open, purchase, isEdit, reset, clearErrors, products])
+  }, [open, purchase, isEdit, reset, clearErrors, editProduct])
 
   const onSubmit = (values: PurchaseFormValues) => {
     if (isEdit && purchase) {

@@ -32,7 +32,7 @@ export function ProductDetailDialog({ open, onOpenChange, productId }: ProductDe
 
         <DialogHeader className="border-b border-border px-6 py-4 shrink-0">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
-            Detail Produk: {product?.name ?? ""}
+            Detail Produk
           </DialogTitle>
         </DialogHeader>
 
@@ -67,12 +67,28 @@ export function ProductDetailDialog({ open, onOpenChange, productId }: ProductDe
                 {/* Right Col: Details */}
                 <div className="col-span-1 md:col-span-2 space-y-4">
                   <div>
-                    <h3 className="text-base font-bold text-foreground leading-tight">{product.name}</h3>
-                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                      <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-transparent text-[10px] font-bold">
+                    <h3 className="text-base font-bold text-foreground leading-tight">
+                      Nama Produk : {product.name}
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 text-sm">
+                    <div>
+                      <span className="text-xs text-muted-foreground block mb-1">Kategori Produk</span>
+                      <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-transparent text-[10px] font-bold w-fit">
                         {product.category.name}
                       </Badge>
-                      <Badge className={product.isActive ? "bg-emerald-500/10 text-emerald-600 border-transparent hover:bg-emerald-500/10 text-[10px] font-bold" : "bg-rose-500/10 text-rose-600 border-transparent hover:bg-rose-500/10 text-[10px] font-bold"}>
+                    </div>
+
+                    <div>
+                      <span className="text-xs text-muted-foreground block mb-1">Status</span>
+                      <Badge
+                        className={
+                          product.isActive
+                            ? "bg-emerald-500/10 text-emerald-600 border-transparent hover:bg-emerald-500/10 text-[10px] font-bold w-fit"
+                            : "bg-rose-500/10 text-rose-600 border-transparent hover:bg-rose-500/10 text-[10px] font-bold w-fit"
+                        }
+                      >
                         {product.isActive ? "Aktif" : "Nonaktif"}
                       </Badge>
                     </div>

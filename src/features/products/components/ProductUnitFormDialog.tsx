@@ -14,19 +14,22 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Spinner } from "@/components/ui/spinner"
 import { ComboboxSelect } from "@/components/common/ComboboxSelect"
 import { useUnits } from "@/features/units/hooks"
-import { addProductUnitSchema, updateProductUnitSchema } from "../schemas/product.schema"
-import { ProductUnit } from "../types/product"
-import { useAddProductUnit, useUpdateProductUnit } from "../hooks"
+import { addProductUnitSchema } from "../schemas/product.schema"
 
 interface ProductUnitFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  productId: string
-  productUnit?: ProductUnit | null
+  productUnit?: {
+    id?: string
+    unitId: string
+    conversionToBase: string | number
+    sellingPrice: string | number
+    unit?: { id: string; name: string }
+  } | null
   existingUnitIds?: string[]
+  onSubmit: (values: { unitId: string; conversionToBase: string; sellingPrice: string }) => void
 }
 
 interface ProductUnitFormValues {
@@ -38,14 +41,11 @@ interface ProductUnitFormValues {
 export function ProductUnitFormDialog({
   open,
   onOpenChange,
-  productId,
   productUnit,
   existingUnitIds = [],
+  onSubmit,
 }: ProductUnitFormDialogProps) {
   const isEdit = Boolean(productUnit)
-  const addUnit = useAddProductUnit()
-  const updateUnit = useUpdateProductUnit()
-  const isPending = addUnit.isPending || updateUnit.isPending
 
   // Fetch master units for dropdown select
   const { data: unitsData, isLoading: isUnitsLoading } = useUnits({ page: 1, limit: 100 })
@@ -53,9 +53,13 @@ export function ProductUnitFormDialog({
 
   // Filter out master units that are already added to this product (unless it's the one we are editing)
   const availableUnits = masterUnits.filter((mu) => {
-    if (isEdit && productUnit?.unit.id === mu.id) return true
+    if (isEdit && (productUnit?.unitId === mu.id || productUnit?.unit?.id === mu.id)) return true
     return !existingUnitIds.includes(mu.id)
   })
+
+  // Find the selected unit's name for display in read-only mode
+  const selectedUnit = masterUnits.find((mu) => mu.id === (productUnit?.unitId || productUnit?.unit?.id))
+  const displayUnitName = selectedUnit?.name || productUnit?.unit?.name || ""
 
   // Set up forms
   const {
@@ -67,7 +71,7 @@ export function ProductUnitFormDialog({
     clearErrors,
     formState: { errors },
   } = useForm<ProductUnitFormValues>({
-    resolver: zodResolver(isEdit ? updateProductUnitSchema : addProductUnitSchema) as any,
+    resolver: zodResolver(addProductUnitSchema) as any,
     defaultValues: {
       unitId: "",
       conversionToBase: "",
@@ -83,7 +87,7 @@ export function ProductUnitFormDialog({
       clearErrors()
       if (productUnit) {
         reset({
-          unitId: productUnit.unit.id,
+          unitId: productUnit.unitId || productUnit.unit?.id || "",
           conversionToBase: String(productUnit.conversionToBase),
           sellingPrice: String(productUnit.sellingPrice),
         })
@@ -97,36 +101,9 @@ export function ProductUnitFormDialog({
     }
   }, [open, productUnit, reset, clearErrors])
 
-  const onSubmit = (values: any) => {
-    if (isEdit && productUnit) {
-      updateUnit.mutate(
-        {
-          id: productId,
-          unitId: productUnit.id, // product relation ID
-          payload: {
-            conversionToBase: Number(values.conversionToBase),
-            sellingPrice: Number(values.sellingPrice),
-          },
-        },
-        {
-          onSuccess: () => onOpenChange(false),
-        }
-      )
-    } else {
-      addUnit.mutate(
-        {
-          id: productId,
-          payload: {
-            unitId: values.unitId,
-            conversionToBase: Number(values.conversionToBase),
-            sellingPrice: Number(values.sellingPrice),
-          },
-        },
-        {
-          onSuccess: () => onOpenChange(false),
-        }
-      )
-    }
+  const handleFormSubmit = (values: ProductUnitFormValues) => {
+    onSubmit(values)
+    onOpenChange(false)
   }
 
   return (
@@ -140,19 +117,19 @@ export function ProductUnitFormDialog({
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">
             {isEdit
-              ? "Perbarui faktor konversi dan harga jual satuan produk ini."
-              : "Tambahkan satuan baru ke produk ini."}
+              ? "Perbarui faktor konversi dan harga jual satuan produk ini secara lokal."
+              : "Tambahkan satuan baru ke daftar satuan produk ini secara lokal."}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
           <div className="space-y-4 px-6 py-4">
             {/* Unit Selection */}
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-foreground">Satuan <span className="text-destructive">*</span></Label>
               {isEdit ? (
                 <div className="px-3 py-2 bg-muted/50 rounded-lg border border-border text-sm font-medium text-muted-foreground">
-                  {productUnit?.unit.name}
+                  {displayUnitName}
                 </div>
               ) : (
                 <ComboboxSelect
@@ -186,7 +163,6 @@ export function ProductUnitFormDialog({
                 step="any"
                 placeholder="Contoh: 10 (1 Dus = 10 Kg)"
                 {...register("conversionToBase")}
-                disabled={isPending}
                 className="bg-white"
               />
               {errors.conversionToBase && (
@@ -206,7 +182,6 @@ export function ProductUnitFormDialog({
                 type="number"
                 placeholder="Contoh: 150000"
                 {...register("sellingPrice")}
-                disabled={isPending}
                 className="bg-white"
               />
               {errors.sellingPrice && (
@@ -222,17 +197,15 @@ export function ProductUnitFormDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isPending}
               className="cursor-pointer font-medium px-3 py-4"
             >
               Batal
             </Button>
             <Button
               type="submit"
-              disabled={isPending}
               className="cursor-pointer font-medium px-3 py-4"
             >
-              {isPending ? <Spinner className="size-4" /> : "Simpan"}
+              Simpan
             </Button>
           </DialogFooter>
         </form>
