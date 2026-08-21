@@ -74,6 +74,19 @@ const messageMap: Record<string, string> = {
   "cannot update quantity or price of a purchase batch that has been partially sold": "Stok telah terjual sebagian, jumlah stok dan harga beli tidak dapat diubah",
   "cannot delete a purchase batch that has been partially sold": "Batch tidak dapat dihapus karena stok telah terjual sebagian",
 
+  // Product messages
+  "product created successfully": "Produk berhasil ditambahkan",
+  "product updated successfully": "Produk berhasil diperbarui",
+  "product deleted successfully": "Produk berhasil dihapus",
+  "product status updated successfully": "Status produk berhasil diubah",
+  "product name already exists": "Nama produk sudah digunakan",
+  "product not found": "Produk tidak ditemukan",
+  "product cannot be deleted as it has transaction history": "Produk tidak dapat dihapus karena telah memiliki riwayat transaksi/stok",
+  "product unit added successfully": "Satuan produk berhasil ditambahkan",
+  "product unit updated successfully": "Satuan produk berhasil diperbarui",
+  "product unit status updated successfully": "Status satuan produk berhasil diubah",
+  "product unit deleted successfully": "Satuan produk berhasil dihapus",
+
   // Generic error messages
   "An unexpected error occurred": "Terjadi kesalahan yang tidak terduga",
   "Internal server error": "Terjadi kesalahan pada server",

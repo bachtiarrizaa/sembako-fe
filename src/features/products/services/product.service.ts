@@ -4,10 +4,8 @@ import { buildListParams } from "@/utils/list-params"
 import {
   ProductSearch,
   UpdateProductStatusRequest,
-  AddProductUnitRequest,
-  UpdateProductUnitRequest,
 } from "../schemas/product.schema"
-import { ProductResponse, ProductUnit } from "../types/product"
+import { ProductResponse } from "../types/product"
 
 export const productService = {
   getProducts: async (
@@ -58,28 +56,4 @@ export const productService = {
     return res.data
   },
 
-  // Product Units Management
-  addProductUnit: async (id: string, payload: AddProductUnitRequest): Promise<ApiResponse<ProductUnit>> => {
-    const res = await apiClient.post<ApiResponse<ProductUnit>>(`/products/${id}/units`, payload)
-    return res.data
-  },
-
-  updateProductUnit: async (
-    id: string,
-    unitId: string,
-    payload: UpdateProductUnitRequest
-  ): Promise<ApiResponse<ProductUnit>> => {
-    const res = await apiClient.put<ApiResponse<ProductUnit>>(`/products/${id}/units/${unitId}`, payload)
-    return res.data
-  },
-
-  toggleProductUnitStatus: async (id: string, unitId: string): Promise<ApiResponse<ProductUnit>> => {
-    const res = await apiClient.patch<ApiResponse<ProductUnit>>(`/products/${id}/units/${unitId}/status`)
-    return res.data
-  },
-
-  deleteProductUnit: async (id: string, unitId: string): Promise<ApiResponse<null>> => {
-    const res = await apiClient.delete<ApiResponse<null>>(`/products/${id}/units/${unitId}`)
-    return res.data
-  },
 }

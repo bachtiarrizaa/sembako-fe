@@ -113,22 +113,22 @@ export function PurchaseDetailDialog({ open, onOpenChange, purchaseId }: Purchas
                     <Table className="table-fixed w-full">
                       <TableHeader className="bg-primary">
                         <TableRow className="bg-primary border-0 hover:bg-primary">
-                          <TableHead className="w-[26%] font-bold text-primary-foreground px-3 py-2">
+                          <TableHead className="w-[25%] font-bold text-primary-foreground px-3 py-2">
                             Produk
                           </TableHead>
-                          <TableHead className="w-[16%] font-bold text-primary-foreground px-3 py-2">
+                          <TableHead className="w-[15%] font-bold text-primary-foreground px-3 py-2">
                             Satuan
                           </TableHead>
-                          <TableHead className="w-[14%] font-bold text-primary-foreground px-3 py-2 text-right">
+                          <TableHead className="w-[10%] font-bold text-primary-foreground px-3 py-2 text-right">
                             Jumlah
                           </TableHead>
-                          <TableHead className="w-[16%] font-bold text-primary-foreground px-3 py-2 text-right">
+                          <TableHead className="w-[20%] font-bold text-primary-foreground px-3 py-2 text-right">
                             Harga
                           </TableHead>
-                          <TableHead className="w-[16%] font-bold text-primary-foreground px-3 py-2 text-right">
+                          <TableHead className="w-[20%] font-bold text-primary-foreground px-3 py-2 text-right">
                             Total
                           </TableHead>
-                          <TableHead className="w-24 font-bold text-primary-foreground px-3 py-2 text-center">
+                          <TableHead className="w-[10%] font-bold text-primary-foreground px-3 py-2 text-center">
                             Aksi
                           </TableHead>
                         </TableRow>
@@ -144,15 +144,15 @@ export function PurchaseDetailDialog({ open, onOpenChange, purchaseId }: Purchas
                               <TableCell className="h-9 text-gray-600 px-3 py-2 whitespace-normal break-words">
                                 {item.unit?.name || "-"}
                               </TableCell>
-                              <TableCell className="h-9 text-gray-600 px-3 py-2 text-right whitespace-normal break-words">
+                              <TableCell className="h-9 text-gray-600 px-3 py-2 text-right whitespace-nowrap">
                                 {purchasedQuantityInUnit(item.initialQuantity, item)}
                               </TableCell>
-                              <TableCell className="h-9 text-gray-600 px-3 py-2 text-right whitespace-normal break-words">
+                              <TableCell className="h-9 text-gray-600 px-3 py-2 text-right whitespace-nowrap">
                                 {item.unit && item.unitPrice != null
                                   ? formatCurrency(item.unitPrice)
                                   : formatCurrency(item.purchasePrice)}
                               </TableCell>
-                              <TableCell className="h-9 font-medium text-gray-800 px-3 py-2 text-right whitespace-normal break-words">
+                              <TableCell className="h-9 font-medium text-gray-800 px-3 py-2 text-right whitespace-nowrap">
                                 {formatCurrency(item.total ?? item.initialQuantity * item.purchasePrice)}
                               </TableCell>
                               <TableCell className="h-9 text-gray-600 px-3 py-2">

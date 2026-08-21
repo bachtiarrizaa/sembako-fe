@@ -28,10 +28,9 @@ import {
   useProductDetails,
   useCreateProduct,
   useUpdateProduct,
-  useToggleProductUnitStatus,
-  useDeleteProductUnit,
 } from "../hooks"
 import { ProductUnitFormDialog } from "./ProductUnitFormDialog"
+import { ConfirmModal } from "@/components/common/ConfirmModal"
 
 interface ProductFormDialogProps {
   open: boolean
@@ -46,10 +45,12 @@ interface ProductFormValues {
   marginThresholdPercent: string
   image?: any
   units: {
+    id?: string
     unitId: string
     conversionToBase: string
     sellingPrice: string
     isBaseUnit: boolean
+    isActive?: boolean
   }[]
 }
 
@@ -62,8 +63,6 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
   // Mutations
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
-  const toggleUnitStatus = useToggleProductUnitStatus()
-  const deleteUnit = useDeleteProductUnit()
   const isPending = createProduct.isPending || updateProduct.isPending
 
   // Fetch product details if in edit mode
@@ -78,7 +77,10 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
 
   // Sub-dialog for adding/editing product units in Edit Mode
   const [unitDialogOpen, setUnitDialogOpen] = useState(false)
-  const [selectedProductUnit, setSelectedProductUnit] = useState<ProductUnit | null>(null)
+  const [selectedProductUnit, setSelectedProductUnit] = useState<any>(null)
+  const [deleteUnitConfirmOpen, setDeleteUnitConfirmOpen] = useState(false)
+  const [unitToDelete, setUnitToDelete] = useState<any>(null)
+  const [selectedUnitIndex, setSelectedUnitIndex] = useState<number | null>(null)
 
   // Image preview state
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -165,7 +167,14 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
           minimumStock: String(product.minimumStock),
           marginThresholdPercent: String(product.marginThresholdPercent),
           image: undefined,
-          units: [],
+          units: product.units?.map((u) => ({
+            id: u.id,
+            unitId: u.unit.id,
+            conversionToBase: String(u.conversionToBase),
+            sellingPrice: String(u.sellingPrice),
+            isBaseUnit: u.isBaseUnit,
+            isActive: u.isActive,
+          })) ?? [],
         })
         if (product.image) {
           setImagePreview(resolveStaticUrl(product.image))
@@ -222,6 +231,23 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
     }
   }
 
+  const handleUnitDialogSubmit = (values: { unitId: string; conversionToBase: string; sellingPrice: string }) => {
+    if (selectedUnitIndex !== null) {
+      setValue(`units.${selectedUnitIndex}.unitId`, values.unitId)
+      setValue(`units.${selectedUnitIndex}.conversionToBase`, values.conversionToBase)
+      setValue(`units.${selectedUnitIndex}.sellingPrice`, values.sellingPrice)
+    } else {
+      append({
+        unitId: values.unitId,
+        conversionToBase: values.conversionToBase,
+        sellingPrice: values.sellingPrice,
+        isBaseUnit: false,
+        isActive: true,
+      })
+    }
+    setUnitDialogOpen(false)
+  }
+
   // Form submit handler for both create and edit modes
   const handleFormSubmit = (values: any) => {
     const formData = new FormData()
@@ -234,15 +260,17 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
       formData.append("image", selectedFile)
     }
 
-    if (!isEdit) {
-      const formattedUnits = values.units.map((u: any) => ({
-        unitId: u.unitId,
-        conversionToBase: Number(u.conversionToBase),
-        sellingPrice: Number(u.sellingPrice),
-        isBaseUnit: u.isBaseUnit,
-      }))
-      formData.append("units", JSON.stringify(formattedUnits))
+    const formattedUnits = values.units.map((u: any) => ({
+      id: u.id,
+      unitId: u.unitId,
+      conversionToBase: Number(u.conversionToBase),
+      sellingPrice: Number(u.sellingPrice),
+      isBaseUnit: u.isBaseUnit,
+      isActive: u.isActive ?? true,
+    }))
+    formData.append("units", JSON.stringify(formattedUnits))
 
+    if (!isEdit) {
       createProduct.mutate(formData, {
         onSuccess: () => onOpenChange(false),
       })
@@ -581,7 +609,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                 </div>
               )}
 
-              {/* STEP 2: EDIT MODE (Manajemen Satuan API) */}
+              {/* STEP 2: EDIT MODE (Manajemen Satuan Form State) */}
               {step === 2 && isEdit && product && (
                 <div className="space-y-4 px-6 py-4 flex-1 flex flex-col">
                   <div className="flex items-center justify-between">
@@ -592,6 +620,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                     <Button
                       type="button"
                       onClick={() => {
+                        setSelectedUnitIndex(null)
                         setSelectedProductUnit(null)
                         setUnitDialogOpen(true)
                       }}
@@ -615,21 +644,29 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {product.units?.length === 0 ? (
+                        {fields.length === 0 ? (
                           <tr>
                             <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground italic">
                               Belum ada satuan.
                             </td>
                           </tr>
                         ) : (
-                          product.units.map((unit) => {
-                            const isPendingThis = toggleUnitStatus.isPending && toggleUnitStatus.variables?.unitId === unit.id
-                            const isDeletingThis = deleteUnit.isPending && deleteUnit.variables?.unitId === unit.id
+                          fields.map((field, index) => {
+                            const unitVal = formUnits[index]
+                            const unitDetail = masterUnits.find((mu) => mu.id === unitVal?.unitId)
+                            const unitName = unitDetail?.name || ""
+                            const isBase = unitVal?.isBaseUnit
+
+                            // Find base unit name from form state
+                            const baseUnitField = formUnits.find((u) => u.isBaseUnit)
+                            const baseUnitDetail = masterUnits.find((mu) => mu.id === baseUnitField?.unitId)
+                            const baseUnitName = baseUnitDetail?.name || product?.baseUnit?.name || ""
+
                             return (
-                              <tr key={unit.id} className="hover:bg-muted/10">
-                                <td className="px-4 py-3 font-semibold text-foreground">{unit.unit.name}</td>
+                              <tr key={field.id} className="hover:bg-muted/10">
+                                <td className="px-4 py-3 font-semibold text-foreground">{unitName}</td>
                                 <td className="px-4 py-3 text-center">
-                                  {unit.isBaseUnit ? (
+                                  {isBase ? (
                                     <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-transparent text-[10px] font-bold">
                                       Base Unit
                                     </Badge>
@@ -638,16 +675,16 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                                   )}
                                 </td>
                                 <td className="px-4 py-3 text-center text-xs font-medium text-slate-600">
-                                  {unit.conversionToBase} {product.baseUnit.name}
+                                  {unitVal?.conversionToBase} {baseUnitName}
                                 </td>
                                 <td className="px-4 py-3 text-right font-medium text-foreground">
-                                  {formatCurrency(unit.sellingPrice)}
+                                  {formatCurrency(Number(unitVal?.sellingPrice || 0))}
                                 </td>
                                 <td className="px-4 py-3 text-center">
                                   <Switch
-                                    checked={unit.isActive}
-                                    onCheckedChange={() => toggleUnitStatus.mutate({ id: product.id, unitId: unit.id })}
-                                    disabled={(unit.isBaseUnit && unit.isActive) || isPendingThis}
+                                    checked={unitVal?.isActive ?? true}
+                                    onCheckedChange={(checked) => setValue(`units.${index}.isActive`, checked)}
+                                    disabled={isBase}
                                     className="cursor-pointer scale-90"
                                   />
                                 </td>
@@ -658,7 +695,11 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                                       variant="ghost"
                                       size="icon"
                                       onClick={() => {
-                                        setSelectedProductUnit(unit)
+                                        setSelectedUnitIndex(index)
+                                        setSelectedProductUnit({
+                                          ...unitVal,
+                                          unit: { id: unitVal.unitId, name: unitName }
+                                        })
                                         setUnitDialogOpen(true)
                                       }}
                                       className="h-7 w-7 text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
@@ -670,11 +711,14 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                                       variant="ghost"
                                       size="icon"
                                       onClick={() => {
-                                        if (confirm(`Apakah Anda yakin ingin menghapus satuan ${unit.unit.name}?`)) {
-                                          deleteUnit.mutate({ id: product.id, unitId: unit.id })
-                                        }
+                                        setSelectedUnitIndex(index)
+                                        setUnitToDelete({
+                                          ...unitVal,
+                                          unit: { id: unitVal.unitId, name: unitName }
+                                        } as any)
+                                        setDeleteUnitConfirmOpen(true)
                                       }}
-                                      disabled={unit.isBaseUnit || isDeletingThis}
+                                      disabled={isBase}
                                       className="h-7 w-7 text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
                                     >
                                       <Trash2 className="size-3.5" />
@@ -719,9 +763,35 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
         <ProductUnitFormDialog
           open={unitDialogOpen}
           onOpenChange={setUnitDialogOpen}
-          productId={product.id}
           productUnit={selectedProductUnit}
-          existingUnitIds={product.units?.map((u) => u.unit.id) ?? []}
+          existingUnitIds={formUnits?.map((u) => u.unitId) ?? []}
+          onSubmit={handleUnitDialogSubmit}
+        />
+      )}
+
+      {/* Product unit deletion confirmation dialog */}
+      {isEdit && product && (
+        <ConfirmModal
+          open={deleteUnitConfirmOpen}
+          onOpenChange={setDeleteUnitConfirmOpen}
+          title="Hapus Satuan"
+          description={
+            unitToDelete ? (
+              <>
+                Apakah Anda yakin ingin menghapus satuan <strong className="font-bold">{unitToDelete.unit?.name || ""}</strong>? Perubahan ini baru akan disimpan setelah Anda menekan tombol "Simpan" di form utama.
+              </>
+            ) : ""
+          }
+          confirmText="Hapus"
+          variant="danger"
+          onConfirm={() => {
+            if (selectedUnitIndex !== null) {
+              remove(selectedUnitIndex)
+              setDeleteUnitConfirmOpen(false)
+              setUnitToDelete(null)
+              setSelectedUnitIndex(null)
+            }
+          }}
         />
       )}
     </Dialog>

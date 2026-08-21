@@ -72,8 +72,7 @@ export function PurchaseItemPopover({
     setValue("productId", productId)
     const selected = products.find((p) => p.id === productId)
     if (selected) {
-      const baseUnit = selected.units.find((u) => u.isBaseUnit)
-      setValue("unitId", baseUnit ? baseUnit.unit.id : "")
+      setValue("unitId", selected.baseUnit ? selected.baseUnit.id : "")
     } else {
       setValue("unitId", "")
     }
