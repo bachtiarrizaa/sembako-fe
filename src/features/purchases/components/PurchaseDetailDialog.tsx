@@ -55,7 +55,7 @@ export function PurchaseDetailDialog({ open, onOpenChange, purchaseId }: Purchas
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:max-w-3xl sm:rounded-xl">
+      <DialogContent className="gap-0 p-0 sm:max-w-4xl sm:rounded-xl">
         <button type="button" className="sr-only" />
 
         <DialogHeader className="border-b border-border px-6 py-4">
