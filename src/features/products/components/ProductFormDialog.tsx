@@ -1,11 +1,10 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
+import { useForm, FormProvider, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Plus, Trash2, Pencil, Image as ImageIcon, Upload, Info, ChevronRight, ChevronLeft } from "lucide-react"
+import { ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -13,17 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { Spinner } from "@/components/ui/spinner"
-import { ComboboxSelect } from "@/components/common/ComboboxSelect"
 import { useCategories } from "@/features/categories/hooks/useCategories"
 import { useUnits } from "@/features/units/hooks"
 import { cn } from "@/utils/cn"
-import { formatCurrency, resolveStaticUrl } from "@/utils/format"
+import { resolveStaticUrl } from "@/utils/format"
 import { createProductSchema, updateProductSchema } from "../schemas/product.schema"
-import { ProductResponse, ProductUnit } from "../types/product"
+import { ProductFormValues, SelectedProductUnit } from "../types/product"
 import {
   useProductDetails,
   useCreateProduct,
@@ -31,6 +26,9 @@ import {
 } from "../hooks"
 import { ProductUnitFormDialog } from "./ProductUnitFormDialog"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
+import { ProductGeneralInfoStep } from "./ProductGeneralInfoStep"
+import { ProductUnitsCreateStep } from "./ProductUnitsCreateStep"
+import { ProductUnitsEditStep } from "./ProductUnitsEditStep"
 
 interface ProductFormDialogProps {
   open: boolean
@@ -38,26 +36,9 @@ interface ProductFormDialogProps {
   productId?: string | null
 }
 
-interface ProductFormValues {
-  name: string
-  categoryId: string
-  minimumStock: string
-  marginThresholdPercent: string
-  image?: any
-  units: {
-    id?: string
-    unitId: string
-    conversionToBase: string
-    sellingPrice: string
-    isBaseUnit: boolean
-    isActive?: boolean
-  }[]
-}
-
 export function ProductFormDialog({ open, onOpenChange, productId }: ProductFormDialogProps) {
   const isEdit = Boolean(productId)
   const [step, setStep] = useState<1 | 2>(1)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const lastSyncedProductIdRef = useRef<string | null>(null)
 
   // Mutations
@@ -75,11 +56,11 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
   const categories = categoriesData?.items ?? []
   const masterUnits = unitsData?.items ?? []
 
-  // Sub-dialog for adding/editing product units in Edit Mode
+  // Sub-dialog states
   const [unitDialogOpen, setUnitDialogOpen] = useState(false)
-  const [selectedProductUnit, setSelectedProductUnit] = useState<any>(null)
+  const [selectedProductUnit, setSelectedProductUnit] = useState<SelectedProductUnit | null>(null)
   const [deleteUnitConfirmOpen, setDeleteUnitConfirmOpen] = useState(false)
-  const [unitToDelete, setUnitToDelete] = useState<any>(null)
+  const [unitToDelete, setUnitToDelete] = useState<SelectedProductUnit | null>(null)
   const [selectedUnitIndex, setSelectedUnitIndex] = useState<number | null>(null)
 
   // Image preview state
@@ -87,18 +68,8 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   // Form setups
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    control,
-    trigger,
-    clearErrors,
-    formState: { errors },
-  } = useForm<ProductFormValues>({
-    resolver: zodResolver(isEdit ? updateProductSchema : createProductSchema) as any,
+  const methods = useForm<ProductFormValues>({
+    resolver: zodResolver(isEdit ? updateProductSchema : createProductSchema) as unknown as Resolver<ProductFormValues>,
     defaultValues: {
       name: "",
       categoryId: "",
@@ -116,14 +87,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
     },
   })
 
-  // Field array for units (only used in Create Mode)
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "units",
-  })
-
-  const formUnits = watch("units")
-  const formCategoryId = watch("categoryId")
+  const { reset, setValue, watch, trigger, clearErrors, handleSubmit } = methods
 
   // Sync data when opening modal or detail loaded
   useEffect(() => {
@@ -184,29 +148,6 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
     }
   }, [open, isEdit, productId, product, reset, clearErrors])
 
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Ukuran gambar maksimal 2MB")
-        return
-      }
-      setSelectedFile(file)
-      setImagePreview(URL.createObjectURL(file))
-    }
-  }
-
-  // Handle Base Unit radio toggle in Create Mode
-  const handleSetBaseUnit = (index: number) => {
-    formUnits.forEach((_, idx) => {
-      setValue(`units.${idx}.isBaseUnit`, idx === index)
-      if (idx === index) {
-        setValue(`units.${idx}.conversionToBase`, "1")
-      }
-    })
-  }
-
   // Triggered when user clicks "Lanjut" in Step 1
   const handleLanjutStep1 = async () => {
     if (!isEdit) {
@@ -232,24 +173,28 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
   }
 
   const handleUnitDialogSubmit = (values: { unitId: string; conversionToBase: string; sellingPrice: string }) => {
+    const currentUnits = watch("units")
     if (selectedUnitIndex !== null) {
       setValue(`units.${selectedUnitIndex}.unitId`, values.unitId)
       setValue(`units.${selectedUnitIndex}.conversionToBase`, values.conversionToBase)
       setValue(`units.${selectedUnitIndex}.sellingPrice`, values.sellingPrice)
     } else {
-      append({
-        unitId: values.unitId,
-        conversionToBase: values.conversionToBase,
-        sellingPrice: values.sellingPrice,
-        isBaseUnit: false,
-        isActive: true,
-      })
+      setValue("units", [
+        ...currentUnits,
+        {
+          unitId: values.unitId,
+          conversionToBase: values.conversionToBase,
+          sellingPrice: values.sellingPrice,
+          isBaseUnit: false,
+          isActive: true,
+        }
+      ])
     }
     setUnitDialogOpen(false)
   }
 
   // Form submit handler for both create and edit modes
-  const handleFormSubmit = (values: any) => {
+  const handleFormSubmit = (values: ProductFormValues) => {
     const formData = new FormData()
     formData.append("name", values.name)
     formData.append("categoryId", values.categoryId)
@@ -260,7 +205,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
       formData.append("image", selectedFile)
     }
 
-    const formattedUnits = values.units.map((u: any) => ({
+    const formattedUnits = values.units.map((u) => ({
       id: u.id,
       unitId: u.unitId,
       conversionToBase: Number(u.conversionToBase),
@@ -334,426 +279,119 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
               <span className="text-xs text-muted-foreground">Memuat detail produk...</span>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(handleFormSubmit)} noValidate className="h-full flex flex-col flex-1">
-              {/* STEP 1: GENERAL INFO FORM */}
-              {step === 1 && (
-                <div className="space-y-4 px-6 py-4 flex-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Product Name */}
-                    <div className="space-y-1.5 col-span-1 sm:col-span-2">
-                      <Label htmlFor="name" className="text-xs font-semibold text-foreground">Nama Produk <span className="text-destructive">*</span></Label>
-                      <Input
-                        id="name"
-                        placeholder="Contoh: Beras SPHP 5kg"
-                        {...register("name")}
-                        disabled={isPending}
-                        className="bg-white"
-                      />
-                      {errors.name && (
-                        <span className="text-[11px] text-destructive leading-none mt-1">
-                          {errors.name.message}
-                        </span>
-                      )}
-                    </div>
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(handleFormSubmit)} noValidate className="h-full flex flex-col flex-1">
+                {/* STEP 1: GENERAL INFO FORM */}
+                {step === 1 && (
+                  <ProductGeneralInfoStep
+                    isPending={isPending}
+                    categories={categories}
+                    isCategoriesLoading={isCategoriesLoading}
+                    imagePreview={imagePreview}
+                    setImagePreview={setImagePreview}
+                    setSelectedFile={setSelectedFile}
+                  />
+                )}
 
-                    {/* Category */}
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-foreground">Kategori <span className="text-destructive">*</span></Label>
-                      <ComboboxSelect
-                        items={categories}
-                        value={formCategoryId}
-                        onChange={(val) => setValue("categoryId", val)}
-                        getOptionValue={(c: any) => c.id}
-                        getOptionLabel={(c: any) => c.name}
-                        placeholder="Pilih Kategori..."
-                        searchPlaceholder="Cari kategori..."
-                        emptyText={isCategoriesLoading ? "Memuat kategori..." : "Kategori tidak ditemukan."}
-                        isLoading={isCategoriesLoading}
-                        className="w-full bg-white"
-                      />
-                      {errors.categoryId && (
-                        <span className="text-[11px] text-destructive leading-none mt-1">
-                          {errors.categoryId.message}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Image Upload Preview Block */}
-                    <div className="space-y-1.5 row-span-3 sm:row-span-3 flex flex-col">
-                      <Label className="text-xs font-semibold text-foreground">Gambar Produk (Max 2MB)</Label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                        disabled={isPending}
-                      />
-                      <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className={cn(
-                          "flex-1 min-h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center p-3 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/10 transition-all",
-                          imagePreview ? "p-0 overflow-hidden relative group" : ""
-                        )}
-                      >
-                        {imagePreview ? (
-                          <>
-                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                            <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                              <span className="text-xs text-white font-medium flex items-center gap-1">
-                                <Upload className="size-3.5" /> Ganti Gambar
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="p-2 bg-muted rounded-full text-muted-foreground mb-1.5 shrink-0">
-                              <ImageIcon className="size-5" />
-                            </div>
-                            <span className="text-xs font-semibold text-foreground">Upload Gambar</span>
-                            <span className="text-[10px] text-muted-foreground mt-0.5">Klik untuk telusuri berkas</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Minimum Stock */}
-                    <div className="space-y-1.5">
-                      <Label htmlFor="minimumStock" className="text-xs font-semibold text-foreground">Stok Minimal</Label>
-                      <Input
-                        id="minimumStock"
-                        type="number"
-                        placeholder="Contoh: 10"
-                        {...register("minimumStock")}
-                        disabled={isPending}
-                        className="bg-white"
-                      />
-                      {errors.minimumStock && (
-                        <span className="text-[11px] text-destructive leading-none mt-1">
-                          {errors.minimumStock.message}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Margin Threshold */}
-                    <div className="space-y-1.5">
-                      <Label htmlFor="marginThresholdPercent" className="text-xs font-semibold text-foreground">Margin Threshold (%)</Label>
-                      <Input
-                        id="marginThresholdPercent"
-                        type="number"
-                        placeholder="Contoh: 15"
-                        {...register("marginThresholdPercent")}
-                        disabled={isPending}
-                        className="bg-white"
-                      />
-                      {errors.marginThresholdPercent && (
-                        <span className="text-[11px] text-destructive leading-none mt-1">
-                          {errors.marginThresholdPercent.message}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 1: FOOTER (Batal & Lanjut ONLY) */}
-              {step === 1 && (
-                <DialogFooter className="border-t border-border px-6 py-4 shrink-0 mt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => onOpenChange(false)}
-                    disabled={isPending}
-                    className="cursor-pointer font-medium px-3 py-4"
-                  >
-                    Batal
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleLanjutStep1}
-                    disabled={isPending}
-                    className="cursor-pointer font-medium px-3 py-4 gap-1"
-                  >
-                    Lanjut <ChevronRight className="size-4" />
-                  </Button>
-                </DialogFooter>
-              )}
-
-              {/* STEP 2: CREATION MODE (Daftar Satuan) */}
-              {step === 2 && !isEdit && (
-                <div className="space-y-3 px-6 py-4 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-0.5">
-                      <Label className="text-xs font-bold text-foreground">Daftar Satuan</Label>
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        <Info className="size-3 text-primary shrink-0" />
-                        Tentukan 1 satuan sebagai Base Unit dengan konversi 1
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={() => append({ unitId: "", conversionToBase: "1", sellingPrice: "0", isBaseUnit: false })}
-                      className="cursor-pointer h-8 text-xs gap-1 font-medium"
-                    >
-                      <Plus className="size-3.5" /> Tambah Satuan
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2 max-h-[50vh] overflow-y-auto no-scrollbar pr-1">
-                    {fields.map((field, index) => {
-                      const isBase = formUnits[index]?.isBaseUnit
-                      return (
-                        <div
-                          key={field.id}
-                          className={cn(
-                            "grid grid-cols-1 sm:grid-cols-12 gap-2 p-3 rounded-lg border border-border bg-muted/10 items-end relative",
-                            isBase ? "border-primary/20 bg-primary/[0.01]" : ""
-                          )}
-                        >
-                          {/* Sub unit selector */}
-                          <div className="space-y-1 sm:col-span-4">
-                            <Label className="text-[10px] font-semibold text-muted-foreground">Satuan <span className="text-destructive">*</span></Label>
-                            <ComboboxSelect
-                              items={masterUnits}
-                              value={formUnits[index]?.unitId || ""}
-                              onChange={(val) => setValue(`units.${index}.unitId`, val)}
-                              getOptionValue={(u: any) => u.id}
-                              getOptionLabel={(u: any) => u.name}
-                              placeholder="Pilih..."
-                              searchPlaceholder="Cari..."
-                              emptyText={isUnitsLoading ? "Memuat..." : "Kosong."}
-                              isLoading={isUnitsLoading}
-                              className="w-full bg-white h-8 text-xs"
-                            />
-                          </div>
-
-                          {/* Conversion */}
-                          <div className="space-y-1 sm:col-span-3">
-                            <Label className="text-[10px] font-semibold text-muted-foreground">Faktor Konversi <span className="text-destructive">*</span></Label>
-                            <Input
-                              type="number"
-                              step="any"
-                              disabled={isBase}
-                              placeholder="Contoh: 1"
-                              {...register(`units.${index}.conversionToBase`)}
-                              className="bg-white h-8 text-xs"
-                            />
-                          </div>
-
-                          {/* Price */}
-                          <div className="space-y-1 sm:col-span-3">
-                            <Label className="text-[10px] font-semibold text-muted-foreground">Harga Jual (Rp) <span className="text-destructive">*</span></Label>
-                            <Input
-                              type="number"
-                              placeholder="Contoh: 14000"
-                              {...register(`units.${index}.sellingPrice`)}
-                              className="bg-white h-8 text-xs"
-                            />
-                          </div>
-
-                          {/* Actions (Base Radio & Remove) */}
-                          <div className="flex items-center gap-2 sm:col-span-2 justify-end pb-1">
-                            <button
-                              type="button"
-                              onClick={() => handleSetBaseUnit(index)}
-                              className={cn(
-                                "px-1.5 py-1 rounded text-[10px] font-bold border transition-all cursor-pointer",
-                                isBase
-                                  ? "bg-primary text-primary-foreground border-primary"
-                                  : "bg-white text-muted-foreground border-border hover:bg-muted/50"
-                              )}
-                              title="Jadikan Base Unit"
-                            >
-                              Base
-                            </button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => remove(index)}
-                              disabled={fields.length === 1 || isBase}
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0 cursor-pointer"
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  {errors.units && (
-                    <span className="text-[11px] text-destructive leading-none block mt-1">
-                      {errors.units.message || (errors.units as any).root?.message}
-                    </span>
-                  )}
-
-                  {/* STEP 2 CREATE: FOOTER (Kembali & Simpan) */}
+                {/* STEP 1: FOOTER (Batal & Lanjut ONLY) */}
+                {step === 1 && (
                   <DialogFooter className="border-t border-border px-6 py-4 shrink-0 mt-4">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setStep(1)}
-                      disabled={isPending}
-                      className="cursor-pointer font-medium px-3 py-4 gap-1"
-                    >
-                      <ChevronLeft className="size-4" /> Kembali
-                    </Button>
-                    <Button
-                      type="submit"
+                      onClick={() => onOpenChange(false)}
                       disabled={isPending}
                       className="cursor-pointer font-medium px-3 py-4"
                     >
-                      {isPending ? <Spinner className="size-4" /> : "Simpan"}
+                      Batal
                     </Button>
-                  </DialogFooter>
-                </div>
-              )}
-
-              {/* STEP 2: EDIT MODE (Manajemen Satuan Form State) */}
-              {step === 2 && isEdit && product && (
-                <div className="space-y-4 px-6 py-4 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-xs font-bold text-foreground">Kemasan Satuan Produk</span>
-                      <span className="text-[10px] text-muted-foreground">Kelola harga dan konversi multi-satuan</span>
-                    </div>
                     <Button
                       type="button"
-                      onClick={() => {
+                      onClick={handleLanjutStep1}
+                      disabled={isPending}
+                      className="cursor-pointer font-medium px-3 py-4 gap-1"
+                    >
+                      Lanjut <ChevronRight className="size-4" />
+                    </Button>
+                  </DialogFooter>
+                )}
+
+                {/* STEP 2: CREATION MODE (Daftar Satuan) */}
+                {step === 2 && !isEdit && (
+                  <>
+                    <ProductUnitsCreateStep
+                      masterUnits={masterUnits}
+                      isUnitsLoading={isUnitsLoading}
+                      isPending={isPending}
+                    />
+
+                    {/* STEP 2 CREATE: FOOTER (Kembali & Simpan) */}
+                    <DialogFooter className="border-t border-border px-6 py-4 shrink-0 mt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setStep(1)}
+                        disabled={isPending}
+                        className="cursor-pointer font-medium px-3 py-4 gap-1"
+                      >
+                        <ChevronLeft className="size-4" /> Kembali
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isPending}
+                        className="cursor-pointer font-medium px-3 py-4"
+                      >
+                        {isPending ? <Spinner className="size-4" /> : "Simpan"}
+                      </Button>
+                    </DialogFooter>
+                  </>
+                )}
+
+                {/* STEP 2: EDIT MODE (Manajemen Satuan Form State) */}
+                {step === 2 && isEdit && product && (
+                  <>
+                    <ProductUnitsEditStep
+                      product={product}
+                      masterUnits={masterUnits}
+                      onEditUnit={(index, unitVal) => {
+                        setSelectedUnitIndex(index)
+                        setSelectedProductUnit(unitVal)
+                        setUnitDialogOpen(true)
+                      }}
+                      onDeleteUnit={(index, unitVal) => {
+                        setSelectedUnitIndex(index)
+                        setUnitToDelete(unitVal)
+                        setDeleteUnitConfirmOpen(true)
+                      }}
+                      onAddUnit={() => {
                         setSelectedUnitIndex(null)
                         setSelectedProductUnit(null)
                         setUnitDialogOpen(true)
                       }}
-                      className="cursor-pointer h-8 text-xs gap-1 font-medium"
-                    >
-                      <Plus className="size-3.5" /> Tambah Satuan
-                    </Button>
-                  </div>
+                    />
 
-                  {/* Units Table */}
-                  <div className="border border-border rounded-xl overflow-hidden bg-card flex-1">
-                    <table className="w-full text-sm">
-                      <thead className="bg-muted/40 border-b border-border">
-                        <tr className="text-xs font-bold text-muted-foreground text-left">
-                          <th className="px-4 py-2.5 font-bold">Satuan</th>
-                          <th className="px-4 py-2.5 font-bold text-center">Base Unit?</th>
-                          <th className="px-4 py-2.5 font-bold text-center">Faktor Konversi</th>
-                          <th className="px-4 py-2.5 font-bold text-right">Harga Jual</th>
-                          <th className="px-4 py-2.5 font-bold text-center">Status</th>
-                          <th className="px-4 py-2.5 font-bold text-center">Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {fields.length === 0 ? (
-                          <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground italic">
-                              Belum ada satuan.
-                            </td>
-                          </tr>
-                        ) : (
-                          fields.map((field, index) => {
-                            const unitVal = formUnits[index]
-                            const unitDetail = masterUnits.find((mu) => mu.id === unitVal?.unitId)
-                            const unitName = unitDetail?.name || ""
-                            const isBase = unitVal?.isBaseUnit
-
-                            // Find base unit name from form state
-                            const baseUnitField = formUnits.find((u) => u.isBaseUnit)
-                            const baseUnitDetail = masterUnits.find((mu) => mu.id === baseUnitField?.unitId)
-                            const baseUnitName = baseUnitDetail?.name || product?.baseUnit?.name || ""
-
-                            return (
-                              <tr key={field.id} className="hover:bg-muted/10">
-                                <td className="px-4 py-3 font-semibold text-foreground">{unitName}</td>
-                                <td className="px-4 py-3 text-center">
-                                  {isBase ? (
-                                    <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-transparent text-[10px] font-bold">
-                                      Base Unit
-                                    </Badge>
-                                  ) : (
-                                    <span className="text-muted-foreground text-xs">-</span>
-                                  )}
-                                </td>
-                                <td className="px-4 py-3 text-center text-xs font-medium text-slate-600">
-                                  {unitVal?.conversionToBase} {baseUnitName}
-                                </td>
-                                <td className="px-4 py-3 text-right font-medium text-foreground">
-                                  {formatCurrency(Number(unitVal?.sellingPrice || 0))}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                  <Switch
-                                    checked={unitVal?.isActive ?? true}
-                                    onCheckedChange={(checked) => setValue(`units.${index}.isActive`, checked)}
-                                    disabled={isBase}
-                                    className="cursor-pointer scale-90"
-                                  />
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        setSelectedUnitIndex(index)
-                                        setSelectedProductUnit({
-                                          ...unitVal,
-                                          unit: { id: unitVal.unitId, name: unitName }
-                                        })
-                                        setUnitDialogOpen(true)
-                                      }}
-                                      className="h-7 w-7 text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-                                    >
-                                      <Pencil className="size-3.5" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        setSelectedUnitIndex(index)
-                                        setUnitToDelete({
-                                          ...unitVal,
-                                          unit: { id: unitVal.unitId, name: unitName }
-                                        } as any)
-                                        setDeleteUnitConfirmOpen(true)
-                                      }}
-                                      disabled={isBase}
-                                      className="h-7 w-7 text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-                                    >
-                                      <Trash2 className="size-3.5" />
-                                    </Button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* STEP 2 EDIT: FOOTER (Kembali & Simpan submit) */}
-                  <DialogFooter className="border-t border-border px-6 py-4 shrink-0 mt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                      className="cursor-pointer font-medium px-3 py-4 gap-1"
-                    >
-                      <ChevronLeft className="size-4" /> Kembali
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={isPending}
-                      className="cursor-pointer font-medium px-3 py-4"
-                    >
-                      {isPending ? <Spinner className="size-4" /> : "Simpan"}
-                    </Button>
-                  </DialogFooter>
-                </div>
-              )}
-            </form>
+                    {/* STEP 2 EDIT: FOOTER (Kembali & Simpan submit) */}
+                    <DialogFooter className="border-t border-border px-6 py-4 shrink-0 mt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setStep(1)}
+                        className="cursor-pointer font-medium px-3 py-4 gap-1"
+                      >
+                        <ChevronLeft className="size-4" /> Kembali
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isPending}
+                        className="cursor-pointer font-medium px-3 py-4"
+                      >
+                        {isPending ? <Spinner className="size-4" /> : "Simpan"}
+                      </Button>
+                    </DialogFooter>
+                  </>
+                )}
+              </form>
+            </FormProvider>
           )}
         </div>
       </DialogContent>
@@ -764,7 +402,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
           open={unitDialogOpen}
           onOpenChange={setUnitDialogOpen}
           productUnit={selectedProductUnit}
-          existingUnitIds={formUnits?.map((u) => u.unitId) ?? []}
+          existingUnitIds={watch("units")?.map((u) => u.unitId) ?? []}
           onSubmit={handleUnitDialogSubmit}
         />
       )}
@@ -786,7 +424,8 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
           variant="danger"
           onConfirm={() => {
             if (selectedUnitIndex !== null) {
-              remove(selectedUnitIndex)
+              const currentUnits = watch("units")
+              setValue("units", currentUnits.filter((_, idx) => idx !== selectedUnitIndex))
               setDeleteUnitConfirmOpen(false)
               setUnitToDelete(null)
               setSelectedUnitIndex(null)

@@ -33,3 +33,29 @@ export interface Product {
 }
 
 export type ProductResponse = Product
+
+export interface ProductFormValues {
+  name: string
+  categoryId: string
+  minimumStock: string
+  marginThresholdPercent: string
+  image?: File | null
+  units: {
+    id?: string
+    unitId: string
+    conversionToBase: string
+    sellingPrice: string
+    isBaseUnit: boolean
+    isActive?: boolean
+  }[]
+}
+
+export interface SelectedProductUnit {
+  id?: string
+  unitId: string
+  conversionToBase: string | number
+  sellingPrice: string | number
+  isBaseUnit: boolean
+  isActive?: boolean
+  unit?: { id: string; name: string }
+}
