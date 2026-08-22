@@ -26,6 +26,18 @@ export const updateUserStatusSchema = z.object({
 
 export type UpdateUserStatusRequest = z.infer<typeof updateUserStatusSchema>
 
+export const updateProfileSchema = z.object({
+  name: z.string().min(1, "Nama wajib diisi").max(25, "Maksimal 25 karakter"),
+  username: z
+    .string()
+    .min(3, "Username minimal 3 karakter")
+    .max(20, "Maksimal 20 karakter")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username hanya boleh huruf, angka, dan underscore"),
+  image: z.any().optional(),
+})
+
+export type UpdateProfileRequest = z.infer<typeof updateProfileSchema>
+
 export const userSearchSchema = z.object({
   page: z.coerce.number().catch(1),
   limit: z.coerce.number().catch(10),

@@ -5,6 +5,7 @@ interface UserBase {
   name: string
   email: string
   username: string
+  image: string | null
   isActive: boolean
   createdAt: string
   updatedAt: string

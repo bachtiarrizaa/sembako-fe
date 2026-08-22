@@ -1,4 +1,5 @@
 export * from "./components/UserPage";
+export * from "./components/ProfilePage";
 export * from "./components/UserFormDialog";
 export * from "./hooks";
 export * from "./services/user.service";
