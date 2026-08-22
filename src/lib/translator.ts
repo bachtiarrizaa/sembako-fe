@@ -10,6 +10,15 @@ const messageMap: Record<string, string> = {
   "Token expired": "Sesi telah berakhir, silakan login kembali",
   "Failed to sign in. Please check your credentials.": "Gagal masuk. Silakan periksa kembali email dan kata sandi Anda.",
   "Failed to log out on server. Proceeding to login.": "Gagal keluar dari server. Dialihkan ke halaman login.",
+  "Password reset email sent successfully": "Tautan reset kata sandi telah dikirim ke email Anda",
+  "Email sent successfully": "Tautan reset kata sandi telah dikirim ke email Anda",
+  "if the email exists, a password reset link has been sent": "Jika email terdaftar, tautan reset kata sandi telah dikirim",
+  "Password reset successfully": "Kata sandi berhasil diubah. Silakan masuk.",
+  "password reset successful": "Kata sandi berhasil diubah",
+  "Invalid or expired token": "Token tidak valid atau sudah kedaluwarsa",
+  "invalid or expired reset token": "Token tidak valid atau sudah kedaluwarsa",
+  "Email not found": "Email tidak ditemukan",
+  "User with this email does not exist": "Pengguna dengan email ini tidak ditemukan",
 
   // Role messages
   "Role created successfully": "Role berhasil ditambahkan",
