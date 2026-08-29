@@ -1,6 +1,4 @@
 "use client"
-
-import { Eye, Info, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -13,6 +11,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { formatCurrency, resolveStaticUrl } from "@/utils/format"
 import { useProductDetails } from "../hooks"
+import Image from "next/image"
 
 interface ProductDetailDialogProps {
   open: boolean
@@ -27,7 +26,7 @@ export function ProductDetailDialog({ open, onOpenChange, productId }: ProductDe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden sm:max-w-2xl">
+      <DialogContent className="gap-0 p-0 sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden sm:max-w-3xl">
         <button type="button" className="sr-only" />
 
         <DialogHeader className="border-b border-border px-6 py-4 shrink-0">
@@ -54,7 +53,14 @@ export function ProductDetailDialog({ open, onOpenChange, productId }: ProductDe
                 <div className="col-span-1 flex flex-col items-center justify-start">
                   <div className="w-full aspect-square border border-border rounded-xl overflow-hidden bg-muted flex items-center justify-center relative shadow-sm">
                     {imageUrl ? (
-                      <img src={imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                      <div className="relative w-full h-full rounded-md overflow-hidden">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center text-muted-foreground/60 gap-1.5">
                         <ImageIcon className="size-8" />
@@ -140,6 +146,8 @@ export function ProductDetailDialog({ open, onOpenChange, productId }: ProductDe
                         <th className="px-4 py-2.5 font-bold">Satuan</th>
                         <th className="px-4 py-2.5 font-bold text-center">Faktor Konversi</th>
                         <th className="px-4 py-2.5 font-bold text-right">Harga Jual</th>
+                        <th className="px-4 py-2.5 font-bold text-center">Nilai Diskon</th>
+                        <th className="px-4 py-2.5 font-bold text-right">Harga Diskon</th>
                         <th className="px-4 py-2.5 font-bold text-center">Base Unit?</th>
                         <th className="px-4 py-2.5 font-bold text-center">Status</th>
                       </tr>
@@ -159,7 +167,19 @@ export function ProductDetailDialog({ open, onOpenChange, productId }: ProductDe
                               1 {unit.unit.name} = {unit.conversionToBase} {product.baseUnit.name}
                             </td>
                             <td className="px-4 py-2.5 text-right font-medium text-foreground">
-                              {formatCurrency(unit.sellingPrice)}
+                              {unit.sellingPrice ? (
+                                formatCurrency(unit.sellingPrice)
+                              ) : "-"}
+                            </td>
+                            <td className="px-4 py-2.5 text-center font-medium text-destructive">
+                              {unit.discountAmount ? (
+                                formatCurrency(unit.discountAmount)
+                              ) : "-"}
+                            </td>
+                            <td className="px-4 py-2.5 text-right font-medium text-gray-600">
+                              {unit.discountedPrice ? (
+                                formatCurrency(unit.discountedPrice)
+                              ) : "-"}
                             </td>
                             <td className="px-4 py-2.5 text-center">
                               {unit.isBaseUnit ? (

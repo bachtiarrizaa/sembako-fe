@@ -311,7 +311,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                       disabled={isPending}
                       className="cursor-pointer font-medium px-3 py-4 gap-1"
                     >
-                      Lanjut <ChevronRight className="size-4" />
+                      Lanjut
                     </Button>
                   </DialogFooter>
                 )}
@@ -334,7 +334,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                         disabled={isPending}
                         className="cursor-pointer font-medium px-3 py-4 gap-1"
                       >
-                        <ChevronLeft className="size-4" /> Kembali
+                        Kembali
                       </Button>
                       <Button
                         type="submit"
@@ -378,7 +378,7 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
                         onClick={() => setStep(1)}
                         className="cursor-pointer font-medium px-3 py-4 gap-1"
                       >
-                        <ChevronLeft className="size-4" /> Kembali
+                        Kembali
                       </Button>
                       <Button
                         type="submit"

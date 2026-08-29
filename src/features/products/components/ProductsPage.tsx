@@ -299,6 +299,7 @@ export function ProductsPage() {
 
       {/* Main product form dialog (Add/Edit) */}
       <ProductFormDialog
+        key={selectedProductId ?? (formDialogOpen ? "create" : "closed")}
         open={formDialogOpen}
         onOpenChange={setFormDialogOpen}
         productId={selectedProductId}

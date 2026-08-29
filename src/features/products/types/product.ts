@@ -13,6 +13,8 @@ export interface ProductUnit {
   unit: UnitInfo
   conversionToBase: number
   sellingPrice: number
+  discountAmount?: number
+  discountedPrice?: number
   isBaseUnit: boolean
   isActive: boolean
 }
