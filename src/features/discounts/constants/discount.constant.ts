@@ -9,3 +9,8 @@ export const DISCOUNT_TYPE_LABELS: Record<DiscountType, string> = {
   percent: "Persentase",
   fixed: "Nominal",
 }
+
+export const DISCOUNT_TYPE_OPTIONS = Object.values(DISCOUNT_TYPES).map((value) => ({
+  value,
+  label: DISCOUNT_TYPE_LABELS[value],
+}))

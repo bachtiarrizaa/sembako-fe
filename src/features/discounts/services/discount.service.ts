@@ -17,6 +17,11 @@ export const discountService = {
     }
   },
 
+  getDiscount: async (id: string): Promise<ApiResponse<DiscountResponse>> => {
+    const res = await apiClient.get<ApiResponse<DiscountResponse>>(`/discounts/${id}`)
+    return res.data
+  },
+
   create: async (
     payload: CreateDiscountRequest
   ): Promise<ApiResponse<DiscountResponse>> => {
