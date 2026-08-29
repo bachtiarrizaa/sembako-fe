@@ -1,4 +1,5 @@
 export * from "./components/TransactionPage"
+export * from "./components/TransactionDetailDialog"
 export * from "./constants/transaction.constant"
 export * from "./schemas/transaction.schema"
 export * from "./types/transaction"
