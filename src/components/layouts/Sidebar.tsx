@@ -44,7 +44,7 @@ const getIcon = (name: string): LucideIcon => {
 const routeMap: Record<string, string> = {
   '/dashboard': '/admin/dashboard',
   '/pos': '/admin/pos',
-  '/transactions': '/admin/transaction',
+  '/transactions': '/admin/transactions',
   '/shifts': '/admin/shifts',
   '/products/list': '/admin/products',
   '/products/units': '/admin/units',
