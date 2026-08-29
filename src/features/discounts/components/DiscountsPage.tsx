@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-import { Pencil, Trash2, SearchX, Inbox } from "lucide-react"
+import { Pencil, Trash2, SearchX, Inbox, Eye } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
@@ -18,6 +18,7 @@ import { DISCOUNT_TYPES, DISCOUNT_TYPE_LABELS } from "../constants/discount.cons
 import { useDiscounts, useUpdateDiscountStatus, useDeleteDiscount } from "../hooks"
 import { DiscountResponse } from "../types/discount"
 import { DiscountFormDialog } from "./DiscountFormDialog"
+import { DiscountDetailDialog } from "./DiscountDetailDialog"
 
 export function DiscountsPage() {
   const router = useRouter()
@@ -73,6 +74,8 @@ export function DiscountsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingDiscount, setEditingDiscount] = useState<DiscountResponse | null>(null)
   const [deletingDiscount, setDeletingDiscount] = useState<DiscountResponse | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedDetailDiscount, setSelectedDetailDiscount] = useState<DiscountResponse | null>(null)
 
   const discounts = data?.items ?? []
   const pagination = data?.pagination
@@ -96,6 +99,11 @@ export function DiscountsPage() {
   const handleEdit = (discount: DiscountResponse) => {
     setEditingDiscount(discount)
     setDialogOpen(true)
+  }
+
+  const handleViewDetail = (discount: DiscountResponse) => {
+    setSelectedDetailDiscount(discount)
+    setDetailOpen(true)
   }
 
   const handleStatusChange = (discount: DiscountResponse, newStatus: boolean) => {
@@ -153,6 +161,17 @@ export function DiscountsPage() {
       cell: (item) => formatDate(item.endDate),
     },
     {
+      header: "Jumlah Produk",
+      cell: (item) => {
+        const count = item.products?.length ?? 0
+        return (
+          <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300 hover:bg-purple-50 border-purple-200">
+            {count} Produk
+          </Badge>
+        )
+      },
+    },
+    {
       header: "Status",
       cell: (item) => {
         const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
@@ -181,6 +200,15 @@ export function DiscountsPage() {
             onClick={() => handleEdit(item)}
           >
             <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Detail Diskon"
+            className="text-blue-500 hover:text-blue/80 hover:bg-muted cursor-pointer"
+            onClick={() => handleViewDetail(item)}
+          >
+            <Eye className="size-4" />
           </Button>
           <Button
             variant="ghost"
@@ -255,7 +283,13 @@ export function DiscountsPage() {
       <DiscountFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        discount={editingDiscount}
+        discountId={editingDiscount?.id}
+      />
+
+      <DiscountDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        discountId={selectedDetailDiscount?.id}
       />
 
       <ConfirmModal
