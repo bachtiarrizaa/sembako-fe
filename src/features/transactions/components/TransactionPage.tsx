@@ -18,6 +18,7 @@ import {
 } from "../constants/transaction.constant"
 import { useTransactions } from "../hooks"
 import type { TransactionResponse, PaymentMethod } from "../types/transaction"
+import { TransactionDetailDialog } from "./TransactionDetailDialog"
 
 export function TransactionsPage() {
   const router = useRouter()
@@ -82,6 +83,14 @@ export function TransactionsPage() {
     [searchParams, pathname, router]
   )
 
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null)
+
+  const handleViewDetail = (transaction: TransactionResponse) => {
+    setSelectedTransactionId(transaction.id)
+    setDetailOpen(true)
+  }
+
   const renderPaymentBadge = (method: PaymentMethod) => {
     const label = PAYMENT_METHOD_LABELS[method] || method
     switch (method) {
@@ -112,9 +121,13 @@ export function TransactionsPage() {
     {
       header: "No. Struk",
       cell: (item) => (
-        <span className="font-semibold text-foreground font-mono text-xs">
+        <button
+          type="button"
+          onClick={() => handleViewDetail(item)}
+          className="font-semibold text-gray-600 hover:underline font-mono text-xs cursor-pointer text-left"
+        >
           {item.receiptNumber || "-"}
-        </span>
+        </button>
       ),
     },
     {
@@ -161,7 +174,7 @@ export function TransactionsPage() {
           const voidedByName = item.voidedByUser?.name
           return (
             <Badge className="bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border-rose-200 hover:bg-rose-50">
-              Void{voidedByName ? ` — oleh ${voidedByName}` : ""}
+              Dibatalkan{voidedByName ? ` — oleh ${voidedByName}` : ""}
             </Badge>
           )
         }
@@ -183,6 +196,7 @@ export function TransactionsPage() {
               variant="ghost"
               size="icon"
               title="Detail Transaksi"
+              onClick={() => handleViewDetail(item)}
               className="text-blue-500 hover:text-blue-500/80 hover:bg-muted cursor-pointer"
             >
               <Eye className="size-4" />
@@ -190,7 +204,7 @@ export function TransactionsPage() {
             <Button
               variant="ghost"
               size="icon"
-              title={isVoided ? "Transaksi Sudah Void" : "Void Transaksi"}
+              title={isVoided ? "Transaksi Sudah Dibatalkan" : "Batalkan Transaksi"}
               disabled={isVoided}
               className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
             >
@@ -255,6 +269,12 @@ export function TransactionsPage() {
       {pagination && (
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
       )}
+
+      <TransactionDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        transactionId={selectedTransactionId}
+      />
     </div>
   )
 }
