@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
-import { AdminLayout } from "@/components/layouts/AdminLayout";
+import { CashierLayout } from "@/components/layouts/CashierLayout";
 import { useUserMe } from "@/features/users/hooks/useUserMe";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -41,5 +41,5 @@ export default function CashierRoute({ children }: { children: React.ReactNode }
     );
   }
 
-  return <AdminLayout>{children}</AdminLayout>;
+  return <CashierLayout>{children}</CashierLayout>;
 }
