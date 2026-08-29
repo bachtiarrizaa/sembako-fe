@@ -63,6 +63,21 @@ const routeMap: Record<string, string> = {
   '/settings': '/admin/settings',
 };
 
+const menuOrderMap: Record<string, number> = {
+  'dashboard': 1,
+  'pos:create': 2,
+  'transactions:read': 3,
+  'shifts:read': 4,
+  'products': 5,
+  'discounts': 6,
+  'inventory': 7,
+  'suppliers-purchases': 8,
+  'customers-loyalty': 9,
+  'reports': 10,
+  'employees': 11,
+  'settings:read': 12,
+}
+
 const getFePath = (bePath: string | null): string => {
   if (!bePath) return '#';
   return routeMap[bePath] || `/admin${bePath}`;
@@ -83,10 +98,13 @@ export function Sidebar() {
 
   const permissions = useAuthStore((state) => state.permissions) || []
 
-  // Hanya ambil menu utama di root level (level 1)
-  const allowedMenus = permissions.filter(
-    (item) => item.parentId === null && item.type === 'menu'
-  )
+  const allowedMenus = permissions
+    .filter((item) => item.parentId === null && item.type === 'menu')
+    .sort((a, b) => {
+      const orderA = menuOrderMap[a.name] ?? 99
+      const orderB = menuOrderMap[b.name] ?? 99
+      return orderA - orderB
+    })
 
   const isPathActive = (path: string) => {
     if (path === '#') return false
@@ -105,13 +123,11 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`relative bg-white border-r border-slate-200 h-full flex flex-col transition-[width] duration-300 ease-in-out shrink-0 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
+      className={`relative bg-white border-r border-slate-200 h-full flex flex-col transition-[width] duration-300 ease-in-out shrink-0 ${isCollapsed ? 'w-20' : 'w-64'
+        }`}
     >
-      <nav className={`flex-1 py-4 space-y-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar transition-[padding] duration-300 ease-in-out ${
-        isCollapsed ? 'pl-[18px] pr-[14px]' : 'px-4'
-      }`}>
+      <nav className={`flex-1 py-4 space-y-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar transition-[padding] duration-300 ease-in-out ${isCollapsed ? 'pl-[18px] pr-[14px]' : 'px-4'
+        }`}>
         {allowedMenus.map((item, index) => {
           const Icon = getIcon(item.name)
 
@@ -131,19 +147,16 @@ export function Sidebar() {
                 <Link
                   href={leafPath}
                   title={isCollapsed ? cleanLabel(item.description) : undefined}
-                  className={`flex items-center rounded-xl transition-all duration-300 ease-in-out ${
-                    isCollapsed ? 'py-3 px-[14px] gap-0' : 'py-3 px-4 gap-3'
-                  } ${
-                    active
+                  className={`flex items-center rounded-xl transition-all duration-300 ease-in-out ${isCollapsed ? 'py-3 px-[14px] gap-0' : 'py-3 px-4 gap-3'
+                    } ${active
                       ? 'bg-primary/10 text-primary font-semibold hover:bg-primary/15'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5 shrink-0" />
                   <span
-                    className={`font-medium text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ease-out ${
-                      isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100'
-                    }`}
+                    className={`font-medium text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ease-out ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100'
+                      }`}
                   >
                     {cleanLabel(item.description)}
                   </span>
@@ -161,34 +174,29 @@ export function Sidebar() {
               <button
                 onClick={() => !isCollapsed && toggleGroup(item.name)}
                 title={isCollapsed ? cleanLabel(item.description) : undefined}
-                className={`w-full flex items-center rounded-xl transition-all duration-300 ease-in-out cursor-pointer ${
-                  isCollapsed ? 'py-3 px-[14px] gap-0' : 'py-3 px-4 gap-3'
-                } ${
-                  groupActive
+                className={`w-full flex items-center rounded-xl transition-all duration-300 ease-in-out cursor-pointer ${isCollapsed ? 'py-3 px-[14px] gap-0' : 'py-3 px-4 gap-3'
+                  } ${groupActive
                     ? 'bg-primary/10 text-primary font-semibold hover:bg-primary/15'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
                 <span
-                  className={`font-medium text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ease-out flex-1 text-left ${
-                    isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100'
-                  }`}
+                  className={`font-medium text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ease-out flex-1 text-left ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[160px] opacity-100'
+                    }`}
                 >
                   {cleanLabel(item.description)}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 shrink-0 transition-all duration-300 ease-out ${
-                    isOpen ? 'rotate-180' : ''
-                  } ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[16px] opacity-100'}`}
+                  className={`w-4 h-4 shrink-0 transition-all duration-300 ease-out ${isOpen ? 'rotate-180' : ''
+                    } ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[16px] opacity-100'}`}
                 />
               </button>
 
               {/* Grid trick: animate height dari 0fr ke 1fr, bukan conditional render */}
               <div
-                className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-                  isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                }`}
+                className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                  }`}
               >
                 <div className="overflow-hidden">
                   <div className="ml-4 pl-4 border-l border-slate-200 mt-1 space-y-1 pb-1">
@@ -199,11 +207,10 @@ export function Sidebar() {
                         <Link
                           key={child.id}
                           href={childPath}
-                          className={`block py-2 px-3 rounded-lg text-sm transition-colors duration-200 ${
-                            active
-                              ? 'bg-primary/10 text-primary font-semibold'
-                              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                          }`}
+                          className={`block py-2 px-3 rounded-lg text-sm transition-colors duration-200 ${active
+                            ? 'bg-primary/10 text-primary font-semibold'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                            }`}
                         >
                           {cleanLabel(child.description)}
                         </Link>

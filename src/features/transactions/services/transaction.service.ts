@@ -1,5 +1,5 @@
 import { ApiResponse, Pagination } from "@/types/api-response";
-import { TransactionSearch } from "../schemas/transaction.schema";
+import { TransactionSearch, VoidTransactionRequest } from "../schemas/transaction.schema";
 import { TransactionResponse } from "../types/transaction";
 import { apiClient } from "@/api/api-client";
 import { buildListParams } from "@/utils/list-params";
@@ -24,5 +24,16 @@ export const transactionService = {
     } catch (error) {
       return null
     }
-  }
+  },
+
+  voidTransaction: async (
+    id: string,
+    payload: VoidTransactionRequest
+  ): Promise<ApiResponse<TransactionResponse>> => {
+    const res = await apiClient.post<ApiResponse<TransactionResponse>>(
+      `/transactions/${id}/void`,
+      payload
+    )
+    return res.data
+  },
 }
