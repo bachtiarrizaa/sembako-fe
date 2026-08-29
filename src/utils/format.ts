@@ -38,6 +38,23 @@ export function formatShortDateTime(value?: string | null, fallback = "-"): stri
   return `${datePart} / ${timePart}`
 }
 
+export function formatTransactionDate(value?: string | null, fallback = "-"): string {
+  if (!value) return fallback
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return fallback
+  const datePart = new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date)
+  const timePart = new Intl.DateTimeFormat("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date).replace(".", ":")
+  return `${datePart}, ${timePart}`
+}
+
 export function formatCurrency(
   value?: string | number | null,
   fallback = "-"
