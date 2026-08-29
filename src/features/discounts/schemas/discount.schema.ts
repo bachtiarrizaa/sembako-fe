@@ -19,7 +19,13 @@ export const discountSchema = z.object({
   type: z.enum(Object.values(DISCOUNT_TYPES), { error: "Tipe diskon wajib dipilih" }),
   value: z.coerce.number().positive("Nilai diskon harus lebih dari 0"),
   startDate: z.string().nullable().optional(),
-  endDate: z.string().nullable().optional()
+  endDate: z.string().nullable().optional(),
+  products: z.array(
+    z.object({
+      productId: z.string().min(1, "Product ID wajib diisi"),
+      isActive: z.boolean().default(true),
+    })
+  ).optional().default([]),
 })
 .refine(isPercentValueValid, { message: "Diskon persentase maksimal 100%", path: ["value"] })
 .refine(isDateRangeValid, { message: "Tanggal berakhir harus setelah tanggal mulai", path: ["endDate"] })
