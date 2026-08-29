@@ -7,27 +7,23 @@ import { Sidebar } from "./Sidebar";
 import { Spinner } from "@/components/ui/spinner";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
   const pathname = usePathname();
 
-  useEffect(() => {
-    setIsNavigating(false);
-  }, [pathname]);
+  const isNavigating = navigatingTo !== null && navigatingTo !== pathname;
 
   useEffect(() => {
     if (!isNavigating) return;
 
     const safetyTimer = setTimeout(() => {
-      setIsNavigating(false);
+      setNavigatingTo(null);
     }, 800);
 
     return () => clearTimeout(safetyTimer);
   }, [isNavigating]);
 
   useEffect(() => {
-    const handlePopState = () => {
-      setIsNavigating(false);
-    };
+    const handlePopState = () => setNavigatingTo(null);
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
@@ -38,7 +34,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       if (anchor) {
         const href = anchor.getAttribute("href");
         if (href && href.startsWith("/") && href !== pathname && !href.startsWith("#")) {
-          setIsNavigating(true);
+          setNavigatingTo(href);
         }
       }
     };

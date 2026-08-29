@@ -19,6 +19,7 @@ import {
 import { useTransactions } from "../hooks"
 import type { TransactionResponse, PaymentMethod } from "../types/transaction"
 import { TransactionDetailDialog } from "./TransactionDetailDialog"
+import { VoidTransactionDialog } from "./VoidTransactionDialog"
 
 export function TransactionsPage() {
   const router = useRouter()
@@ -86,9 +87,17 @@ export function TransactionsPage() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null)
 
+  const [voidDialogOpen, setVoidDialogOpen] = useState(false)
+  const [selectedVoidTransaction, setSelectedVoidTransaction] = useState<TransactionResponse | null>(null)
+
   const handleViewDetail = (transaction: TransactionResponse) => {
     setSelectedTransactionId(transaction.id)
     setDetailOpen(true)
+  }
+
+  const handleOpenVoidDialog = (transaction: TransactionResponse) => {
+    setSelectedVoidTransaction(transaction)
+    setVoidDialogOpen(true)
   }
 
   const renderPaymentBadge = (method: PaymentMethod) => {
@@ -205,6 +214,7 @@ export function TransactionsPage() {
               variant="ghost"
               size="icon"
               title={isVoided ? "Transaksi Sudah Dibatalkan" : "Batalkan Transaksi"}
+              onClick={() => handleOpenVoidDialog(item)}
               disabled={isVoided}
               className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
             >
@@ -274,6 +284,12 @@ export function TransactionsPage() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         transactionId={selectedTransactionId}
+      />
+
+      <VoidTransactionDialog
+        open={voidDialogOpen}
+        onOpenChange={setVoidDialogOpen}
+        transaction={selectedVoidTransaction}
       />
     </div>
   )

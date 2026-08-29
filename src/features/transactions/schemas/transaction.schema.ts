@@ -7,3 +7,9 @@ export const transactionSearchSchema = z.object({
 })
 
 export type TransactionSearch = z.infer<typeof transactionSearchSchema>
+
+export const voidTransactionSchema = z.object({
+  reason: z.string().min(1, "Alasan pembatalan wajib diisi"),
+})
+
+export type VoidTransactionRequest = z.infer<typeof voidTransactionSchema>
