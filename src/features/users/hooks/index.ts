@@ -5,3 +5,4 @@ export * from "./useCreateUser";
 export * from "./useUpdateUser";
 export * from "./useUpdateUserStatus";
 export * from "./useDeleteUser";
+export * from "./useUpdateProfile";

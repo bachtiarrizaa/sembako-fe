@@ -13,6 +13,10 @@ export function Navbar() {
   const { data, isLoading } = useUserMe()
   const { mutate: logout, isPending: isLoggingOut } = useLogout()
 
+  const user = data?.data
+  const userRole = (user?.role?.name || "").toLowerCase()
+  const profileHref = userRole === "admin" ? "/admin/profile" : "/cashier/profile"
+
   return (
     <>
       <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
@@ -41,11 +45,11 @@ export function Navbar() {
                 {isLoading ? (
                   <Spinner className="size-3 text-slate-400" />
                 ) : (
-                  data?.data.name || 'Staff'
+                  user?.name || 'Staff'
                 )}
               </div>
               <div className="text-xs text-slate-500 leading-tight">
-                {data?.data.role?.name || 'Kasir'}
+                {user?.role?.name || 'Kasir'}
               </div>
             </div>
 
@@ -71,17 +75,17 @@ export function Navbar() {
               {/* Header Info User */}
               <div className="px-4 py-2.5 border-b border-slate-100">
                 <p className="text-xs font-bold text-slate-900 truncate">
-                  {data?.data.name || 'Staff'}
+                  {user?.name || 'Staff'}
                 </p>
                 <p className="text-xs text-slate-500 truncate mt-0.5">
-                  {data?.data.email || 'staff@toko.com'}
+                  {user?.email || 'staff@toko.com'}
                 </p>
               </div>
 
               {/* Navigation Links */}
               <div className="py-1">
                 <Link
-                  href="/cashier/users"
+                  href={profileHref}
                   onClick={() => setShowDropdown(false)}
                   className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors cursor-pointer"
                 >

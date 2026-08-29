@@ -1,11 +1,8 @@
 "use client"
 
-import { useEffect } from "react"
-import { useForm, Controller } from "react-hook-form"
+import { useEffect, useMemo } from "react"
+import { useForm, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
-import { Calendar as CalendarIcon, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,40 +11,57 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ComboboxSelect } from "@/components/common/ComboboxSelect"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group"
-import { cn } from "@/utils/cn"
-import { DiscountResponse } from "../types/discount"
-import { useCreateDiscount, useUpdateDiscount } from "../hooks"
+import { useCreateDiscount, useUpdateDiscount, useDiscountDetails } from "../hooks"
 import { discountSchema, CreateDiscountRequest } from "../schemas/discount.schema"
 import { DISCOUNT_TYPES } from "../constants/discount.constant"
 import { formatStartDate, formatEndDate } from "@/utils/format"
+import { useProducts } from "@/features/products/hooks/useProducts"
+import { DiscountFormFields } from "./DiscountFormFields"
+import { DiscountFormProductsSection } from "./DiscountFormProductsSection"
 
 interface DiscountFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  discount?: DiscountResponse | null
+  discountId?: string | null
 }
 
-const discountTypeOptions = [
-  { value: DISCOUNT_TYPES.PERCENT, label: "Persentase" },
-  { value: DISCOUNT_TYPES.NOMINAL, label: "Nominal" },
-]
-
-export function DiscountFormDialog({ open, onOpenChange, discount }: DiscountFormDialogProps) {
-  const isEdit = Boolean(discount)
+export function DiscountFormDialog({ open, onOpenChange, discountId }: DiscountFormDialogProps) {
+  const isEdit = Boolean(discountId)
 
   const createDiscount = useCreateDiscount()
   const updateDiscount = useUpdateDiscount()
   const isPending = createDiscount.isPending || updateDiscount.isPending
+
+  // Fetch discount details if in edit mode
+  const { data: detailResponse, isLoading: isDetailLoading } = useDiscountDetails(discountId)
+  const discount = detailResponse?.data
+
+  // Fetch products for dropdown selection
+  const { data: productsData, isLoading: isProductsLoading } = useProducts(
+    { page: 1, limit: 200, is_active: true },
+    { enabled: open }
+  )
+  const products = productsData?.items ?? []
+
+  // Derived lookup map: product name & category from active list + discount detail (for edit mode with inactive products)
+  const productDetailsCache = useMemo(() => {
+    const map: Record<string, { name: string; categoryName?: string }> = {}
+
+    products.forEach((p) => {
+      map[p.id] = { name: p.name, categoryName: p.category?.name ?? "Kategori N/A" }
+    })
+
+    discount?.products?.forEach((dp) => {
+      const id = dp.id || dp.productId || dp.product?.id
+      const name = dp.name || dp.product?.name
+      if (id && name && !map[id]) {
+        map[id] = { name, categoryName: dp.category?.name || dp.product?.category?.name || "Kategori N/A" }
+      }
+    })
+
+    return map
+  }, [products, discount?.products])
 
   const {
     register,
@@ -59,18 +73,20 @@ export function DiscountFormDialog({ open, onOpenChange, discount }: DiscountFor
     setValue,
     formState: { errors },
   } = useForm<CreateDiscountRequest>({
-    resolver: zodResolver(discountSchema) as any,
+    resolver: zodResolver(discountSchema) as unknown as Resolver<CreateDiscountRequest>,
     defaultValues: {
       name: "",
       type: DISCOUNT_TYPES.PERCENT,
-      value: undefined as any,
+      value: undefined as unknown as number,
       startDate: null,
       endDate: null,
+      products: [],
     },
   })
 
   const discountType = watch("type")
   const discountValue = watch("value")
+  const formProducts = watch("products") || []
 
   useEffect(() => {
     if (discountType === DISCOUNT_TYPES.PERCENT && Number(discountValue) > 100) {
@@ -80,16 +96,57 @@ export function DiscountFormDialog({ open, onOpenChange, discount }: DiscountFor
 
   useEffect(() => {
     if (open) {
-      reset({
-        name: discount?.name ?? "",
-        type: discount?.type ?? DISCOUNT_TYPES.PERCENT,
-        value: discount ? Number(discount.value) : (undefined as any),
-        startDate: discount?.startDate ?? null,
-        endDate: discount?.endDate ?? null,
-      })
-      clearErrors()
+      if (isEdit) {
+        if (discount) {
+          const existingProducts = discount.products || []
+          const mappedProducts = existingProducts.map((p) => {
+            return {
+              productId: p.productId || p.id,
+              isActive: p.isActive !== false
+            }
+          }).filter(Boolean) as { productId: string; isActive: boolean }[]
+
+          reset({
+            name: discount.name ?? "",
+            type: discount.type ?? DISCOUNT_TYPES.PERCENT,
+            value: discount ? Number(discount.value) : (undefined as unknown as number),
+            startDate: discount.startDate ?? null,
+            endDate: discount.endDate ?? null,
+            products: mappedProducts,
+          })
+          clearErrors()
+        }
+      } else {
+        reset({
+          name: "",
+          type: DISCOUNT_TYPES.PERCENT,
+          value: undefined as unknown as number,
+          startDate: null,
+          endDate: null,
+          products: [],
+        })
+        clearErrors()
+      }
     }
-  }, [open, discount, reset, clearErrors])
+  }, [open, discount, isEdit, reset, clearErrors])
+
+  const handleSelectProduct = (productId: string) => {
+    if (!formProducts.some((p) => p.productId === productId)) {
+      setValue(
+        "products",
+        [...formProducts, { productId, isActive: true }],
+        { shouldValidate: true }
+      )
+    }
+  }
+
+  const handleRemoveProduct = (productId: string) => {
+    setValue(
+      "products",
+      formProducts.filter((p) => p.productId !== productId),
+      { shouldValidate: true }
+    )
+  }
 
   const onSubmit = (values: CreateDiscountRequest) => {
     const payload = {
@@ -98,11 +155,12 @@ export function DiscountFormDialog({ open, onOpenChange, discount }: DiscountFor
       value: values.value,
       startDate: values.startDate ? formatStartDate(new Date(values.startDate)) : null,
       endDate: values.endDate ? formatEndDate(new Date(values.endDate)) : null,
+      products: values.products ?? [],
     }
 
-    if (isEdit && discount) {
+    if (isEdit && discountId) {
       updateDiscount.mutate(
-        { id: discount.id, payload },
+        { id: discountId, payload },
         { onSuccess: () => onOpenChange(false) }
       )
     } else {
@@ -112,205 +170,63 @@ export function DiscountFormDialog({ open, onOpenChange, discount }: DiscountFor
     }
   }
 
+  // Filter out already selected products from dropdown options
+  const availableProducts = products.filter(
+    (p) => !formProducts.some((fp) => fp.productId === p.id)
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:max-w-lg sm:rounded-xl">
+      <DialogContent className="gap-0 p-0 sm:max-w-3xl sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden">
         <button type="button" className="sr-only" />
 
-        <DialogHeader className="border-b border-border px-6 py-4">
+        <DialogHeader className="border-b border-border px-6 py-4 shrink-0">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
             {isEdit ? "Edit Diskon" : "Tambah Diskon"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="space-y-4 px-6 py-4 max-h-[70vh] overflow-y-auto">
-            {/* Nama Diskon */}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-semibold text-foreground">
-                Nama Diskon <span className="text-destructive">*</span>
-              </Label>
-              <InputGroup className="bg-background">
-                <InputGroupInput
-                  id="name"
-                  placeholder="Diskon Awal Tahun"
-                  {...register("name")}
-                />
-              </InputGroup>
-              {errors.name && (
-                <p className="text-xs font-medium text-destructive">{errors.name.message}</p>
-              )}
-            </div>
-
-            {/* Tipe & Nilai Diskon */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground">
-                  Tipe Diskon <span className="text-destructive">*</span>
-                </Label>
-                <Controller
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex-1 flex flex-col overflow-hidden">
+          <div className="space-y-5 px-6 py-4 max-h-[70vh] overflow-y-auto no-scrollbar">
+            {isEdit && isDetailLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Spinner className="size-8" />
+                <span className="text-xs text-muted-foreground">Memuat detail diskon...</span>
+              </div>
+            ) : (
+              <>
+                <DiscountFormFields
                   control={control}
-                  name="type"
-                  render={({ field }) => (
-                    <ComboboxSelect
-                      items={discountTypeOptions}
-                      value={field.value}
-                      onChange={field.onChange}
-                      getOptionValue={(opt) => opt.value}
-                      getOptionLabel={(opt) => opt.label}
-                      placeholder="Pilih tipe..."
-                      searchPlaceholder="Cari tipe..."
-                      emptyText="Tipe diskon tidak ditemukan."
-                    />
-                  )}
+                  register={register}
+                  errors={errors}
+                  discountType={discountType}
+                  isPending={isPending}
                 />
-                {errors.type && (
-                  <p className="text-xs font-medium text-destructive">{errors.type.message}</p>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="value" className="text-sm font-semibold text-foreground">
-                  Nilai Diskon <span className="text-destructive">*</span>
-                </Label>
-                <InputGroup className="bg-background">
-                  {discountType === DISCOUNT_TYPES.NOMINAL && (
-                    <InputGroupAddon align="inline-start">Rp</InputGroupAddon>
-                  )}
-                  <InputGroupInput
-                    id="value"
-                    type="number"
-                    placeholder={discountType === DISCOUNT_TYPES.PERCENT ? "25" : "10000"}
-                    max={discountType === DISCOUNT_TYPES.PERCENT ? 100 : undefined}
-                    {...register("value")}
-                  />
-                  {discountType === DISCOUNT_TYPES.PERCENT && (
-                    <InputGroupAddon align="inline-end">%</InputGroupAddon>
-                  )}
-                </InputGroup>
-                {errors.value && (
-                  <p className="text-xs font-medium text-destructive">{errors.value.message}</p>
-                )}
-              </div>
-            </div>
+                {/* Separator line */}
+                <hr className="border-border" />
 
-            {/* Tanggal Mulai & Tanggal Berakhir */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground">Tanggal Mulai</Label>
-                <Controller
-                  control={control}
-                  name="startDate"
-                  render={({ field }) => (
-                    <div className="relative flex items-center">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal bg-background h-8 px-2.5 pr-8 py-1 text-xs md:text-xs",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {field.value ? (
-                              format(new Date(field.value), "dd MMMM yyyy", { locale: id })
-                            ) : (
-                              <span>Pilih tanggal</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => {
-                              field.onChange(date ? date.toISOString() : null)
-                            }}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {field.value && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 h-5 w-5 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer rounded-full"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            field.onChange(null)
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                <DiscountFormProductsSection
+                  availableProducts={availableProducts}
+                  isProductsLoading={isProductsLoading}
+                  isPending={isPending}
+                  formProducts={formProducts}
+                  productDetailsCache={productDetailsCache}
+                  onSelectProduct={handleSelectProduct}
+                  onStatusChange={(productId, isActive) => {
+                    const newProducts = formProducts.map((p) =>
+                      p.productId === productId ? { ...p, isActive } : p
+                    )
+                    setValue("products", newProducts, { shouldValidate: true })
+                  }}
+                  onRemoveProduct={handleRemoveProduct}
+                  errors={errors}
                 />
-                {errors.startDate && (
-                  <p className="text-xs font-medium text-destructive">{errors.startDate.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground">Tanggal Berakhir</Label>
-                <Controller
-                  control={control}
-                  name="endDate"
-                  render={({ field }) => (
-                    <div className="relative flex items-center">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal bg-background h-8 px-2.5 pr-8 py-1 text-xs md:text-xs",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {field.value ? (
-                              format(new Date(field.value), "dd MMMM yyyy", { locale: id })
-                            ) : (
-                              <span>Pilih tanggal</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => {
-                              field.onChange(date ? date.toISOString() : null)
-                            }}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {field.value && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 h-5 w-5 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer rounded-full"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            field.onChange(null)
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                />
-                {errors.endDate && (
-                  <p className="text-xs font-medium text-destructive">{errors.endDate.message}</p>
-                )}
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
-          <DialogFooter className="border-t border-border px-6 py-4">
+          <DialogFooter className="border-t border-border px-6 py-4 shrink-0">
             <Button
               type="button"
               variant="outline"
@@ -323,7 +239,7 @@ export function DiscountFormDialog({ open, onOpenChange, discount }: DiscountFor
             <Button
               type="submit"
               className="cursor-pointer font-medium px-3 py-4"
-              disabled={isPending}
+              disabled={isPending || (isEdit && isDetailLoading)}
             >
               {isPending ? <Spinner className="size-4" /> : "Simpan"}
             </Button>

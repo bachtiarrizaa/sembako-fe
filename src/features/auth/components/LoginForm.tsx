@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
+import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
+interface LoginFormProps extends React.ComponentProps<"form"> {
+  portal?: "admin" | "cashier";
+}
+
+export function LoginForm({ className, portal = "admin", ...props }: LoginFormProps) {
   const { mutate: login, isPending } = useLogin();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -45,23 +50,24 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           {...register("email")}
         />
         {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
+          <p className="text-xs text-red-500">{errors.email.message}</p>
         )}
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex items-center">
           <Label htmlFor="password">Kata Sandi</Label>
-          <a
-            href="#"
-            className="ml-auto text-xs text-emerald-900 muter underline-offset-4 hover:underline"
+          <Link
+            href={`/forgot-password?portal=${portal}`}
+            className="ml-auto text-xs text-primary underline-offset-4 hover:underline"
           >
             Lupa kata sandi?
-          </a>
+          </Link>
         </div>
         <div className="relative">
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
             className="pr-9"
             {...register("password")}
           />
@@ -75,12 +81,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           </button>
         </div>
         {errors.password && (
-          <p className="text-sm text-red-500">{errors.password.message}</p>
+          <p className="text-xs text-red-500">{errors.password.message}</p>
         )}
       </div>
       <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
-        {isPending && <Spinner data-icon="inline-start" className="size-4" />}
-        {isPending ? "Memproses..." : "Masuk"}
+        {isPending ? (
+          <Spinner data-icon="inline-start" className="size-4" />
+        ) : (
+          "Masuk"
+        )}
       </Button>
     </form>
   );

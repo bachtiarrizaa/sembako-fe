@@ -10,6 +10,15 @@ export const userService = {
     return res.data
   },
 
+  updateMe: async (formData: FormData): Promise<ApiResponse<UserResponse>> => {
+    const res = await apiClient.patch<ApiResponse<UserResponse>>("/users/me", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    return res.data
+  },
+
   getUsers: async (
     filters: UserSearch = { page: 1, limit: 10 }
   ): Promise<{ items: UserResponse[]; pagination?: Pagination }> => {

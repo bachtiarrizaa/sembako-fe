@@ -1,19 +1,8 @@
-import type { ReactNode } from "react"
 import { Wheat } from "lucide-react"
-import { LoginForm } from "@/features/auth/components/LoginForm"
+import { ForgotPasswordForm } from "@/features/auth/components/ForgotPasswordForm"
 import { AuthCoverPanel } from "@/features/auth/components/AuthCoverPanel"
 
-interface LoginPageProps {
-  title?: string
-  subtitle?: ReactNode
-  portal?: "admin" | "cashier"
-}
-
-export function LoginPage({
-  title = "Selamat Datang",
-  subtitle = "Masuk dengan akun Anda untuk mengelola Toko Beras Putra Mandiri",
-  portal = "admin",
-}: LoginPageProps) {
+export function ForgotPasswordPage() {
   return (
     <div className="theme-teal grid min-h-screen w-full lg:grid-cols-2 bg-background">
       <AuthCoverPanel />
@@ -30,16 +19,7 @@ export function LoginPage({
 
         <div className="flex flex-1 items-center justify-center py-8">
           <div className="w-full max-w-sm space-y-4 rounded-2xl border bg-card shadow-xs p-6 sm:p-8">
-            <div className="space-y-3 text-center">
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
-                {title}
-              </h1>
-              <div className="space-y-2 text-sm text-muted-foreground leading-tight">
-                {subtitle}
-              </div>
-            </div>
-
-            <LoginForm portal={portal} />
+            <ForgotPasswordForm />
           </div>
         </div>
 
