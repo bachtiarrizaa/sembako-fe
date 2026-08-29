@@ -35,7 +35,7 @@ export const createProductSchema = z.object({
   categoryId: z.string().min(1, "Kategori wajib dipilih"),
   minimumStock: z.coerce.number().min(0, "Stok minimal minimal 0").optional(),
   marginThresholdPercent: z.coerce.number().min(0, "Margin threshold minimal 0").optional(),
-  image: z.any().optional(), // File instance
+  image: z.custom<File | string | null>().optional(), // File instance or URL path
   units: z.array(productFormUnitSchema).min(1, "Minimal harus ada 1 satuan"),
 }).refine((data) => {
   const baseUnits = data.units.filter((u) => u.isBaseUnit)
@@ -53,7 +53,7 @@ export const updateProductSchema = z.object({
   categoryId: z.string().min(1, "Kategori wajib dipilih"),
   minimumStock: z.coerce.number().min(0, "Stok minimal minimal 0").optional(),
   marginThresholdPercent: z.coerce.number().min(0, "Margin threshold minimal 0").optional(),
-  image: z.any().optional(),
+  image: z.custom<File | string | null>().optional(),
   units: z.array(productFormUnitSchema).min(1, "Minimal harus ada 1 satuan"),
 }).refine((data) => {
   const baseUnits = data.units.filter((u) => u.isBaseUnit)

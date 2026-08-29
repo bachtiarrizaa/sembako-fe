@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Resolver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import {
@@ -71,7 +71,7 @@ export function ProductUnitFormDialog({
     clearErrors,
     formState: { errors },
   } = useForm<ProductUnitFormValues>({
-    resolver: zodResolver(addProductUnitSchema) as any,
+    resolver: zodResolver(addProductUnitSchema) as unknown as Resolver<ProductUnitFormValues>,
     defaultValues: {
       unitId: "",
       conversionToBase: "",
@@ -136,8 +136,8 @@ export function ProductUnitFormDialog({
                   items={availableUnits}
                   value={selectedUnitId}
                   onChange={(val) => setValue("unitId", val)}
-                  getOptionValue={(u: any) => u.id}
-                  getOptionLabel={(u: any) => u.name}
+                  getOptionValue={(u: { id: string; name: string }) => u.id}
+                  getOptionLabel={(u: { id: string; name: string }) => u.name}
                   placeholder="Pilih Satuan..."
                   searchPlaceholder="Cari satuan..."
                   emptyText={isUnitsLoading ? "Memuat satuan..." : "Satuan tidak ditemukan."}
