@@ -7,7 +7,7 @@ import { buildListParams } from "@/utils/list-params";
 export const transactionService = {
   getTransactions: async (
     filters: TransactionSearch = { page: 1, limit: 10 }
-  ): Promise<{ items: TransactionResponse[]; pagination?: Pagination}> => {
+  ): Promise<{ items: TransactionResponse[]; pagination?: Pagination }> => {
     const res = await apiClient.get<ApiResponse<TransactionResponse[]>>("/transactions", {
       params: buildListParams({ page: 1, limit: 10 }, filters)
     })
@@ -16,4 +16,13 @@ export const transactionService = {
       pagination: res.data.pagination
     }
   },
+
+  getTransactionById: async (id: string): Promise<TransactionResponse | null> => {
+    try {
+      const res = await apiClient.get<ApiResponse<TransactionResponse>>(`/transactions/${id}`)
+      return res.data.data
+    } catch (error) {
+      return null
+    }
+  }
 }

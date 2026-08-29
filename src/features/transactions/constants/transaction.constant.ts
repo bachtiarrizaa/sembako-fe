@@ -19,5 +19,5 @@ export const TRANSACTION_STATUSES = {
 
 export const TRANSACTION_STATUS_LABELS: Record<TransactionStatus, string> = {
   completed: "Selesai",
-  void: "Void",
+  void: "Dibatalkan",
 }
