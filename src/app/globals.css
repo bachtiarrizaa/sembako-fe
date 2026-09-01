@@ -126,6 +126,44 @@
   }
   html {
     @apply font-sans;
+
+    /* Mobile (default): base 14px */
+    font-size: 14px;
+  }
+
+  /* Tablet (sm: 640px+) */
+  @media (min-width: 640px) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  /* Tablet landscape / small laptop (md: 768px+) */
+  @media (min-width: 768px) {
+    html {
+      font-size: 15.5px;
+    }
+  }
+
+  /* Laptop (lg: 1024px+) */
+  @media (min-width: 1024px) {
+    html {
+      font-size: 16px;
+    }
+  }
+
+  /* Desktop (xl: 1280px+) */
+  @media (min-width: 1280px) {
+    html {
+      font-size: 16.5px;
+    }
+  }
+
+  /* Large Desktop (2xl: 1536px+) */
+  @media (min-width: 1536px) {
+    html {
+      font-size: 17px;
+    }
   }
 }
 

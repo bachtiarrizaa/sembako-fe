@@ -25,13 +25,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUserMe } from "@/features/users/hooks/useUserMe";
+import { useActiveShift } from "@/features/shifts/hooks/useActiveShift";
+import { OpenShiftModal } from "@/features/pos/components/OpenShiftModal";
+import { CloseShiftModal } from "@/features/shifts/components/CloseShiftModal";
 
 export function CashierDashboardView() {
   const { data } = useUserMe();
   const user = data?.data;
 
-  // Demo shift state: default to store open
-  const [shiftOpen, setShiftOpen] = useState(true);
+  // Real Active Shift API hook
+  const { data: activeShift, isLoading: isShiftLoading } = useActiveShift();
+  const shiftOpen = !!activeShift && (activeShift.status === "open" || activeShift.status === "ACTIVE");
+
+  // Modals state
+  const [openShiftModalOpen, setOpenShiftModalOpen] = useState(false);
+  const [closeShiftModalOpen, setCloseShiftModalOpen] = useState(false);
 
   // Real-time clock state
   const [now, setNow] = useState<Date | null>(null);
@@ -65,17 +73,17 @@ export function CashierDashboardView() {
     return `${timeStr} WIB`;
   };
 
-  // Mock metrics
+  // Dynamic shift metrics from activeShift or fallback
   const shiftMetrics = {
+    shiftId: activeShift?.id ? `#SF-${activeShift.id.substring(0, 8).toUpperCase()}` : "-",
+    openedAt: activeShift?.openedAt
+      ? new Date(activeShift.openedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB"
+      : "-",
+    initialModal: activeShift?.openingBalance || 0,
     totalRevenue: 2450000,
     totalTransactions: 18,
-    cashInDrawer: 2300000, // Modal Awal 500k + Tunai 1.8M
-    nonCashTotal: 650000, // QRIS & Transfer
-    initialModal: 500000,
-    openedAt: "08:00 WIB",
-    duration: "2j 45m",
-    shiftId: "SF-20260829-01",
-    printerConnected: true,
+    cashInDrawer: (activeShift?.openingBalance || 0) + 1800000,
+    nonCashTotal: 650000,
   };
 
   // Mock recent transactions
@@ -108,6 +116,17 @@ export function CashierDashboardView() {
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-4 sm:pb-6">
+      <OpenShiftModal
+        open={openShiftModalOpen}
+        onOpenChange={setOpenShiftModalOpen}
+        onSuccess={() => setOpenShiftModalOpen(false)}
+      />
+      <CloseShiftModal
+        open={closeShiftModalOpen}
+        onOpenChange={setCloseShiftModalOpen}
+        shiftData={activeShift || null}
+      />
+
       {/* 1. BANNER GREETING & SHIFT STATUS */}
       <Card className="border-slate-200 shadow-sm bg-slate-900 text-white rounded-2xl">
         <CardContent className="p-4 sm:p-6 space-y-3.5">
@@ -122,8 +141,14 @@ export function CashierDashboardView() {
             {/* Right: Status Toko Badge */}
             <button
               type="button"
-              onClick={() => setShiftOpen(!shiftOpen)}
-              title="Klik untuk simulasi Ubah Status Shift"
+              onClick={() => {
+                if (shiftOpen) {
+                  setCloseShiftModalOpen(true);
+                } else {
+                  setOpenShiftModalOpen(true);
+                }
+              }}
+              title={shiftOpen ? "Tutup toko & rekap shift" : "Buka toko & shift baru"}
               className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide border transition-all cursor-pointer shrink-0 ${
                 shiftOpen
                   ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30"
@@ -135,14 +160,14 @@ export function CashierDashboardView() {
                   shiftOpen ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
                 }`}
               />
-              <span>{shiftOpen ? "TOKO BUKA" : "TOKO TUTUP"}</span>
+              <span>{isShiftLoading ? "MEMUAT..." : shiftOpen ? "TOKO BUKA" : "TOKO TUTUP"}</span>
             </button>
           </div>
 
           {/* Greeting Utama Kasir (Di bawah Header) */}
           <div>
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-white leading-snug">
-              Halo, {user?.name || "Kasir"}! Selamat Bertugas 👋
+              Halo, {user?.name || activeShift?.cashier?.name || "Kasir"}! Selamat Bertugas 👋
             </h1>
           </div>
 
@@ -155,31 +180,28 @@ export function CashierDashboardView() {
               </div>
               <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
                 <span className="text-slate-400 text-[10px] block">Waktu Buka</span>
-                <span className="font-semibold text-slate-100">{shiftMetrics.openedAt} ({shiftMetrics.duration})</span>
+                <span className="font-semibold text-slate-100">{shiftMetrics.openedAt}</span>
               </div>
               <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
                 <span className="text-slate-400 text-[10px] block">Modal Kas Awal</span>
                 <span className="font-semibold text-slate-100">{formatRupiah(shiftMetrics.initialModal)}</span>
               </div>
-              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
-                <span className="text-slate-400 text-[10px] block">Printer Struk</span>
-                <span className="font-semibold text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Terhubung
-                </span>
+              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60 flex items-center justify-between">
+                <div>
+                  <span className="text-slate-400 text-[10px] block">Printer Struk</span>
+                  <span className="font-semibold text-emerald-400">Terhubung</span>
+                </div>
+                <Printer className="w-4 h-4 text-emerald-400" />
               </div>
             </div>
           ) : (
-            <div className="pt-2 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <p className="text-xs text-slate-300">
-                Toko saat ini belum dibuka. Silakan Buka Toko untuk menginput modal kas awal.
-              </p>
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
+              <span>Shift Kasir Belum Aktif. Silakan buka toko untuk mulai berjualan.</span>
               <Button
-                size="sm"
-                onClick={() => setShiftOpen(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-9 text-xs shrink-0 cursor-pointer"
+                onClick={() => setOpenShiftModalOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-8 text-xs rounded-xl cursor-pointer"
               >
-                <Clock className="w-3.5 h-3.5 mr-1.5" />
-                BUKA TOKO SEKARANG
+                Buka Toko Sekarang
               </Button>
             </div>
           )}

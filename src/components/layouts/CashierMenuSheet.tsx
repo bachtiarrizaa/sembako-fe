@@ -41,7 +41,7 @@ export function CashierMenuSheet({ open, onClose }: CashierMenuSheetProps) {
       color: "bg-emerald-50 text-emerald-600 border-emerald-200",
     },
     {
-      title: "Rekap & Tutup Toko",
+      title: "Tutup toko & rekap shift",
       description: "Laporan kasir & penutupan shift",
       icon: Clock,
       href: "/cashier/shifts",
