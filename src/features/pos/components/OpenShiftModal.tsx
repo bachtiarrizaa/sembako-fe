@@ -47,17 +47,19 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-md rounded-2xl overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-2 text-left space-y-1">
-          <DialogTitle className="text-xl font-bold text-slate-900">
-            Buka toko & shift baru
+        <DialogHeader className="border-b border-border px-6 py-4 text-left">
+          <DialogTitle className="text-lg font-bold text-slate-900">
+            Buka Toko & Input Modal Kas
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500 leading-relaxed">
-            Toko belum dibuka. Silakan masukkan modal kas awal di laci untuk memulai sesi transaksi kasir.
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 px-6 py-4">
+          <div className="space-y-4 px-6 py-5">
+            {/* Description inside body */}
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Toko belum dibuka. Silakan masukkan modal kas awal di laci untuk memulai sesi transaksi kasir.
+            </p>
+
             {/* Modal Kas Awal Input */}
             <div className="space-y-2">
               <Label htmlFor="modal-amount" className="text-xs font-bold text-slate-700">
@@ -88,7 +90,7 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
                     onClick={() => setModalAmount(amt)}
                     className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all border cursor-pointer ${
                       modalAmount === amt
-                        ? "bg-primary text-white border-primary"
+                        ? "bg-primary text-primary-foreground border-primary"
                         : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
@@ -114,16 +116,16 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-4 mt-2">
+          <DialogFooter className="border-t border-border px-6 py-4">
             <Button
               type="submit"
               disabled={isSubmitting || modalAmount < 0}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-11 shadow-md shadow-emerald-600/20 cursor-pointer text-sm"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl h-11 shadow-sm cursor-pointer text-sm"
             >
               {isSubmitting ? (
                 <span>Membuka Toko...</span>
               ) : (
-                <span>Buka toko & mulai transaksi</span>
+                <span>Buka Toko & Mulai Transaksi</span>
               )}
             </Button>
           </DialogFooter>

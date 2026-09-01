@@ -60,17 +60,18 @@ export function CloseShiftModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-md rounded-2xl overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-2 text-left space-y-1">
-          <DialogTitle className="text-xl font-bold text-slate-900">
-            Tutup toko & rekap shift
+        <DialogHeader className="border-b border-border px-6 py-4 text-left">
+          <DialogTitle className="text-lg font-bold text-slate-900">
+            Tutup Toko & Rekap Kas
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500 leading-relaxed">
-            Hitung total fisik uang kas di laci dan masukkan untuk mengakhiri shift operasional kasir.
-          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 px-6 py-4">
+          <div className="space-y-4 px-6 py-5">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Hitung total fisik uang kas di laci dan masukkan untuk mengakhiri shift operasional kasir.
+            </p>
+
             {/* Shift Details Summary Box */}
             {shiftData && (
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-xs">
@@ -81,8 +82,10 @@ export function CloseShiftModal({
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>Shift ID</span>
-                  <span className="font-mono text-slate-700">{shiftData.id.substring(0, 8)}...</span>
+                  <span>Nama Kasir</span>
+                  <span className="font-semibold text-slate-800">
+                    {shiftData.cashier?.name || "Kasir"}
+                  </span>
                 </div>
               </div>
             )}
@@ -124,16 +127,16 @@ export function CloseShiftModal({
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-4 mt-2">
+          <DialogFooter className="border-t border-border px-6 py-4">
             <Button
               type="submit"
               disabled={isPending || closingBalance < 0}
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl h-11 shadow-md shadow-amber-600/20 cursor-pointer text-sm"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl h-11 shadow-sm cursor-pointer text-sm"
             >
               {isPending ? (
                 <span>Menutup Toko...</span>
               ) : (
-                <span>Tutup toko & rekap shift</span>
+                <span>Tutup Toko & Rekap Shift</span>
               )}
             </Button>
           </DialogFooter>

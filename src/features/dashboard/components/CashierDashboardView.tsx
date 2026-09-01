@@ -80,18 +80,20 @@ export function CashierDashboardView() {
       ? new Date(activeShift.openedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB"
       : "-",
     initialModal: activeShift?.openingBalance || 0,
-    totalRevenue: 2450000,
-    totalTransactions: 18,
-    cashInDrawer: (activeShift?.openingBalance || 0) + 1800000,
-    nonCashTotal: 650000,
+    totalRevenue: shiftOpen ? 2450000 : 0,
+    totalTransactions: shiftOpen ? 18 : 0,
+    cashInDrawer: shiftOpen ? (activeShift?.openingBalance || 0) + 1800000 : 0,
+    nonCashTotal: shiftOpen ? 650000 : 0,
   };
 
-  // Mock recent transactions
-  const recentTransactions = [
-    { id: "TRX-1092", time: "10:15 WIB", method: "Tunai", total: 150000, items: 3 },
-    { id: "TRX-1091", time: "09:50 WIB", method: "QRIS", total: 85000, items: 2 },
-    { id: "TRX-1090", time: "09:12 WIB", method: "Tunai", total: 42000, items: 1 },
-  ];
+  // Mock recent transactions (only available when shift is open)
+  const recentTransactions = shiftOpen
+    ? [
+        { id: "TRX-1092", time: "10:15 WIB", method: "Tunai", total: 150000, items: 3 },
+        { id: "TRX-1091", time: "09:50 WIB", method: "QRIS", total: 85000, items: 2 },
+        { id: "TRX-1090", time: "09:12 WIB", method: "Tunai", total: 42000, items: 1 },
+      ]
+    : [];
 
   // Mock low stock alerts
   const lowStockItems = [
@@ -139,35 +141,28 @@ export function CashierDashboardView() {
             </div>
 
             {/* Right: Status Toko Badge */}
-            <button
-              type="button"
-              onClick={() => {
-                if (shiftOpen) {
-                  setCloseShiftModalOpen(true);
-                } else {
-                  setOpenShiftModalOpen(true);
-                }
-              }}
-              title={shiftOpen ? "Tutup toko & rekap shift" : "Buka toko & shift baru"}
-              className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide border transition-all cursor-pointer shrink-0 ${
-                shiftOpen
-                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30"
-                  : "bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30"
-              }`}
-            >
-              <span
-                className={`size-2 rounded-full ${
-                  shiftOpen ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
-                }`}
-              />
-              <span>{isShiftLoading ? "MEMUAT..." : shiftOpen ? "TOKO BUKA" : "TOKO TUTUP"}</span>
-            </button>
+            {shiftOpen ? (
+              <button
+                type="button"
+                onClick={() => setCloseShiftModalOpen(true)}
+                title="Tutup toko & rekap shift"
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide border transition-all cursor-pointer shrink-0 bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30"
+              >
+                <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>{isShiftLoading ? "MEMUAT..." : "TOKO BUKA"}</span>
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide border shrink-0 bg-amber-500/20 text-amber-300 border-amber-500/40">
+                <span className="size-2 rounded-full bg-amber-400" />
+                <span>{isShiftLoading ? "MEMUAT..." : "TOKO TUTUP"}</span>
+              </div>
+            )}
           </div>
 
           {/* Greeting Utama Kasir (Di bawah Header) */}
           <div>
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-white leading-snug">
-              Halo, {user?.name || activeShift?.cashier?.name || "Kasir"}! Selamat Bertugas 👋
+              Halo, {user?.name || activeShift?.cashier?.name || "Kasir"}! Selamat Bertugas
             </h1>
           </div>
 
@@ -195,11 +190,14 @@ export function CashierDashboardView() {
               </div>
             </div>
           ) : (
-            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
-              <span>Shift Kasir Belum Aktif. Silakan buka toko untuk mulai berjualan.</span>
+            <div className="pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-amber-300 bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-500/20 w-full sm:w-auto">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>Shift Kasir Belum Aktif. Buka toko dan isi modal kas awal sebelum memulai transaksi.</span>
+              </div>
               <Button
                 onClick={() => setOpenShiftModalOpen(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-8 text-xs rounded-xl cursor-pointer"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-9 px-4 text-xs rounded-xl shrink-0 cursor-pointer w-full sm:w-auto shadow-md shadow-primary/20"
               >
                 Buka Toko Sekarang
               </Button>
@@ -225,10 +223,14 @@ export function CashierDashboardView() {
               <h3 className="text-sm sm:text-xl font-bold text-slate-800 tracking-tight leading-tight">
                 {formatRupiah(shiftMetrics.totalRevenue)}
               </h3>
-              <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-emerald-600 font-semibold mt-1">
-                <TrendingUp className="w-3 h-3" />
-                <span>+12% vs lalu</span>
-              </div>
+              {shiftOpen ? (
+                <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-emerald-600 font-semibold mt-1">
+                  <TrendingUp className="w-3 h-3" />
+                  <span>+12% vs lalu</span>
+                </div>
+              ) : (
+                <p className="text-[10px] sm:text-[11px] text-amber-600 font-medium mt-1">Shift Belum Aktif</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -248,7 +250,9 @@ export function CashierDashboardView() {
               <h3 className="text-sm sm:text-xl font-bold text-slate-800 tracking-tight leading-tight">
                 {shiftMetrics.totalTransactions} Transaksi
               </h3>
-              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">Struk diproses</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">
+                {shiftOpen ? "Struk diproses" : "Shift Inaktif"}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -268,7 +272,9 @@ export function CashierDashboardView() {
               <h3 className="text-sm sm:text-xl font-bold text-slate-800 tracking-tight leading-tight">
                 {formatRupiah(shiftMetrics.cashInDrawer)}
               </h3>
-              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">Modal + Tunai</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">
+                {shiftOpen ? "Modal + Tunai" : "Shift Inaktif"}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -288,7 +294,9 @@ export function CashierDashboardView() {
               <h3 className="text-sm sm:text-xl font-bold text-slate-800 tracking-tight leading-tight">
                 {formatRupiah(shiftMetrics.nonCashTotal)}
               </h3>
-              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">Non-tunai</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">
+                {shiftOpen ? "Non-tunai" : "Shift Inaktif"}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -355,7 +363,7 @@ export function CashierDashboardView() {
       </div>
 
       {/* 4. RECENT TRANSACTIONS (Responsive: Card List on Mobile, Table on Tablet/Desktop) */}
-      <Card className="border-slate-200/80 shadow-xs rounded-2xl">
+      <Card className="border-slate-200/80 shadow-xs rounded-2xl overflow-hidden">
         <CardHeader className="p-3.5 sm:p-5 flex flex-row items-center justify-between pb-3 border-b border-slate-100">
           <div>
             <CardTitle className="text-sm sm:text-base font-bold text-slate-800">
@@ -365,101 +373,121 @@ export function CashierDashboardView() {
               Struk terbaru shift ini
             </CardDescription>
           </div>
-          <Button asChild variant="ghost" size="sm" className="text-xs text-primary font-bold px-2">
-            <Link href="/cashier/transactions" className="flex items-center gap-1">
-              <span>Lihat Semua</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </Button>
+          {shiftOpen && recentTransactions.length > 0 && (
+            <Button asChild variant="ghost" size="sm" className="text-xs text-primary font-bold px-2">
+              <Link href="/cashier/transactions" className="flex items-center gap-1">
+                <span>Lihat Semua</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </Button>
+          )}
         </CardHeader>
 
-        {/* Mobile View: Card List (< sm) */}
-        <div className="block sm:hidden divide-y divide-slate-100">
-          {recentTransactions.map((trx) => (
-            <div key={trx.id} className="p-3.5 space-y-2 hover:bg-slate-50/80 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-xs text-slate-900">{trx.id}</span>
-                  <Badge
-                    variant="outline"
-                    className={
-                      trx.method === "Tunai"
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] py-0 px-1.5 font-semibold"
-                        : "bg-purple-50 text-purple-700 border-purple-200 text-[10px] py-0 px-1.5 font-semibold"
-                    }
-                  >
-                    {trx.method}
-                  </Badge>
-                </div>
-                <span className="text-[11px] text-slate-400">{trx.time}</span>
-              </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <div>
-                  <div className="text-[10px] text-slate-500">{trx.items} item barang</div>
-                  <div className="font-bold text-sm text-slate-900">{formatRupiah(trx.total)}</div>
-                </div>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 px-2.5 text-xs gap-1 border-slate-200 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Struk</span>
-                </Button>
-              </div>
+        {recentTransactions.length === 0 ? (
+          <div className="p-8 sm:p-12 text-center flex flex-col items-center justify-center bg-slate-50/40">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3 text-slate-400 border border-slate-200/60">
+              <Receipt className="w-6 h-6 stroke-[1.5]" />
             </div>
-          ))}
-        </div>
-
-        {/* Tablet & Desktop View: Table (>= sm) */}
-        <CardContent className="hidden sm:block p-0 overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
-              <tr>
-                <th className="px-4 py-3">No. Struk</th>
-                <th className="px-4 py-3">Waktu</th>
-                <th className="px-4 py-3">Pembayaran</th>
-                <th className="px-4 py-3 text-right">Total</th>
-                <th className="px-4 py-3 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+            <h4 className="text-sm font-bold text-slate-800">
+              {shiftOpen ? "Belum Ada Transaksi Shift Ini" : "Shift Kasir Belum Aktif"}
+            </h4>
+            <p className="text-xs text-slate-500 max-w-sm mt-1">
+              {shiftOpen
+                ? "Belum ada transaksi struk yang diproses pada shift ini."
+                : "Silakan buka toko dan isi modal kas awal untuk mulai melayani transaksi POS."}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile View: Card List (< sm) */}
+            <div className="block sm:hidden divide-y divide-slate-100">
               {recentTransactions.map((trx) => (
-                <tr key={trx.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="px-4 py-3 font-bold text-slate-800">{trx.id}</td>
-                  <td className="px-4 py-3 text-slate-500">{trx.time}</td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      variant="outline"
-                      className={
-                        trx.method === "Tunai"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold"
-                          : "bg-purple-50 text-purple-700 border-purple-200 font-semibold"
-                      }
-                    >
-                      {trx.method}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-right font-bold text-slate-800">
-                    {formatRupiah(trx.total)}
-                  </td>
-                  <td className="px-4 py-3 text-center">
+                <div key={trx.id} className="p-3.5 space-y-2 hover:bg-slate-50/80 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-xs text-slate-900">{trx.id}</span>
+                      <Badge
+                        variant="outline"
+                        className={
+                          trx.method === "Tunai"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] py-0 px-1.5 font-semibold"
+                            : "bg-purple-50 text-purple-700 border-purple-200 text-[10px] py-0 px-1.5 font-semibold"
+                        }
+                      >
+                        {trx.method}
+                      </Badge>
+                    </div>
+                    <span className="text-[11px] text-slate-400">{trx.time}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <div>
+                      <div className="text-[10px] text-slate-500">{trx.items} item barang</div>
+                      <div className="font-bold text-sm text-slate-900">{formatRupiah(trx.total)}</div>
+                    </div>
+
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 px-2.5 text-xs gap-1.5 border-slate-200 cursor-pointer"
+                      className="h-8 px-2.5 text-xs gap-1 border-slate-200 cursor-pointer"
                     >
                       <Printer className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Cetak Struk</span>
+                      <span>Struk</span>
                     </Button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </CardContent>
+            </div>
+
+            {/* Tablet & Desktop View: Table (>= sm) */}
+            <CardContent className="hidden sm:block p-0 overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                  <tr>
+                    <th className="px-4 py-3">No. Struk</th>
+                    <th className="px-4 py-3">Waktu</th>
+                    <th className="px-4 py-3">Pembayaran</th>
+                    <th className="px-4 py-3 text-right">Total</th>
+                    <th className="px-4 py-3 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recentTransactions.map((trx) => (
+                    <tr key={trx.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-4 py-3 font-bold text-slate-800">{trx.id}</td>
+                      <td className="px-4 py-3 text-slate-500">{trx.time}</td>
+                      <td className="px-4 py-3">
+                        <Badge
+                          variant="outline"
+                          className={
+                            trx.method === "Tunai"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold"
+                              : "bg-purple-50 text-purple-700 border-purple-200 font-semibold"
+                          }
+                        >
+                          {trx.method}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-slate-800">
+                        {formatRupiah(trx.total)}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-2.5 text-xs gap-1.5 border-slate-200 cursor-pointer"
+                        >
+                          <Printer className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Cetak Struk</span>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </>
+        )}
       </Card>
 
       {/* 5. LOW STOCK & PROMO ALERTS (1 column on mobile, 2 columns on tablet) */}
