@@ -9,8 +9,8 @@ export type CreateCategoryRequest = z.infer<typeof categorySchema>
 export type UpdateCategoryRequest = CreateCategoryRequest
 
 export const categorySearchSchema = z.object({
-  page: z.coerce.number().catch(1),
-  limit: z.coerce.number().catch(10),
+  page: z.coerce.number().optional().catch(1),
+  limit: z.coerce.number().optional().catch(10),
   search: z.string().optional(),
 })
 

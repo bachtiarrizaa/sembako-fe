@@ -20,11 +20,16 @@ import { useTransactions } from "../hooks"
 import type { TransactionResponse, PaymentMethod } from "../types/transaction"
 import { TransactionDetailDialog } from "./TransactionDetailDialog"
 import { VoidTransactionDialog } from "./VoidTransactionDialog"
+import { useUserMe } from "@/features/users/hooks/useUserMe"
 
 export function TransactionsPage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  const { data: userData } = useUserMe()
+  const userRole = userData?.data?.role?.name?.toLowerCase()
+  const isCashier = userRole === "cashier"
 
   const page = Number(searchParams.get("page") ?? 1)
   const limit = Number(searchParams.get("limit") ?? 10)
@@ -140,7 +145,7 @@ export function TransactionsPage() {
       ),
     },
     {
-      header: "Waktu",
+      header: "Tanggal Transaksi",
       cell: (item) => formatTransactionDate(item.createdAt),
     },
     {
@@ -149,7 +154,7 @@ export function TransactionsPage() {
     },
     {
       header: "Customer",
-      cell: (item) => item.customer?.name ?? "Umum",
+      cell: (item) => item.customer?.name || "-",
     },
     {
       header: "Jumlah Item",
@@ -238,7 +243,9 @@ export function TransactionsPage() {
             Riwayat Transaksi
           </h1>
           <p className="text-sm text-muted-foreground">
-            Daftar seluruh transaksi penjualan toko
+            {isCashier
+              ? "Daftar riwayat transaksi penjualan Anda"
+              : "Daftar seluruh transaksi penjualan toko"}
           </p>
         </div>
       </div>

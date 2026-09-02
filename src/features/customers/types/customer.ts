@@ -3,6 +3,7 @@ export interface Customer {
   name: string
   phoneNumber: string
   address: string
+  totalPoints?: number
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -13,6 +14,7 @@ export interface CustomerResponse {
   name: string
   phoneNumber: string
   address: string
+  totalPoints?: number
   isActive: boolean
   createdAt: string
   updatedAt: string

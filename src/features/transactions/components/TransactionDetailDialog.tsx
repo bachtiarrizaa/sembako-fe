@@ -110,7 +110,7 @@ export function TransactionDetailDialog({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground w-28 shrink-0 font-medium">
-                      Waktu Transaksi
+                      Tanggal Transaksi
                     </span>
                     <span className="text-muted-foreground font-medium">:</span>
                     <span className="font-medium text-foreground">
@@ -277,7 +277,7 @@ export function TransactionDetailDialog({
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Customer</span>
                       <span className="font-semibold text-foreground">
-                        {transaction.customer?.name || "Umum"}
+                        {transaction.customer?.name || "-"}
                       </span>
                     </div>
 

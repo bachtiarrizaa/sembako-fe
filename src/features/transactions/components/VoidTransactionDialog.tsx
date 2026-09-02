@@ -14,8 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
-import { AlertTriangle } from "lucide-react"
-import { formatCurrency } from "@/utils/format"
+import { formatCurrency, formatTransactionDate } from "@/utils/format"
 import { voidTransactionSchema, VoidTransactionRequest } from "../schemas/transaction.schema"
 import { useVoidTransaction } from "../hooks/useVoidTransaction"
 import type { TransactionResponse } from "../types/transaction"
@@ -100,6 +99,12 @@ export function VoidTransactionDialog({
                 </span>
               </div>
               <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Tanggal Transaksi</span>
+                <span className="font-medium text-foreground">
+                  {formatTransactionDate(transaction.createdAt)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Kasir</span>
                 <span className="font-semibold text-foreground">
                   {transaction.cashier?.name || "-"}
@@ -108,7 +113,7 @@ export function VoidTransactionDialog({
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Customer</span>
                 <span className="font-semibold text-foreground">
-                  {transaction.customer?.name || "Umum"}
+                  {transaction.customer?.name || "-"}
                 </span>
               </div>
               <div className="flex justify-between items-center border-t border-border pt-2 mt-1">

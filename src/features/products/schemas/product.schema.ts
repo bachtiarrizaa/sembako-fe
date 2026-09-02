@@ -1,11 +1,12 @@
 import { z } from "zod"
 
 export const productSearchSchema = z.object({
-  page: z.coerce.number().catch(1),
-  limit: z.coerce.number().catch(10),
+  page: z.coerce.number().optional().catch(1),
+  limit: z.coerce.number().optional().catch(10),
   search: z.string().optional(),
   category_id: z.string().optional(),
   is_active: z.coerce.boolean().optional(),
+  has_discount: z.coerce.boolean().optional(),
   include: z.string().optional(),
 })
 

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Store, Clock, DollarSign, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { formatCurrency } from "@/utils/format";
 import { useOpenShift } from "@/features/shifts/hooks/useOpenShift";
 
 interface OpenShiftModalProps {
@@ -36,25 +35,19 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
     );
   };
 
-  const formatRupiah = (val: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(val);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:max-w-md rounded-2xl overflow-hidden">
-        <DialogHeader className="border-b border-border px-6 py-4 text-left">
+      <DialogContent className="gap-0 p-0 sm:max-w-md sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden">
+        <button type="button" className="sr-only" />
+
+        <DialogHeader className="border-b border-border px-6 py-4 shrink-0 text-left">
           <DialogTitle className="text-lg font-bold text-slate-900">
             Buka Toko & Input Modal Kas
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 px-6 py-5">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+          <div className="space-y-4 px-6 py-5 flex-1">
             {/* Description inside body */}
             <p className="text-xs text-slate-500 leading-relaxed">
               Toko belum dibuka. Silakan masukkan modal kas awal di laci untuk memulai sesi transaksi kasir.
@@ -94,7 +87,7 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
                         : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    {formatRupiah(amt).replace(",00", "").replace("Rp", "Rp ")}
+                    {formatCurrency(amt)}
                   </button>
                 ))}
               </div>
@@ -116,7 +109,7 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
             </div>
           </div>
 
-          <DialogFooter className="border-t border-border px-6 py-4">
+          <DialogFooter className="border-t border-border px-6 py-4 shrink-0">
             <Button
               type="submit"
               disabled={isSubmitting || modalAmount < 0}

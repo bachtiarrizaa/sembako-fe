@@ -1,10 +1,20 @@
 import { ApiResponse, Pagination } from "@/types/api-response";
-import { TransactionSearch, VoidTransactionRequest } from "../schemas/transaction.schema";
+import { CreateTransactionRequest, TransactionSearch, VoidTransactionRequest } from "../schemas/transaction.schema";
 import { TransactionResponse } from "../types/transaction";
 import { apiClient } from "@/api/api-client";
 import { buildListParams } from "@/utils/list-params";
 
 export const transactionService = {
+  createTransaction: async (
+    payload: CreateTransactionRequest
+  ): Promise<ApiResponse<TransactionResponse>> => {
+    const res = await apiClient.post<ApiResponse<TransactionResponse>>(
+      "/transactions",
+      payload
+    );
+    return res.data;
+  },
+
   getTransactions: async (
     filters: TransactionSearch = { page: 1, limit: 10 }
   ): Promise<{ items: TransactionResponse[]; pagination?: Pagination }> => {
