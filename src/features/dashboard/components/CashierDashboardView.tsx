@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUserMe } from "@/features/users/hooks/useUserMe";
 import { useActiveShift } from "@/features/shifts/hooks/useActiveShift";
-import { OpenShiftModal } from "@/features/pos/components/OpenShiftModal";
+import { OpenShiftModal } from "@/features/shifts/components/OpenShiftModal";
 import { CloseShiftModal } from "@/features/shifts/components/CloseShiftModal";
 
 export function CashierDashboardView() {
