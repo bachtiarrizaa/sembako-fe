@@ -79,7 +79,7 @@ export function CustomerFormDialog({ open, onOpenChange, customer }: CustomerFor
 
         <DialogHeader className="border-b border-border px-6 py-4">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
-            {isEdit ? "Edit Customer" : "Tambah Customer"}
+            {isEdit ? "Edit Pelanggan" : "Tambah Pelanggan Baru"}
           </DialogTitle>
         </DialogHeader>
 
@@ -88,11 +88,11 @@ export function CustomerFormDialog({ open, onOpenChange, customer }: CustomerFor
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-semibold text-foreground">
-                  Nama Customer <span className="text-destructive">*</span>
+                  Nama Pelanggan <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name"
-                  placeholder="Nama Customer"
+                  placeholder="Masukkan nama pelanggan"
                   className="bg-background w-full"
                   {...register("name")}
                 />

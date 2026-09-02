@@ -42,13 +42,21 @@ export function CashierLayout({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("click", handleClick);
   }, [pathname]);
 
+  const isPosPage = pathname === "/cashier/pos";
+
   return (
     <div className="theme-teal h-screen flex flex-col bg-slate-50 overflow-hidden relative">
       {/* Top Navbar */}
       <Navbar />
 
-      {/* Main Content Area (pb-24 sm:pb-20 ensures content is not blocked by fixed BottomBar) */}
-      <main className="flex-1 overflow-y-auto pb-24 sm:pb-20 p-3.5 sm:p-6 relative">
+      {/* Main Content Area */}
+      <main
+        className={`flex-1 relative ${
+          isPosPage
+            ? "overflow-hidden flex flex-col p-2 sm:p-4 md:p-5 pb-20 md:pb-20 min-h-0"
+            : "overflow-y-auto pb-24 sm:pb-20 p-3.5 sm:p-6"
+        }`}
+      >
         {children}
       </main>
 
