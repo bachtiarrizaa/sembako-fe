@@ -17,7 +17,6 @@ interface ShiftOperationalSectionProps {
 export function ShiftOperationalSection({
   isEditing,
   isPending,
-  toleranceValue,
   register,
   errors,
   initialData,

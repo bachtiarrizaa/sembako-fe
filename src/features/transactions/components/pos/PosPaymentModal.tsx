@@ -132,8 +132,8 @@ export function PosPaymentModal({
                 </div>
               </div>
 
-              {/* Quick Nominal Presets */}
-              <div className="flex flex-wrap gap-1.5">
+              {/* Quick Nominal Presets: grid-cols-2 on mobile, grid-cols-3 on desktop to prevent text collision */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {quickPresets.map((amt) => {
                   const isSelected = cashPaid === amt;
                   return (
@@ -141,7 +141,7 @@ export function PosPaymentModal({
                       key={amt}
                       type="button"
                       onClick={() => setCashPaid(isSelected ? totalAmount : amt)}
-                      className={`py-1.5 px-2.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${isSelected
+                      className={`py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap text-center ${isSelected
                         ? "bg-primary text-white border-primary shadow-xs"
                         : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
                         }`}
