@@ -2,8 +2,12 @@ import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { Store, Phone, MapPin } from "lucide-react";
 import { StoreSetting } from "../types/setting";
 import { StoreSettingFormValues } from "../schemas/setting.schema";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
 
 interface StoreIdentitySectionProps {
   isEditing: boolean;
@@ -35,13 +39,18 @@ export function StoreIdentitySection({
           </label>
           {isEditing ? (
             <div>
-              <Input
-                id="storeName"
-                placeholder="Contoh: Toko Sembako Jaya"
-                className="font-semibold text-slate-700 h-9"
-                disabled={isPending}
-                {...register("storeName")}
-              />
+              <InputGroup className="bg-white border-slate-200 h-9 font-semibold text-slate-700">
+                <InputGroupAddon align="inline-start">
+                  <Store className="size-3.5 text-slate-400 shrink-0" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="storeName"
+                  placeholder="Contoh: Toko Sembako Jaya"
+                  className="font-semibold text-slate-700 h-8"
+                  disabled={isPending}
+                  {...register("storeName")}
+                />
+              </InputGroup>
               {errors.storeName && (
                 <span className="text-[11px] text-destructive leading-none mt-1 block">
                   {errors.storeName.message}
@@ -63,13 +72,18 @@ export function StoreIdentitySection({
           </label>
           {isEditing ? (
             <div>
-              <Input
-                id="storePhone"
-                placeholder="Contoh: 081234567890"
-                className="font-semibold text-slate-700 h-9"
-                disabled={isPending}
-                {...register("storePhone")}
-              />
+              <InputGroup className="bg-white border-slate-200 h-9 font-semibold text-slate-700">
+                <InputGroupAddon align="inline-start">
+                  <Phone className="size-3.5 text-slate-400 shrink-0" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="storePhone"
+                  placeholder="Contoh: 081234567890"
+                  className="font-semibold text-slate-700 h-8"
+                  disabled={isPending}
+                  {...register("storePhone")}
+                />
+              </InputGroup>
               {errors.storePhone && (
                 <span className="text-[11px] text-destructive leading-none mt-1 block">
                   {errors.storePhone.message}
@@ -91,14 +105,19 @@ export function StoreIdentitySection({
           </label>
           {isEditing ? (
             <div>
-              <Textarea
-                id="storeAddress"
-                rows={2}
-                placeholder="Jl. Raya Sembako No. 123, Jakarta"
-                className="font-semibold text-slate-700 text-sm"
-                disabled={isPending}
-                {...register("storeAddress")}
-              />
+              <InputGroup className="bg-white border-slate-200 font-semibold text-slate-700 items-start">
+                <InputGroupAddon align="inline-start" className="pt-2.5">
+                  <MapPin className="size-3.5 text-slate-400 shrink-0" />
+                </InputGroupAddon>
+                <InputGroupTextarea
+                  id="storeAddress"
+                  rows={2}
+                  placeholder="Jl. Raya Sembako No. 123, Jakarta"
+                  className="font-semibold text-slate-700 text-sm"
+                  disabled={isPending}
+                  {...register("storeAddress")}
+                />
+              </InputGroup>
               {errors.storeAddress && (
                 <span className="text-[11px] text-destructive leading-none mt-1 block">
                   {errors.storeAddress.message}

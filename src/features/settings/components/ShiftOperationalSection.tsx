@@ -1,8 +1,8 @@
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import { Clock, ShieldAlert } from "lucide-react";
+import { Clock } from "lucide-react";
 import { StoreSetting } from "../types/setting";
 import { StoreSettingFormValues } from "../schemas/setting.schema";
-import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { formatCurrency } from "@/utils/format";
 
 interface ShiftOperationalSectionProps {
@@ -36,27 +36,25 @@ export function ShiftOperationalSection({
           </label>
           {isEditing ? (
             <div className="space-y-1">
-              <Input
-                id="shiftDiscrepancyTolerance"
-                type="number"
-                min={0}
-                placeholder="1000"
-                className="font-semibold text-slate-700 h-9 max-w-md"
-                disabled={isPending}
-                {...register("shiftDiscrepancyTolerance", { valueAsNumber: true })}
-              />
+              <InputGroup className="bg-white border-slate-200 h-9 font-semibold text-slate-700 max-w-md">
+                <InputGroupAddon align="inline-start">
+                  <Clock className="size-3.5 text-slate-400 shrink-0" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="shiftDiscrepancyTolerance"
+                  type="number"
+                  min={0}
+                  placeholder="1000"
+                  className="font-semibold text-slate-700 h-8"
+                  disabled={isPending}
+                  {...register("shiftDiscrepancyTolerance", { valueAsNumber: true })}
+                />
+              </InputGroup>
               {errors.shiftDiscrepancyTolerance && (
                 <span className="text-[11px] text-destructive leading-none mt-1 block">
                   {errors.shiftDiscrepancyTolerance.message}
                 </span>
               )}
-              <p className="text-[11px] text-slate-500 flex items-center gap-1.5 pt-1">
-                <ShieldAlert className="size-3.5 text-amber-500 shrink-0" />
-                Nilai toleransi saat ini:{" "}
-                <span className="font-bold text-slate-700">
-                  {formatCurrency(Number(toleranceValue) || 0)}
-                </span>
-              </p>
             </div>
           ) : (
             <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-sm text-slate-700 font-semibold select-all h-9 max-w-md">

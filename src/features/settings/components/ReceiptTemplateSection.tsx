@@ -2,7 +2,11 @@ import { UseFormRegister, Control, Controller, FieldErrors } from "react-hook-fo
 import { Receipt } from "lucide-react";
 import { StoreSetting } from "../types/setting";
 import { StoreSettingFormValues } from "../schemas/setting.schema";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
 import { Switch } from "@/components/ui/switch";
 
 interface ReceiptTemplateSectionProps {
@@ -37,14 +41,19 @@ export function ReceiptTemplateSection({
           </label>
           {isEditing ? (
             <div>
-              <Textarea
-                id="receiptHeaderText"
-                rows={2}
-                placeholder="Selamat Datang di Toko Sembako Jaya!"
-                className="font-semibold text-slate-700 text-sm"
-                disabled={isPending}
-                {...register("receiptHeaderText")}
-              />
+              <InputGroup className="bg-white border-slate-200 font-semibold text-slate-700 items-start">
+                <InputGroupAddon align="inline-start" className="pt-2.5">
+                  <Receipt className="size-3.5 text-slate-400 shrink-0" />
+                </InputGroupAddon>
+                <InputGroupTextarea
+                  id="receiptHeaderText"
+                  rows={2}
+                  placeholder="Selamat Datang di Toko Sembako Jaya!"
+                  className="font-semibold text-slate-700 text-sm"
+                  disabled={isPending}
+                  {...register("receiptHeaderText")}
+                />
+              </InputGroup>
               {errors.receiptHeaderText && (
                 <span className="text-[11px] text-destructive leading-none mt-1 block">
                   {errors.receiptHeaderText.message}
@@ -66,14 +75,19 @@ export function ReceiptTemplateSection({
           </label>
           {isEditing ? (
             <div>
-              <Textarea
-                id="receiptFooterText"
-                rows={2}
-                placeholder="Terima kasih telah berbelanja!"
-                className="font-semibold text-slate-700 text-sm"
-                disabled={isPending}
-                {...register("receiptFooterText")}
-              />
+              <InputGroup className="bg-white border-slate-200 font-semibold text-slate-700 items-start">
+                <InputGroupAddon align="inline-start" className="pt-2.5">
+                  <Receipt className="size-3.5 text-slate-400 shrink-0" />
+                </InputGroupAddon>
+                <InputGroupTextarea
+                  id="receiptFooterText"
+                  rows={2}
+                  placeholder="Terima kasih telah berbelanja!"
+                  className="font-semibold text-slate-700 text-sm"
+                  disabled={isPending}
+                  {...register("receiptFooterText")}
+                />
+              </InputGroup>
               {errors.receiptFooterText && (
                 <span className="text-[11px] text-destructive leading-none mt-1 block">
                   {errors.receiptFooterText.message}
@@ -112,7 +126,7 @@ export function ReceiptTemplateSection({
             </label>
           ) : (
             <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-sm text-slate-700 font-semibold h-9">
-              <span className="text-slate-500 font-normal text-xs">Cetak di Struk</span>
+              <span className="text-slate-500 font-normal text-xs">Tampilkan Nama Kasir</span>
               <span className={initialData.receiptShowCashierName ? "text-teal-600 font-bold text-xs" : "text-slate-400 text-xs"}>
                 {initialData.receiptShowCashierName ? "Aktif" : "Non-aktif"}
               </span>
@@ -143,7 +157,7 @@ export function ReceiptTemplateSection({
             </label>
           ) : (
             <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-lg text-sm text-slate-700 font-semibold h-9">
-              <span className="text-slate-500 font-normal text-xs">Cetak di Struk</span>
+              <span className="text-slate-500 font-normal text-xs">Tampilkan Nama Pelanggan</span>
               <span className={initialData.receiptShowCustomerName ? "text-teal-600 font-bold text-xs" : "text-slate-400 text-xs"}>
                 {initialData.receiptShowCustomerName ? "Aktif" : "Non-aktif"}
               </span>
