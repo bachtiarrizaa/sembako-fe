@@ -250,12 +250,12 @@ export function TransactionsPage() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs text-muted-foreground">Tampilkan:</span>
+      <div className="flex flex-row items-center justify-between gap-2.5 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <span className="text-xs text-muted-foreground hidden sm:inline">Tampilkan:</span>
           <LimitSelect value={limit} onChange={handleLimitChange} />
         </div>
-        <div className="relative w-full sm:max-w-sm">
+        <div className="flex-1 min-w-0 sm:max-w-sm">
           <SearchBar
             value={searchInput}
             onChange={setSearchInput}

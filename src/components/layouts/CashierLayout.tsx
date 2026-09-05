@@ -42,7 +42,7 @@ export function CashierLayout({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("click", handleClick);
   }, [pathname]);
 
-  const isPosPage = pathname === "/cashier/transactions" || pathname === "/cashier/pos";
+  const isPosPage = pathname === "/cashier/transactions";
 
   return (
     <div className="theme-teal h-screen flex flex-col bg-slate-50 overflow-hidden relative">

@@ -19,13 +19,13 @@ export function Navbar() {
 
   return (
     <>
-      <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
+      <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-20">
         {/* Logo & Brand Name */}
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-primary rounded-lg text-primary-foreground flex items-center justify-center">
+          <div className="hidden sm:flex p-2 bg-primary rounded-lg text-primary-foreground items-center justify-center">
             <Store className="w-5 h-5" strokeWidth={2.5} />
           </div>
-          <span className="font-bold text-lg text-slate-800 tracking-tight">
+          <span className="font-bold text-base sm:text-lg text-slate-800 tracking-tight">
             Toko Beras Putra Mandiri
           </span>
         </div>
