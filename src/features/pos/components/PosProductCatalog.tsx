@@ -5,6 +5,7 @@ import { SearchBar } from "@/components/common/SearchBar";
 import { ComboboxSelect } from "@/components/common/ComboboxSelect";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { useCategories } from "@/features/categories/hooks/useCategories";
+import { useDebouncedValue } from "@/hooks/useDebounceValue";
 import { formatCurrency } from "@/utils/format";
 import type { PosProduct, ProductUnit } from "../types/pos";
 
@@ -36,6 +37,8 @@ export function PosProductCatalog({
   const [selectedDiscountFilter, setSelectedDiscountFilter] = useState<DiscountFilterOption>("ALL");
   const [selectedUnits, setSelectedUnits] = useState<Record<string, string>>({});
 
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
+
   const hasDiscountParam =
     selectedDiscountFilter === "WITH_DISCOUNT"
       ? true
@@ -44,14 +47,19 @@ export function PosProductCatalog({
       : undefined;
 
   // Real API Queries with include: "units", category_id, search, has_discount
-  const { data: productsData, isLoading: isProductsLoading } = useProducts({
-    page: 1,
-    limit: 100,
-    include: "units",
-    category_id: selectedCategoryId !== "ALL" ? selectedCategoryId : undefined,
-    search: searchQuery ? searchQuery : undefined,
-    has_discount: hasDiscountParam,
-  });
+  const { data: productsData, isLoading: isProductsLoading } = useProducts(
+    {
+      page: 1,
+      limit: 100,
+      include: "units",
+      category_id: selectedCategoryId !== "ALL" ? selectedCategoryId : undefined,
+      search: debouncedSearch ? debouncedSearch : undefined,
+      has_discount: hasDiscountParam,
+    },
+    {
+      staleTime: 1000 * 30, // 30s cache for POS catalog
+    }
+  );
   const { data: categoriesData, isLoading: isCategoriesLoading } = useCategories({
     page: 1,
     limit: 100,

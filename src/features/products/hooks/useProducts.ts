@@ -5,7 +5,7 @@ import { productService } from "../services/product.service"
 
 export function useProducts(
   filters: ProductSearch = { page: 1, limit: 10 },
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean; staleTime?: number }
 ) {
   return useQuery({
     queryKey: productKeys.list(filters),

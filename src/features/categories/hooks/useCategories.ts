@@ -7,5 +7,6 @@ export function useCategories(filters: CategorySearch = { page: 1, limit: 10 }) 
     queryKey: ["categories", filters],
     queryFn: () => categoryService.getCategories(filters),
     placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 10, // 10 menit cache
   })
 }
