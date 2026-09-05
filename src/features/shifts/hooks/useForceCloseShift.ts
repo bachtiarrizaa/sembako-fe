@@ -1,27 +1,27 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { shiftService } from "../services/shift.service";
-import { CloseShiftPayload } from "../types/shift";
+import { ForceCloseShiftPayload } from "../types/shift";
 import { shiftKeys } from "./shift.keys";
 import { toast } from "@/components/ui/toast";
 import { handleApiError } from "@/lib/error";
 import { translateMessage } from "@/lib/translator";
 
-export function useCloseShift() {
+export function useForceCloseShift() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ shiftId, payload }: { shiftId: string; payload: CloseShiftPayload }) =>
-      shiftService.closeShift(shiftId, payload),
+    mutationFn: ({ shiftId, payload }: { shiftId: string; payload: ForceCloseShiftPayload }) =>
+      shiftService.forceCloseShift(shiftId, payload),
     onSuccess: (res) => {
       toast.add({
-        title: translateMessage(res?.message, "Toko & shift kasir berhasil ditutup"),
+        title: translateMessage(res?.message, "Shift kasir berhasil ditutup paksa oleh admin"),
         type: "success",
       });
       queryClient.invalidateQueries({ queryKey: shiftKeys.all });
       queryClient.invalidateQueries({ queryKey: ["cashier-dashboard"] });
     },
     onError: (err) => {
-      handleApiError(err, "Gagal menutup toko & shift");
+      handleApiError(err, "Gagal menutup paksa shift kasir");
     },
   });
 }

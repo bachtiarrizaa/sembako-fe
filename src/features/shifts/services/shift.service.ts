@@ -1,8 +1,27 @@
-import { ApiResponse } from "@/types/api-response";
+import { ApiResponse, Pagination } from "@/types/api-response";
 import { apiClient } from "@/api/api-client";
-import { ShiftData, OpenShiftPayload, CloseShiftPayload } from "../types/shift";
+import { buildListParams } from "@/utils/list-params";
+import { ShiftData, OpenShiftPayload, CloseShiftPayload, ForceCloseShiftPayload } from "../types/shift";
+import { ShiftSearch } from "../schemas/shift.schema";
 
 export const shiftService = {
+  getShifts: async (
+    filters: ShiftSearch = { page: 1, limit: 10 }
+  ): Promise<{ items: ShiftData[]; pagination?: Pagination }> => {
+    const res = await apiClient.get<ApiResponse<ShiftData[]>>("/shifts", {
+      params: buildListParams({ page: 1, limit: 10 }, filters),
+    });
+    return {
+      items: res.data.data,
+      pagination: res.data.pagination,
+    };
+  },
+
+  getShiftDetail: async (shiftId: string): Promise<ApiResponse<ShiftData>> => {
+    const res = await apiClient.get<ApiResponse<ShiftData>>(`/shifts/${shiftId}`);
+    return res.data;
+  },
+
   getActiveShift: async (): Promise<ShiftData | null> => {
     try {
       const res = await apiClient.get<ApiResponse<ShiftData>>("/shifts/active");
@@ -10,7 +29,7 @@ export const shiftService = {
         return res.data.data;
       }
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
   },
@@ -22,6 +41,11 @@ export const shiftService = {
 
   closeShift: async (shiftId: string, payload: CloseShiftPayload): Promise<ApiResponse<ShiftData>> => {
     const res = await apiClient.post<ApiResponse<ShiftData>>(`/shifts/${shiftId}/close`, payload);
+    return res.data;
+  },
+
+  forceCloseShift: async (shiftId: string, payload: ForceCloseShiftPayload): Promise<ApiResponse<ShiftData>> => {
+    const res = await apiClient.post<ApiResponse<ShiftData>>(`/shifts/${shiftId}/force-close`, payload);
     return res.data;
   },
 };

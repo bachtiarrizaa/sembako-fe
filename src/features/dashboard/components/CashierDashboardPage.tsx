@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { formatTransactionDate } from "@/utils/format";
 import { useUserMe } from "@/features/users/hooks/useUserMe";
-import { useActiveShift } from "@/features/shifts/hooks/useActiveShift";
+import { useActiveShift, ShiftStatus } from "@/features/shifts";
 import { useCashierDashboard } from "@/features/dashboard/hooks/useCashierDashboard";
 
 import { CashierBanner } from "./CashierBanner";
@@ -28,7 +28,7 @@ export function CashierDashboardPage() {
 
   const shiftOpen =
     dashboardData?.shiftOpen ??
-    (!!activeShift && (activeShift.status === "open" || activeShift.status === "ACTIVE"));
+    (!!activeShift && activeShift.status === ShiftStatus.OPEN);
 
   // Modals state
   const [openShiftModalOpen, setOpenShiftModalOpen] = useState(false);

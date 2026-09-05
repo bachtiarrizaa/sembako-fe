@@ -10,7 +10,7 @@ import { PosCartMatrix } from "./PosCartMatrix";
 import { OpenShiftModal } from "@/features/shifts/components/OpenShiftModal";
 import { PosPaymentModal } from "./PosPaymentModal";
 import { PosReceiptModal } from "./PosReceiptModal";
-import { useActiveShift } from "@/features/shifts/hooks/useActiveShift";
+import { useActiveShift, ShiftStatus } from "@/features/shifts";
 import { useCreateTransaction } from "@/features/transactions/hooks";
 import type { CreateTransactionRequest } from "@/features/transactions/schemas/transaction.schema";
 import type { CartItem, PosProduct, ProductUnit } from "../../types/pos";
@@ -18,7 +18,7 @@ import type { CartItem, PosProduct, ProductUnit } from "../../types/pos";
 export function CashierPosView() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const { data: activeShift, isLoading: isShiftLoading } = useActiveShift();
-  const shiftOpen = !!activeShift && (activeShift.status === "open" || activeShift.status === "ACTIVE");
+  const shiftOpen = !!activeShift && activeShift.status === ShiftStatus.OPEN;
   const [openShiftModal, setOpenShiftModal] = useState<boolean>(false);
   const createTransactionMutation = useCreateTransaction();
 

@@ -1,4 +1,4 @@
-export type ShiftStatus = "open" | "closed" | string;
+import { ShiftStatus } from "../constants/shift.constant";
 
 export interface ShiftCashier {
   id: string;
@@ -16,7 +16,7 @@ export interface ShiftData {
   discrepancyNote: string | null;
   status: ShiftStatus;
   forceCloseReason: string | null;
-  forceClosedByUser: string | null;
+  forceClosedByUser?: ShiftCashier | string | null;
   openedAt: string;
   closedAt: string | null;
   createdAt: string;
@@ -29,5 +29,11 @@ export interface OpenShiftPayload {
 
 export interface CloseShiftPayload {
   closingBalance: number;
+  discrepancyNote?: string;
+}
+
+export interface ForceCloseShiftPayload {
+  closingBalance: number;
+  reason: string;
   discrepancyNote?: string;
 }
