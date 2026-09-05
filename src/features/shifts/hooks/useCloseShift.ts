@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { shiftService } from "../services/shift.service";
 import { CloseShiftPayload } from "../types/shift";
-import { shiftKeys } from "./useActiveShift";
+import { shiftKeys } from "./shift.keys";
 import { toast } from "@/components/ui/toast";
 import { handleApiError } from "@/lib/error";
 import { translateMessage } from "@/lib/translator";
