@@ -1,4 +1,4 @@
-export interface StoreSetting {
+export interface StoreSettingResponse {
   id: string;
   storeName: string;
   storeAddress: string;
@@ -12,4 +12,4 @@ export interface StoreSetting {
   updatedAt: string;
 }
 
-export type StoreSettingResponse = StoreSetting;
+export type StoreSetting = StoreSettingResponse;
