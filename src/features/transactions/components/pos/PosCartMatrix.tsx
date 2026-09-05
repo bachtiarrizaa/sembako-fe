@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Trash2, Plus, Minus, CreditCard, ArrowRight, Coins } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
 import { ComboboxSelect } from "@/components/common/ComboboxSelect";
@@ -9,7 +9,7 @@ import { useCustomers } from "@/features/customers/hooks/useCustomers";
 import { useLoyaltySettings } from "@/features/loyalty/hooks/useLoyaltySettings";
 import { CustomerFormDialog } from "@/features/customers/components/CustomerFormDialog";
 import type { CustomerResponse } from "@/features/customers/types/customer";
-import type { CartItem, PosProduct, ProductUnit } from "../types/pos";
+import type { CartItem, PosProduct, ProductUnit } from "../../types/pos";
 
 export type { CartItem, PosProduct, ProductUnit };
 
@@ -76,15 +76,15 @@ export function PosCartMatrix({
   const finalTotal = Math.max(0, grandTotal - pointsDiscount);
 
   return (
-    <div className={`bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden ${isMobile ? "h-full max-h-[75vh]" : "h-full"}`}>
-      {/* Header Cart (Fixed Top) */}
-      <div className="px-3.5 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+    <div className={isMobile ? "bg-white flex flex-col overflow-hidden h-full" : "bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden h-full"}>
+      {/* Header Bar inside Content Body */}
+      <div className={`py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0 ${isMobile ? "px-6" : "px-3.5"}`}>
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-primary/10 text-primary rounded-xl">
             <ShoppingCart className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-bold text-xs text-slate-800">Keranjang Belanja</h3>
+            <h3 className="font-bold text-xs text-slate-800">Ringkasan Item</h3>
             <p className="text-[10px] text-slate-500">{items.length} jenis item</p>
           </div>
         </div>
@@ -214,8 +214,8 @@ export function PosCartMatrix({
         )}
       </div>
 
-      {/* Member / Customer Selection Widget (2-Row Layout: Switch Point | + Tambah Pelanggan / Label | Combobox) */}
-      <div className="px-3 py-2 border-t border-slate-100 bg-slate-50/40 space-y-1.5 text-xs shrink-0">
+      {/* Member / Customer Selection Widget & Summary Breakdown */}
+      <div className={`py-3 border-t border-slate-100 bg-slate-50/40 space-y-2 text-xs shrink-0 ${isMobile ? "px-6" : "px-3"}`}>
         {/* Top Row: Switch Point (Left) | + Tambah Pelanggan (Right) */}
         <div className="flex items-center justify-between gap-2 min-h-[20px]">
           <div>
@@ -268,22 +268,24 @@ export function PosCartMatrix({
             />
           </div>
         </div>
+        {/* Summary Breakdown (Inside Body Section) */}
+        <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+          {pointsDiscount > 0 && (
+            <div className="flex justify-between items-center text-[11px] text-amber-700 font-semibold">
+              <span>Diskon Poin ({availableCustomerPoints} Poin)</span>
+              <span>-{formatCurrency(pointsDiscount)}</span>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center text-xs font-bold text-slate-800">
+            <span>Total Pembayaran</span>
+            <span className="text-primary text-base font-bold">{formatCurrency(finalTotal)}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Cart Summary Breakdown & Checkout Button (Fixed Bottom) */}
-      <div className="px-3.5 py-2.5 bg-white border-t border-slate-200 text-slate-900 space-y-2 shrink-0">
-        {pointsDiscount > 0 && (
-          <div className="flex justify-between items-center text-[11px] text-amber-700 font-semibold">
-            <span>Diskon Poin Pelanggan ({availableCustomerPoints} Poin)</span>
-            <span>-{formatCurrency(pointsDiscount)}</span>
-          </div>
-        )}
-
-        <div className="flex justify-between items-center text-xs font-bold text-slate-800">
-          <span>Total Pembayaran</span>
-          <span className="text-primary text-base font-bold">{formatCurrency(finalTotal)}</span>
-        </div>
-
+      {/* Clean Footer: Action Button Only */}
+      <div className={`border-t border-border shrink-0 bg-white ${isMobile ? "px-6 py-4" : "px-3.5 py-3"}`}>
         <Button
           disabled={items.length === 0}
           onClick={() =>
@@ -296,7 +298,7 @@ export function PosCartMatrix({
               usePoints
             )
           }
-          className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-10 rounded-xl shadow-md shadow-primary/20 text-xs cursor-pointer disabled:opacity-50 tracking-wide"
+          className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-11 rounded-xl shadow-md shadow-primary/20 text-xs cursor-pointer disabled:opacity-50 tracking-wide"
         >
           Proses Bayar
         </Button>

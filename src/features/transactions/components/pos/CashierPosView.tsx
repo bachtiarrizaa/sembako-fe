@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Store, ArrowRight, AlertCircle } from "lucide-react";
+import { ArrowRight, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatCurrency } from "@/utils/format";
@@ -13,7 +13,7 @@ import { PosReceiptModal } from "./PosReceiptModal";
 import { useActiveShift } from "@/features/shifts/hooks/useActiveShift";
 import { useCreateTransaction } from "@/features/transactions/hooks";
 import type { CreateTransactionRequest } from "@/features/transactions/schemas/transaction.schema";
-import type { CartItem, PosProduct, ProductUnit } from "../types";
+import type { CartItem, PosProduct, ProductUnit } from "../../types/pos";
 
 export function CashierPosView() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -23,7 +23,8 @@ export function CashierPosView() {
   const createTransactionMutation = useCreateTransaction();
 
   useEffect(() => {
-    setIsMounted(true);
+    const frame = requestAnimationFrame(() => setIsMounted(true));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   // Cart state
@@ -54,6 +55,8 @@ export function CashierPosView() {
     paidAmount: number;
     change: number;
     customerName?: string;
+    receiptNumber?: string;
+    createdAt?: string;
   }>({
     items: [],
     subtotal: 0,
@@ -174,7 +177,8 @@ export function CashierPosView() {
     };
 
     createTransactionMutation.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: (res) => {
+        const transaction = res.data;
         const methodLabel =
           method === "cash"
             ? "Tunai"
@@ -191,6 +195,8 @@ export function CashierPosView() {
           paidAmount,
           change,
           customerName: checkoutSummary.customerName,
+          receiptNumber: transaction?.receiptNumber,
+          createdAt: transaction?.createdAt,
         });
         setPaymentModalOpen(false);
         setReceiptModalOpen(true);
@@ -218,18 +224,19 @@ export function CashierPosView() {
     <div className="space-y-3 max-w-[1600px] w-full mx-auto h-full flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Shift Warning Alert (If Shift Closed & Done Loading) */}
       {!isShiftLoading && !shiftOpen && (
-        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between gap-3 text-amber-800 dark:text-amber-300 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
-            <span className="text-xs font-semibold">
-              Shift Kasir belum dibuka. Buka shift kasir terlebih dahulu sebelum memproses transaksi POS.
+        <div className="p-2.5 sm:p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl sm:rounded-2xl flex items-center justify-between gap-2.5 text-amber-800 dark:text-amber-300 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span className="text-xs font-semibold leading-tight truncate sm:whitespace-normal">
+              <span className="hidden sm:inline">Shift kasir belum dibuka. Buka shift untuk mulai transaksi.</span>
+              <span className="sm:hidden">Shift kasir belum dibuka.</span>
             </span>
           </div>
           <Button
             onClick={() => setOpenShiftModal(true)}
-            className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-8 text-xs rounded-xl shrink-0 cursor-pointer"
+            className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-7 sm:h-8 px-3 text-xs rounded-lg sm:rounded-xl shrink-0 cursor-pointer"
           >
-            Buka Toko Sekarang
+            Buka Shift
           </Button>
         </div>
       )}
@@ -286,13 +293,14 @@ export function CashierPosView() {
 
       {/* Mobile Cart Dialog Overlay */}
       <Dialog open={mobileCartOpen} onOpenChange={setMobileCartOpen}>
-        <DialogContent className="w-[95vw] sm:max-w-lg rounded-2xl sm:rounded-3xl p-3 sm:p-4 max-h-[90vh] flex flex-col overflow-hidden">
-          <DialogHeader className="pb-2 text-left shrink-0">
-            <DialogTitle className="text-sm sm:text-base font-bold text-slate-900">
-              Keranjang Belanja POS
+        <DialogContent className="gap-0 p-0 w-[95vw] sm:max-w-lg sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden">
+          <button type="button" className="sr-only" />
+          <DialogHeader className="border-b border-border px-6 py-4 shrink-0 text-left">
+            <DialogTitle className="text-base sm:text-lg font-bold text-slate-900">
+              Keranjang Belanja
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-hidden min-h-0">
+          <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
             <PosCartMatrix
               items={cartItems}
               onUpdateQty={handleUpdateQty}
@@ -335,6 +343,8 @@ export function CashierPosView() {
         paidAmount={receiptData.paidAmount}
         change={receiptData.change}
         customerName={receiptData.customerName}
+        receiptNumber={receiptData.receiptNumber}
+        createdAt={receiptData.createdAt}
         onNewTransaction={handleNewTransaction}
       />
     </div>

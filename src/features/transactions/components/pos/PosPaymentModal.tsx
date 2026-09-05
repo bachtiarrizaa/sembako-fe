@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, QrCode, Banknote, Landmark, CheckCircle2, Printer, Gift } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { QrCode, Banknote, Landmark, CheckCircle2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,6 @@ export function PosPaymentModal({
   open,
   onOpenChange,
   totalAmount,
-  customerName,
   isPending = false,
   onPaymentSuccess,
 }: PosPaymentModalProps) {
@@ -46,17 +45,16 @@ export function PosPaymentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md rounded-2xl p-6">
-        <DialogHeader className="space-y-1">
-          <DialogTitle className="text-xl font-bold text-slate-900">
-            Pembayaran Checkout
+      <DialogContent className="gap-0 p-0 sm:max-w-md sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden">
+        <button type="button" className="sr-only" />
+
+        <DialogHeader className="border-b border-border px-6 py-4 shrink-0 text-left">
+          <DialogTitle className="text-lg font-bold text-slate-900">
+            Metode Pembayaran
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500">
-            {customerName ? `Pelanggan: ${customerName}` : "Pelanggan Umum"}
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-4 px-6 py-5 flex-1 overflow-y-auto min-h-0">
           {/* Total Tagihan Banner */}
           <div className="p-4 bg-teal-50/60 border border-teal-100 text-slate-900 rounded-2xl flex items-center justify-between">
             <div>
@@ -84,7 +82,7 @@ export function PosPaymentModal({
                 }`}
             >
               <Banknote className="w-4 h-4" />
-              <span>Tunai (Cash)</span>
+              <span>Tunai</span>
             </button>
 
             <button
@@ -171,7 +169,7 @@ export function PosPaymentModal({
               <div>
                 <p className="font-bold">Pembayaran Transfer Bank</p>
                 <p className="text-[11px] text-slate-600 mt-0.5">
-                  Pembayaran otomatis dianggap berhasil (bypass). Klik tombol di bawah untuk mencetak struk.
+                  Pembayaran otomatis dianggap berhasil. Klik tombol di bawah untuk mencetak struk.
                 </p>
               </div>
             </div>
@@ -184,14 +182,14 @@ export function PosPaymentModal({
               <div>
                 <p className="font-bold">Pembayaran QRIS</p>
                 <p className="text-[11px] text-slate-600 mt-0.5">
-                  Pembayaran QRIS otomatis dianggap berhasil (bypass). Klik tombol di bawah untuk mencetak struk.
+                  Pembayaran QRIS otomatis dianggap berhasil. Klik tombol di bawah untuk mencetak struk.
                 </p>
               </div>
             </div>
           )}
         </div>
 
-        <DialogFooter className="pt-2 sm:space-x-0">
+        <DialogFooter className="border-t border-border px-6 py-4 shrink-0">
           <Button
             type="button"
             onClick={handlePay}
