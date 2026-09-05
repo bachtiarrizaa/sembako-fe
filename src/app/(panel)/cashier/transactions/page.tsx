@@ -1,10 +1,10 @@
-import { TransactionsPage } from "@/features/transactions/components/TransactionPage";
+import { CashierPosView } from "@/features/pos/components/CashierPosView";
 
 export const metadata = {
-  title: "Riwayat Transaksi Penjualan | Toko Beras Putra Mandiri",
-  description: "Daftar riwayat transaksi penjualan kasir",
+  title: "Transaksi Penjualan Kasir | Toko Sembako",
+  description: "Layar transaksi mesin kasir penjualan sembako",
 };
 
 export default function CashierTransactionsPage() {
-  return <TransactionsPage />;
+  return <CashierPosView />;
 }

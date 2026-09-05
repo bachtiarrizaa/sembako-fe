@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   X,
   ClipboardList,
-  Users,
+  PackageCheck,
   Percent,
   Clock,
   ChevronRight,
@@ -27,10 +27,10 @@ export function CashierMenuSheet({ open, onClose }: CashierMenuSheetProps) {
       color: "bg-blue-50 text-blue-600 border-blue-200",
     },
     {
-      title: "Daftar Pelanggan",
-      description: "Kelola member & poin loyalty",
-      icon: Users,
-      href: "/cashier/customers",
+      title: "Daftar Produk",
+      description: "Katalog & stok produk kasir",
+      icon: PackageCheck,
+      href: "/cashier/products",
       color: "bg-purple-50 text-purple-600 border-purple-200",
     },
     {
