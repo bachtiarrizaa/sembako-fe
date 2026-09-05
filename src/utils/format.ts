@@ -9,6 +9,31 @@ export function formatDate(value?: string | null, fallback = "-"): string {
   }).format(date)
 }
 
+export function formatFullDate(value?: Date | string | null, fallback = "-"): string {
+  if (!value) return fallback
+  const date = typeof value === "string" ? new Date(value) : value
+  if (Number.isNaN(date.getTime())) return fallback
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date)
+}
+
+export function formatTimeOnly(value?: Date | string | null, fallback = "--:--:-- WIB"): string {
+  if (!value) return fallback
+  const date = typeof value === "string" ? new Date(value) : value
+  if (Number.isNaN(date.getTime())) return fallback
+  const timeStr = new Intl.DateTimeFormat("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date)
+  return `${timeStr} WIB`
+}
+
 export function formatDateTime(value?: string | null, fallback = "-"): string {
   if (!value) return fallback
   const date = new Date(value)

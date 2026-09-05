@@ -18,6 +18,8 @@ export function useVoidTransaction() {
         type: "success",
       })
       queryClient.invalidateQueries({ queryKey: transactionKeys.all })
+      queryClient.invalidateQueries({ queryKey: ["shifts"] })
+      queryClient.invalidateQueries({ queryKey: ["cashier-dashboard"] })
     },
     onError: (error) => handleApiError(error),
   })
