@@ -10,7 +10,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Sembako POS",
+  title: "Kasir Toko Sembako",
   description: "Aplikasi Kasir Toko Sembako",
 };
 

@@ -7,6 +7,7 @@ import {
   PackageCheck,
   Percent,
   Clock,
+  Users,
   ChevronRight,
 } from "lucide-react";
 
@@ -19,6 +20,13 @@ export function CashierMenuSheet({ open, onClose }: CashierMenuSheetProps) {
   if (!open) return null;
 
   const menuItems = [
+    {
+      title: "Daftar Pelanggan",
+      description: "Kelola & cari data pelanggan",
+      icon: Users,
+      href: "/cashier/customers",
+      color: "bg-teal-50 text-teal-600 border-teal-200",
+    },
     {
       title: "Stok Opname",
       description: "Opname & rekonsiliasi stok fisik",
