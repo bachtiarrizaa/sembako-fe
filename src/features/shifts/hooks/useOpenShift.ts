@@ -17,6 +17,7 @@ export function useOpenShift() {
         type: "success",
       });
       queryClient.invalidateQueries({ queryKey: shiftKeys.all });
+      queryClient.invalidateQueries({ queryKey: ["cashier-dashboard"] });
     },
     onError: (err) => {
       handleApiError(err, "Gagal membuka toko & shift baru");

@@ -1,10 +1,5 @@
-import { CashierPosView } from "@/features/pos/components/CashierPosView";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Toko Sembako",
-  description: "Layar transaksi mesin kasir penjualan sembako",
-};
-
-export default function CashierPosPage() {
-  return <CashierPosView />;
+export default function CashierPosRedirectPage() {
+  redirect("/cashier/transactions");
 }

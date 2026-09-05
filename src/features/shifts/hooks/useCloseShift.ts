@@ -18,6 +18,7 @@ export function useCloseShift() {
         type: "success",
       });
       queryClient.invalidateQueries({ queryKey: shiftKeys.all });
+      queryClient.invalidateQueries({ queryKey: ["cashier-dashboard"] });
     },
     onError: (err) => {
       handleApiError(err, "Gagal menutup toko & shift");

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  PackageCheck,
+  Users,
   ShoppingCart,
   Receipt,
   Grid,
@@ -28,18 +28,18 @@ export function CashierBottomBar() {
       icon: LayoutDashboard,
     },
     {
-      label: "Produk",
-      href: "/cashier/products",
-      icon: PackageCheck,
+      label: "Pelanggan",
+      href: "/cashier/customers",
+      icon: Users,
     },
     {
-      label: "Kasir / POS",
-      href: "/cashier/pos",
+      label: "Transaksi",
+      href: "/cashier/transactions",
       icon: ShoppingCart,
     },
     {
       label: "Riwayat",
-      href: "/cashier/transactions",
+      href: "/cashier/history",
       icon: Receipt,
     },
   ];
@@ -94,10 +94,10 @@ export function CashierBottomBar() {
             );
           })()}
 
-          {/* Item 3 (CENTER FAB): Kasir / POS */}
+          {/* Item 3 (CENTER FAB): Transaksi */}
           {(() => {
             const item = navItems[2];
-            const active = isPathActive(item.href) || pathname === "/cashier/dashboard";
+            const active = isPathActive(item.href);
             const Icon = item.icon;
             return (
               <Link
@@ -115,8 +115,8 @@ export function CashierBottomBar() {
                   <Icon className="w-6 h-6 stroke-[2.5]" />
                 </div>
                 <span
-                  className={`text-[11px] mt-1 font-bold tracking-tight ${
-                    active ? "text-primary" : "text-slate-700"
+                  className={`text-[11px] mt-1 font-bold tracking-tight transition-colors ${
+                    active ? "text-primary" : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   {item.label}

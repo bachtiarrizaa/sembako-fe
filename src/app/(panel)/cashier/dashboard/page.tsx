@@ -1,7 +1,7 @@
 "use client";
 
-import { CashierDashboardView } from "@/features/dashboard/components/CashierDashboardView";
+import { CashierDashboardPage } from "@/features/dashboard/components/CashierDashboardPage";
 
-export default function CashierDashboardPage() {
-  return <CashierDashboardView />;
+export default function Page() {
+  return <CashierDashboardPage />;
 }
