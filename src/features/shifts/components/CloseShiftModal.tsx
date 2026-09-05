@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { LogOut, DollarSign, AlertCircle, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ShiftData } from "../types/shift";
 import { useCloseShift } from "../hooks/useCloseShift";
+import { Spinner } from "@/components/ui/spinner";
+import { formatCurrency } from "@/utils/format";
 
 interface CloseShiftModalProps {
   open: boolean;
@@ -49,14 +50,6 @@ export function CloseShiftModal({
     );
   };
 
-  const formatRupiah = (val: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(val);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-md rounded-2xl overflow-hidden">
@@ -78,7 +71,7 @@ export function CloseShiftModal({
                 <div className="flex justify-between text-slate-600">
                   <span>Modal Kas Awal</span>
                   <span className="font-bold text-slate-800">
-                    {formatRupiah(shiftData.openingBalance)}
+                    {formatCurrency(shiftData.openingBalance)}
                   </span>
                 </div>
                 <div className="flex justify-between text-slate-600">
@@ -134,7 +127,7 @@ export function CloseShiftModal({
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl h-11 shadow-sm cursor-pointer text-sm"
             >
               {isPending ? (
-                <span>Menutup Toko...</span>
+                <Spinner data-icon="inline-start" className="size-4" />
               ) : (
                 <span>Tutup Toko & Rekap Shift</span>
               )}

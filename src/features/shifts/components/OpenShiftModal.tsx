@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/utils/format";
 import { useOpenShift } from "@/features/shifts/hooks/useOpenShift";
+import { Spinner } from "@/components/ui/spinner";
 
 interface OpenShiftModalProps {
   open: boolean;
@@ -56,7 +57,7 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
             {/* Modal Kas Awal Input */}
             <div className="space-y-2">
               <Label htmlFor="modal-amount" className="text-xs font-bold text-slate-700">
-                Modal Kas Awal (Laci Uang)
+                Modal Kas Awal
               </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
@@ -74,16 +75,16 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
                 />
               </div>
 
-              {/* Quick Amount Buttons */}
-              <div className="grid grid-cols-4 gap-1.5 pt-1">
+              {/* Quick Amount Buttons: grid-cols-2 on mobile, grid-cols-4 on desktop to prevent text collision */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 {quickAmounts.map((amt) => (
                   <button
                     key={amt}
                     type="button"
                     onClick={() => setModalAmount(amt)}
-                    className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all border cursor-pointer ${
+                    className={`py-2 px-2.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer whitespace-nowrap text-center ${
                       modalAmount === amt
-                        ? "bg-primary text-primary-foreground border-primary"
+                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
                         : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
@@ -116,7 +117,7 @@ export function OpenShiftModal({ open, onOpenChange, onSuccess }: OpenShiftModal
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl h-11 shadow-sm cursor-pointer text-sm"
             >
               {isSubmitting ? (
-                <span>Membuka Toko...</span>
+                <Spinner data-icon="inline-start" className="size-4" />
               ) : (
                 <span>Buka Toko & Mulai Transaksi</span>
               )}

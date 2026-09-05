@@ -285,7 +285,6 @@ export function CashierPosView() {
 
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-xl">
               <span>Keranjang</span>
-              <ArrowRight className="w-4 h-4 text-primary" />
             </div>
           </Button>
         </div>
