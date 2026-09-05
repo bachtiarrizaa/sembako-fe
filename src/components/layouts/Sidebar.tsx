@@ -31,10 +31,15 @@ const iconMap: Record<string, LucideIcon> = {
   'discounts': Percent,
   'inventory': Boxes,
   'suppliers-purchases': Building2,
+  'customers': Users,
+  'customers:read': Users,
   'customers-loyalty': Users,
   'reports': BarChart3,
   'employees': Users,
+  'settings': Settings,
   'settings:read': Settings,
+  'settings-store': Settings,
+  'settings-loyalty': Percent,
 };
 
 const getIcon = (name: string): LucideIcon => {
@@ -56,11 +61,13 @@ const routeMap: Record<string, string> = {
   '/suppliers': '/admin/suppliers',
   '/purchases': '/admin/purchases',
   '/customers': '/admin/customers',
+  '/settings': '/admin/settings',
+  '/settings/store': '/admin/settings',
+  '/settings/loyalty': '/admin/loyalty-settings',
   '/loyalty-settings': '/admin/loyalty-settings',
   '/reports': '/admin/reports',
   '/users': '/admin/users',
   '/roles': '/admin/roles',
-  '/settings': '/admin/settings',
 };
 
 const menuOrderMap: Record<string, number> = {
@@ -72,9 +79,12 @@ const menuOrderMap: Record<string, number> = {
   'discounts': 6,
   'inventory': 7,
   'suppliers-purchases': 8,
+  'customers': 9,
+  'customers:read': 9,
   'customers-loyalty': 9,
   'reports': 10,
   'employees': 11,
+  'settings': 12,
   'settings:read': 12,
 }
 
@@ -111,11 +121,11 @@ export function Sidebar() {
     return pathname === path || pathname.startsWith(path + '/')
   }
 
-  const isGroupActive = (item: Permission) =>
-    item.children?.some((child) => {
+  const isGroupActive = (children: Permission[]) =>
+    children.some((child) => {
       const path = getFePath(child.path)
       return path !== '#' && isPathActive(path)
-    }) ?? false
+    })
 
   const toggleGroup = (name: string) => {
     setOpenGroups((prev) => ({ ...prev, [name]: !prev[name] }))
@@ -131,15 +141,38 @@ export function Sidebar() {
         {allowedMenus.map((item, index) => {
           const Icon = getIcon(item.name)
 
-          // Hanya ambil child item bertipe menu (level 2)
-          const menuChildren = (item.children || []).filter(
+          // Ambil child item bertipe menu (level 2)
+          const rawMenuChildren = (item.children || []).filter(
             (child) => child.type === 'menu'
           )
 
-          const hasSingleChildMenu = menuChildren.length === 1;
+          // Khusus menu Pengaturan (settings / settings:read), bentukan 2 sub-menu: Pengaturan Toko & Pengaturan Poin
+          let menuChildren = rawMenuChildren;
+          if (
+            (item.name === 'settings:read' || item.name === 'settings' || item.path === '/settings') &&
+            rawMenuChildren.length >= 1
+          ) {
+            menuChildren = [
+              {
+                id: `${item.id}-store`,
+                name: 'settings:store',
+                description: 'Pengaturan Toko',
+                parentId: item.id,
+                type: 'menu',
+                path: '/settings',
+                children: null,
+              },
+              ...rawMenuChildren.map((c) => ({
+                ...c,
+                description: cleanLabel(c.description) === 'Loyalty' ? 'Pengaturan Poin' : c.description,
+              })),
+            ];
+          }
 
-          if (menuChildren.length === 0 || hasSingleChildMenu) {
-            const leafPath = getFePath(hasSingleChildMenu ? menuChildren[0].path : item.path)
+          const isGroup = menuChildren.length >= 2;
+
+          if (!isGroup) {
+            const leafPath = getFePath(menuChildren.length === 1 ? menuChildren[0].path : item.path)
             const active = isPathActive(leafPath)
             return (
               <div key={item.id}>
@@ -166,7 +199,7 @@ export function Sidebar() {
             )
           }
 
-          const groupActive = isGroupActive(item)
+          const groupActive = isGroupActive(menuChildren)
           const isOpen = !isCollapsed && (openGroups[item.name] ?? groupActive)
 
           return (

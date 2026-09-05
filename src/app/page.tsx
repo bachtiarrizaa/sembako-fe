@@ -6,7 +6,7 @@ import { useStoreInfo } from "@/features/store"
 
 export default function Home() {
   const { data: storeInfo } = useStoreInfo()
-  const storeName = storeInfo?.storeName || "Toko Beras Putra Mandiri"
+  const storeName = storeInfo?.storeName
 
   return (
     <div className="relative min-h-dvh w-full flex flex-col items-center justify-center bg-gradient-to-b from-primary/[0.04] via-background to-primary/[0.06] text-foreground overflow-y-auto py-8 sm:py-12 font-sans">

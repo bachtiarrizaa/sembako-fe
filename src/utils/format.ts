@@ -63,12 +63,12 @@ export function formatShortDateTime(value?: string | null, fallback = "-"): stri
   return `${datePart} / ${timePart}`
 }
 
-export function formatTransactionDate(value?: string | null, fallback = "-"): string {
+export function formatTransactionDate(value?: string | Date | null, fallback = "-"): string {
   if (!value) return fallback
-  const date = new Date(value)
+  const date = typeof value === "string" ? new Date(value) : value
   if (Number.isNaN(date.getTime())) return fallback
   const datePart = new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
+    day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(date)
