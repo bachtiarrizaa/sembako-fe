@@ -1,10 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { Printer, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
-import { CartItem } from "./PosCartMatrix";
+import type { CartItem } from "../../types/pos";
 
 interface PosReceiptModalProps {
   open: boolean;
@@ -17,6 +18,8 @@ interface PosReceiptModalProps {
   paidAmount: number;
   change: number;
   customerName?: string;
+  receiptNumber?: string;
+  createdAt?: string;
   onNewTransaction: () => void;
 }
 
@@ -31,14 +34,15 @@ export function PosReceiptModal({
   paidAmount,
   change,
   customerName,
+  receiptNumber,
+  createdAt,
   onNewTransaction,
 }: PosReceiptModalProps) {
-  const now = new Date();
-  const invoiceNo = `INV/${now.getFullYear()}${(now.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}${now.getDate().toString().padStart(2, "0")}/${Math.floor(
-      1000 + Math.random() * 9000
-    )}`;
+  const formattedDate = useMemo(() => {
+    if (!open) return "";
+    const dateObj = createdAt ? new Date(createdAt) : new Date();
+    return `${dateObj.toLocaleDateString("id-ID")} ${dateObj.toLocaleTimeString("id-ID")}`;
+  }, [open, createdAt]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,13 +77,11 @@ export function PosReceiptModal({
             <div className="text-[10px] space-y-0.5 border-b border-dashed border-slate-300 pb-2">
               <div className="flex justify-between">
                 <span>No. Struk</span>
-                <span className="font-bold">{invoiceNo}</span>
+                <span className="font-bold">{receiptNumber || "-"}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tanggal</span>
-                <span>
-                  {now.toLocaleDateString("id-ID")} {now.toLocaleTimeString("id-ID")}
-                </span>
+                <span>{formattedDate}</span>
               </div>
               <div className="flex justify-between">
                 <span>Pelanggan</span>

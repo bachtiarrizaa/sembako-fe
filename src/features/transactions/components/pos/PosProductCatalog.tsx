@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Minus, Package, ChevronDown } from "lucide-react";
+import { Plus, Minus, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SearchBar } from "@/components/common/SearchBar";
 import { ComboboxSelect } from "@/components/common/ComboboxSelect";
@@ -7,7 +7,7 @@ import { useProducts } from "@/features/products/hooks/useProducts";
 import { useCategories } from "@/features/categories/hooks/useCategories";
 import { useDebouncedValue } from "@/hooks/useDebounceValue";
 import { formatCurrency } from "@/utils/format";
-import type { PosProduct, ProductUnit } from "../types/pos";
+import type { PosProduct, ProductUnit } from "../../types/pos";
 
 export type { PosProduct, ProductUnit };
 
