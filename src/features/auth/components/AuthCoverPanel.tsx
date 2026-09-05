@@ -1,12 +1,16 @@
 const LOGIN_COVER =
   "https://images.unsplash.com/photo-1645331465778-eb409d112198?q=80&w=2000&auto=format&fit=crop";
 
-export function AuthCoverPanel() {
+interface AuthCoverPanelProps {
+  storeName?: string;
+}
+
+export function AuthCoverPanel({ storeName = "Toko Beras Putra Mandiri" }: AuthCoverPanelProps) {
   return (
     <div className="relative hidden bg-muted lg:block overflow-hidden">
       <img
         src={LOGIN_COVER}
-        alt="Toko Beras Putra Mandiri"
+        alt={storeName}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-10000 hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
@@ -20,7 +24,7 @@ export function AuthCoverPanel() {
         </p>
         <div className="pt-4 border-t border-white/15 flex items-center justify-between">
           <div>
-            <p className="font-semibold text-white">POS Toko Beras Putra Mandiri</p>
+            <p className="font-semibold text-white">POS {storeName}</p>
             <p className="text-xs text-neutral-400">Dashboard Manajemen Toko Sembako</p>
           </div>
           <span className="text-[10px] bg-white/15 backdrop-blur-md px-2.5 py-1 rounded-full text-neutral-200 font-mono">

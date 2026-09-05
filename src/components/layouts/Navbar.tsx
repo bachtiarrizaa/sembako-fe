@@ -5,17 +5,20 @@ import { Spinner } from '@/components/ui/spinner'
 import { useLogout } from '@/features/auth/hooks/useLogout'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { useUserMe } from '@/features/users/hooks/useUserMe'
+import { useStoreInfo } from '@/features/store'
 
 export function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const { data, isLoading } = useUserMe()
+  const { data: storeInfo } = useStoreInfo()
   const { mutate: logout, isPending: isLoggingOut } = useLogout()
 
   const user = data?.data
   const userRole = (user?.role?.name || "").toLowerCase()
   const profileHref = userRole === "admin" ? "/admin/profile" : "/cashier/profile"
+  const storeName = storeInfo?.storeName || "Toko Beras Putra Mandiri"
 
   return (
     <>
@@ -26,7 +29,7 @@ export function Navbar() {
             <Store className="w-5 h-5" strokeWidth={2.5} />
           </div>
           <span className="font-bold text-base sm:text-lg text-slate-800 tracking-tight">
-            Toko Beras Putra Mandiri
+            {storeName}
           </span>
         </div>
 
