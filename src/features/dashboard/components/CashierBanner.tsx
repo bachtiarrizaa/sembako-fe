@@ -4,6 +4,7 @@ import { AlertTriangle, Printer } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatFullDate, formatTimeOnly } from "@/utils/format";
+import { Spinner } from "@/components/ui/spinner";
 
 interface CashierBannerProps {
   userName?: string;
@@ -45,10 +46,7 @@ export function CashierBanner({
           </div>
 
           {isShiftLoading ? (
-            <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold tracking-wide border shrink-0 bg-slate-800 text-slate-300 border-slate-700 animate-pulse">
-              <span className="size-2 rounded-full bg-slate-400" />
-              <span>MEMUAT...</span>
-            </div>
+            <Spinner data-icon="inline-start" className="size-4" />
           ) : shiftOpen ? (
             <button
               type="button"
