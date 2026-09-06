@@ -1,7 +1,5 @@
 "use client"
 
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -11,16 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Spinner } from "@/components/ui/spinner"
-import { formatCurrency } from "@/utils/format"
+import { formatCurrency, formatShortDate } from "@/utils/format"
 import { DISCOUNT_TYPES } from "../constants/discount.constant"
 import { useDiscountDetails } from "../hooks"
 
@@ -30,16 +20,11 @@ interface DiscountDetailDialogProps {
   discountId?: string | null
 }
 
-const formatPeriodDate = (dateStr?: string | null) => {
-  if (!dateStr) return ""
-  try {
-    return format(new Date(dateStr), "d MMMM yyyy", { locale: id })
-  } catch {
-    return ""
-  }
-}
-
-export function DiscountDetailDialog({ open, onOpenChange, discountId }: DiscountDetailDialogProps) {
+export function DiscountDetailDialog({
+  open,
+  onOpenChange,
+  discountId,
+}: DiscountDetailDialogProps) {
   const { data: detailResponse, isLoading } = useDiscountDetails(discountId)
   const discount = detailResponse?.data
 
@@ -50,28 +35,38 @@ export function DiscountDetailDialog({ open, onOpenChange, discountId }: Discoun
       : formatCurrency(discount.value)
     : ""
 
-  const startDateText = discount?.startDate ? formatPeriodDate(discount.startDate) : ""
-  const endDateText = discount?.endDate ? formatPeriodDate(discount.endDate) : ""
-  const periodText = (startDateText || endDateText)
-    ? `${startDateText || "-"} - ${endDateText || "-"}`
+  const startDateText = discount?.startDate
+    ? formatShortDate(discount.startDate)
+    : ""
+  const endDateText = discount?.endDate
+    ? formatShortDate(discount.endDate)
+    : ""
+  const periodText = startDateText && endDateText
+    ? `${startDateText} - ${endDateText}`
+    : startDateText
+    ? `${startDateText} - Tanpa Batas`
+    : endDateText
+    ? `- ${endDateText}`
     : "-"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden sm:max-w-3xl">
+      <DialogContent className="gap-0 p-0 sm:rounded-xl transition-all max-h-[90vh] flex flex-col overflow-hidden sm:max-w-2xl">
         <button type="button" className="sr-only" />
 
         <DialogHeader className="border-b border-border px-6 py-4 shrink-0">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
-            Detail Diskon
+            Detail Diskon & Simulasi Harga
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-3">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-4">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <Spinner className="size-8" />
-              <span className="text-xs text-muted-foreground">Memuat detail diskon...</span>
+              <Spinner className="size-8 text-primary" />
+              <span className="text-xs text-muted-foreground">
+                Memuat detail diskon...
+              </span>
             </div>
           ) : !discount ? (
             <div className="text-center py-10 text-sm text-muted-foreground italic">
@@ -79,181 +74,155 @@ export function DiscountDetailDialog({ open, onOpenChange, discountId }: Discoun
             </div>
           ) : (
             <>
-              {/* Metadata Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-2 text-sm pb-2">
-                <div className="md:col-span-7 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-28 shrink-0 font-medium">Nama Diskon</span>
+              {/* Metadata Info Summary Box */}
+              <div className="bg-muted/20 border border-border rounded-xl p-4 space-y-2 text-xs">
+                {/* Row 1: Nama Diskon & Badge Status */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-muted-foreground w-24 shrink-0 font-medium">Nama Diskon</span>
                     <span className="text-muted-foreground font-medium">:</span>
-                    <span className="font-bold text-foreground truncate">{discount.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-28 shrink-0 font-medium">Periode Diskon</span>
-                    <span className="text-muted-foreground font-medium">:</span>
-                    <span className="font-semibold text-foreground">
-                      {periodText}
+                    <span className="font-bold text-foreground text-sm truncate">
+                      {discount.name}
                     </span>
                   </div>
+                  {discount.isActive ? (
+                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 shrink-0">
+                      Aktif
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-50 shrink-0">
+                      Nonaktif
+                    </Badge>
+                  )}
                 </div>
 
-                <div className="md:col-span-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-28 shrink-0 font-medium">Tipe Diskon</span>
-                    <span className="text-muted-foreground font-medium">:</span>
-                    <span className="font-semibold text-foreground">
-                      {isPercent ? `Persentase (${formattedValue})` : `Nominal (${formattedValue})`}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-28 shrink-0 font-medium">Status Diskon</span>
-                    <span className="text-muted-foreground font-medium">:</span>
-                    <span>
-                      {discount.isActive ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                          Aktif
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                          Nonaktif
-                        </span>
-                      )}
-                    </span>
-                  </div>
+                {/* Row 2: Tipe Diskon */}
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground w-24 shrink-0 font-medium">Tipe Diskon</span>
+                  <span className="text-muted-foreground font-medium">:</span>
+                  <span className="font-semibold text-foreground">
+                    {isPercent
+                      ? `Persentase (${formattedValue})`
+                      : `Nominal (${formattedValue})`}
+                  </span>
+                </div>
+
+                {/* Row 3: Periode */}
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground w-24 shrink-0 font-medium">Periode</span>
+                  <span className="text-muted-foreground font-medium">:</span>
+                  <span className="font-semibold text-foreground">
+                    {periodText}
+                  </span>
                 </div>
               </div>
 
-              {/* Separator line */}
-              <hr className="border-border" />
-
               {/* Products & Price Simulation Section */}
-              <div className="space-y-3 pt-2">
-                <div className="text-sm font-bold text-foreground">
-                  Daftar Produk & Simulasi Harga:
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-foreground">
+                    Daftar Produk ({discount.products?.length ?? 0} Produk)
+                  </h4>
                 </div>
 
-                <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm max-h-[380px] overflow-y-auto">
-                  <Table className="w-full text-sm border-collapse table-fixed">
-                    <TableHeader className="bg-muted/40 border-b border-border sticky top-0 z-10">
-                      <TableRow className="bg-muted/40 border-b border-border hover:bg-muted/40 border-0">
-                        <TableHead className="w-[28%] font-bold text-muted-foreground pl-6 pr-4 py-2.5">
-                          Nama Produk
-                        </TableHead>
-                        <TableHead className="w-[12%] font-bold text-muted-foreground text-center px-4 py-2.5">
-                          Status
-                        </TableHead>
-                        <TableHead className="w-[16%] font-bold text-muted-foreground text-center px-4 py-2.5">
-                          Satuan
-                        </TableHead>
-                        <TableHead className="w-[14%] font-bold text-muted-foreground text-right px-4 py-2.5">
-                          Harga Normal
-                        </TableHead>
-                        <TableHead className="w-[12%] font-bold text-muted-foreground text-right px-4 py-2.5">
-                          Potongan
-                        </TableHead>
-                        <TableHead className="w-[18%] font-bold text-muted-foreground text-right pl-4 pr-6 py-2.5">
-                          Harga Diskon
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody className="divide-y divide-border">
-                      {!discount.products || discount.products.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground italic bg-white">
-                            Tidak ada produk terkait diskon ini.
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        discount.products.map((dp, pIdx) => {
-                          const productName = dp.name || ""
-                          const productActive = dp.isActive !== false // defaults to true
+                <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1 no-scrollbar">
+                  {!discount.products || discount.products.length === 0 ? (
+                    <div className="text-center py-10 text-xs text-muted-foreground italic bg-muted/10 border border-dashed border-border rounded-xl">
+                      Belum ada produk terkait diskon ini.
+                    </div>
+                  ) : (
+                    discount.products.map((dp) => {
+                      const productName = dp.name || "Produk"
+                      const productActive = dp.isActive !== false
+                      const units = dp.units || []
 
-                          const units = dp.units || []
-                          const totalUnits = units.length
+                      return (
+                        <div
+                          key={dp.id}
+                          className="bg-white border border-border rounded-xl p-4 space-y-3 shadow-2xs"
+                        >
+                          {/* Product Card Header */}
+                          <div className="flex items-center justify-between border-b border-border pb-2.5">
+                            <span className="font-bold text-xs text-foreground">
+                              {productName}
+                            </span>
+                            {productActive ? (
+                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
+                                Produk Aktif
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-[10px]">
+                                Produk Nonaktif
+                              </Badge>
+                            )}
+                          </div>
 
-                          if (totalUnits === 0) {
-                            return (
-                              <TableRow key={dp.id} className="hover:bg-muted/10 bg-white">
-                                <TableCell className="font-semibold text-foreground pl-6 pr-4 py-2.5">
-                                  <div className="break-words whitespace-normal">{productName}</div>
-                                </TableCell>
-                                <TableCell className="text-center px-4 py-2.5">
-                                  {productActive ? (
-                                    <span className="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                      Aktif
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                                      Nonaktif
-                                    </span>
-                                  )}
-                                </TableCell>
-                                <TableCell colSpan={4} className="text-center text-xs text-muted-foreground italic px-4 py-2.5 bg-muted/5">
-                                  Belum ada satuan / data harga.
-                                </TableCell>
-                              </TableRow>
-                            )
-                          }
+                          {/* Units List */}
+                          {units.length === 0 ? (
+                            <div className="text-xs text-muted-foreground italic py-2 text-center">
+                              Belum ada satuan / data harga untuk produk ini.
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {units.map((unit, uIdx) => {
+                                const isUnitActive =
+                                  unit.isActive !== false &&
+                                  productActive &&
+                                  discount.isActive
+                                const unitName = unit.unit?.name || "Satuan"
 
-                          return units.map((unit, uIdx) => {
-                            const isUnitActive = unit.isActive !== false && productActive && discount.isActive
-                            const unitName = unit.unit?.name || "N/A"
+                                return (
+                                  <div
+                                    key={`${dp.id}-${unit.id || uIdx}`}
+                                    className="bg-muted/20 border border-border/80 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                                  >
+                                    {/* Unit Name Badge */}
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md text-xs">
+                                        Satuan: {unitName}
+                                      </span>
+                                    </div>
 
-                            return (
-                              <TableRow key={`${dp.id}-${unit.id || uIdx}`} className="hover:bg-muted/10 bg-white">
-                                {/* Only render product info columns on the first unit row using rowSpan */}
-                                {uIdx === 0 && (
-                                  <>
-                                    <TableCell rowSpan={totalUnits} className="font-semibold text-foreground pl-6 pr-4 py-2.5 align-top">
-                                      <div className="break-words whitespace-normal">{productName}</div>
-                                    </TableCell>
-                                    <TableCell rowSpan={totalUnits} className="text-center px-4 py-2.5 align-top">
-                                      {productActive ? (
-                                        <span className="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                          Aktif
+                                    {/* Price Simulation Details */}
+                                    <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 text-right">
+                                      <div>
+                                        <span className="text-[11px] text-muted-foreground block font-medium">
+                                          Harga Normal
                                         </span>
-                                      ) : (
-                                        <span className="inline-flex items-center text-xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                                          Nonaktif
+                                        <span className="text-slate-600 line-through font-medium">
+                                          {formatCurrency(unit.sellingPrice)}
                                         </span>
-                                      )}
-                                    </TableCell>
-                                  </>
-                                )}
+                                      </div>
 
-                                {/* Unit packaging details */}
-                                <TableCell className="px-4 py-2.5 text-center text-xs text-slate-600 font-medium">
-                                  {unitName}
-                                </TableCell>
-                                <TableCell className="px-4 py-2.5 text-right font-medium text-foreground">
-                                  {isUnitActive ? (
-                                    formatCurrency(unit.sellingPrice)
-                                  ) : (
-                                    <span className="text-muted-foreground italic text-xs">*(Nonaktif)*</span>
-                                  )}
-                                </TableCell>
-                                <TableCell className="px-4 py-2.5 text-right text-rose-600 font-semibold">
-                                  {isUnitActive ? (
-                                    `- ${formatCurrency(unit.discountAmount || 0)}`
-                                  ) : (
-                                    <span className="text-muted-foreground italic text-xs">*(Nonaktif)*</span>
-                                  )}
-                                </TableCell>
-                                <TableCell className="pl-4 pr-6 py-2.5 text-right font-bold text-foreground">
-                                  {isUnitActive ? (
-                                    formatCurrency(unit.discountedPrice)
-                                  ) : (
-                                    <span className="text-muted-foreground font-bold">
-                                      {formatCurrency(unit.sellingPrice)}
-                                    </span>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            )
-                          })
-                        })
-                      )}
-                    </TableBody>
-                  </Table>
+                                      <div>
+                                        <span className="text-[11px] text-rose-600 block font-medium">
+                                          Potongan
+                                        </span>
+                                        <span className="text-rose-600 font-semibold">
+                                          -{formatCurrency(unit.discountAmount || 0)}
+                                        </span>
+                                      </div>
+
+                                      <div>
+                                        <span className="text-[11px] text-emerald-700 block font-medium">
+                                          Harga Diskon
+                                        </span>
+                                        <span className="text-emerald-700 font-bold text-sm">
+                                          {isUnitActive
+                                            ? formatCurrency(unit.discountedPrice)
+                                            : formatCurrency(unit.sellingPrice)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })
+                  )}
                 </div>
               </div>
             </>
@@ -264,7 +233,7 @@ export function DiscountDetailDialog({ open, onOpenChange, discountId }: Discoun
           <Button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="cursor-pointer font-medium px-4 py-2 bg-primary hover:bg-primary/95 text-primary-foreground rounded-lg"
+            className="cursor-pointer font-medium px-4 py-2"
           >
             Tutup
           </Button>
