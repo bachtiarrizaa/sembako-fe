@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-import { Pencil, Trash2, SearchX, Inbox, Eye } from "lucide-react"
+import { Pencil, Trash2, SearchX, Inbox, Eye, Plus } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
@@ -13,17 +13,22 @@ import { CustomPagination } from "@/components/common/Pagination"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatDate } from "@/utils/format"
+import { formatCurrency, formatShortDate } from "@/utils/format"
 import { DISCOUNT_TYPES, DISCOUNT_TYPE_LABELS } from "../constants/discount.constant"
 import { useDiscounts, useUpdateDiscountStatus, useDeleteDiscount } from "../hooks"
 import { DiscountResponse } from "../types/discount"
 import { DiscountFormDialog } from "./DiscountFormDialog"
 import { DiscountDetailDialog } from "./DiscountDetailDialog"
+import { useUserMe } from "@/features/users/hooks/useUserMe"
 
 export function DiscountsPage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  const { data: userData } = useUserMe()
+  const userRole = userData?.data?.role?.name?.toLowerCase()
+  const isCashier = userRole === "cashier"
 
   const page = Number(searchParams.get("page") ?? 1)
   const limit = Number(searchParams.get("limit") ?? 10)
@@ -129,10 +134,12 @@ export function DiscountsPage() {
   const columns: Column<DiscountResponse>[] = [
     {
       header: "Nama",
-      cell: (item) => item.name || "-"
+      className: "w-[20%]",
+      cell: (item) => <span className="font-semibold text-foreground">{item.name || "-"}</span>,
     },
     {
       header: "Tipe Diskon",
+      className: "w-[14%]",
       cell: (item) => (
         <Badge
           className={
@@ -147,21 +154,28 @@ export function DiscountsPage() {
     },
     {
       header: "Nilai",
-      cell: (item) =>
-        item.type === DISCOUNT_TYPES.PERCENT
-          ? `${Number(item.value)}%`
-          : formatCurrency(item.value),
+      className: "w-[14%]",
+      cell: (item) => (
+        <span className="font-semibold text-foreground">
+          {item.type === DISCOUNT_TYPES.PERCENT
+            ? `${Number(item.value)}%`
+            : formatCurrency(item.value)}
+        </span>
+      ),
     },
     {
       header: "Tanggal Mulai",
-      cell: (item) => formatDate(item.startDate),
+      className: "w-[14%]",
+      cell: (item) => formatShortDate(item.startDate),
     },
     {
       header: "Tanggal Berakhir",
-      cell: (item) => formatDate(item.endDate),
+      className: "w-[14%]",
+      cell: (item) => formatShortDate(item.endDate),
     },
     {
       header: "Jumlah Produk",
+      className: "w-[12%]",
       cell: (item) => {
         const count = item.products?.length ?? 0
         return (
@@ -173,10 +187,22 @@ export function DiscountsPage() {
     },
     {
       header: "Status",
+      className: "w-[10%] text-center",
       cell: (item) => {
+        if (isCashier) {
+          return item.isActive ? (
+            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+              Aktif
+            </Badge>
+          ) : (
+            <Badge className="bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-100">
+              Nonaktif
+            </Badge>
+          )
+        }
         const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
         return (
-          <div>
+          <div className="flex justify-center">
             <Switch
               checked={item.isActive}
               onCheckedChange={(checked) => handleStatusChange(item, checked)}
@@ -189,36 +215,40 @@ export function DiscountsPage() {
     },
     {
       header: "Aksi",
-      className: "w-28 text-center",
+      className: "w-24 text-center",
       cell: (item) => (
         <div className="flex justify-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Edit Diskon"
-            className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
-            onClick={() => handleEdit(item)}
-          >
-            <Pencil className="size-4" />
-          </Button>
+          {!isCashier && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Edit Diskon"
+              className="text-yellow-500 hover:text-yellow-500/80 hover:bg-muted cursor-pointer"
+              onClick={() => handleEdit(item)}
+            >
+              <Pencil className="size-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
             title="Detail Diskon"
-            className="text-blue-500 hover:text-blue/80 hover:bg-muted cursor-pointer"
+            className="text-blue-500 hover:text-blue-500/80 hover:bg-muted cursor-pointer"
             onClick={() => handleViewDetail(item)}
           >
             <Eye className="size-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Hapus Diskon"
-            className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
-            onClick={() => setDeletingDiscount(item)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {!isCashier && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Hapus Diskon"
+              className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 cursor-pointer"
+              onClick={() => setDeletingDiscount(item)}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -232,15 +262,24 @@ export function DiscountsPage() {
     <div className="space-y-5 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Diskon</h1>
-          <p className="text-sm text-muted-foreground">Kelola data diskon produk anda</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {isCashier ? "Daftar Promo & Diskon" : "Manajemen Diskon"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {isCashier
+              ? "Daftar promo dan diskon produk yang sedang berlaku"
+              : "Kelola data diskon produk anda"}
+          </p>
         </div>
-        <Button
-          className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
-          onClick={handleAdd}
-        >
-          Tambah
-        </Button>
+        {!isCashier && (
+          <Button
+            className="w-full sm:w-auto cursor-pointer font-medium px-4 py-2"
+            onClick={handleAdd}
+          >
+            <Plus className="size-4 mr-1.5" />
+            Tambah
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -1,85 +1,86 @@
-export function formatDate(value?: string | null, fallback = "-"): string {
-  if (!value) return fallback
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return fallback
+/**
+ * Utility Fungsi Format Tanggal, Waktu, & Angka (Global & Konsisten)
+ * 
+ * Sesuai Kesepakatan 3 Standard Utama:
+ * 1. formatDate(val)      -> "06 September 2026" (Full Date)
+ * 2. formatFullDate(val)  -> "Minggu, 06 September 2026" (Full Date + Hari)
+ * 3. formatDateTime(val)  -> "06 September 2026, 14:31" (Full Date + Jam)
+ */
+
+/** Helper internal untuk parse string/Date secara aman */
+function parseDate(value?: string | Date | null): Date | null {
+  if (!value) return null
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value
+  }
+  const str = String(value).trim()
+  if (!str) return null
+  const normalized = str.includes(" ") && !str.includes("T") ? str.replace(" ", "T") : str
+  const date = new Date(normalized)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+/** Standard 1: "06 September 2026" (Full Date) */
+export function formatDate(value?: string | Date | null, fallback = "-"): string {
+  const date = parseDate(value)
+  if (!date) return fallback
   return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
+    day: "2-digit",
     month: "long",
     year: "numeric",
   }).format(date)
 }
 
+/** Standard 2: "Minggu, 06 September 2026" (Full Date + Hari) */
 export function formatFullDate(value?: Date | string | null, fallback = "-"): string {
-  if (!value) return fallback
-  const date = typeof value === "string" ? new Date(value) : value
-  if (Number.isNaN(date.getTime())) return fallback
+  const date = parseDate(value)
+  if (!date) return fallback
   return new Intl.DateTimeFormat("id-ID", {
     weekday: "long",
-    day: "numeric",
+    day: "2-digit",
     month: "long",
     year: "numeric",
   }).format(date)
 }
 
+/** Standard 3: "06 September 2026, 14:31" (Full Date + Jam) */
+export function formatDateTime(value?: string | Date | null, fallback = "-"): string {
+  const date = parseDate(value)
+  if (!date) return fallback
+  const datePart = new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date)
+  const timePart = new Intl.DateTimeFormat("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date).replace(/\./g, ":")
+  return `${datePart}, ${timePart}`
+}
+
+/** Format: "14:31:09 WIB" (Hanya Waktu Jam:Menit:Detik) */
 export function formatTimeOnly(value?: Date | string | null, fallback = "--:--:-- WIB"): string {
-  if (!value) return fallback
-  const date = typeof value === "string" ? new Date(value) : value
-  if (Number.isNaN(date.getTime())) return fallback
+  const date = parseDate(value)
+  if (!date) return fallback
   const timeStr = new Intl.DateTimeFormat("id-ID", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
-  }).format(date)
+  }).format(date).replace(/\./g, ":")
   return `${timeStr} WIB`
 }
 
-export function formatDateTime(value?: string | null, fallback = "-"): string {
-  if (!value) return fallback
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return fallback
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date)
-}
+/** Alias/Kompatibilitas: Menggunakan Standard 1 (formatDate: "06 September 2026") */
+export const formatShortDate = formatDate
 
-export function formatShortDateTime(value?: string | null, fallback = "-"): string {
-  if (!value) return fallback
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return fallback
-  const datePart = new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date)
-  const timePart = new Intl.DateTimeFormat("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date)
-  return `${datePart} / ${timePart}`
-}
+/** Alias/Kompatibilitas: Menggunakan Standard 3 (formatDateTime: "06 September 2026, 14:31") */
+export const formatShortDateTime = formatDateTime
+export const formatTransactionDate = formatDateTime
 
-export function formatTransactionDate(value?: string | Date | null, fallback = "-"): string {
-  if (!value) return fallback
-  const date = typeof value === "string" ? new Date(value) : value
-  if (Number.isNaN(date.getTime())) return fallback
-  const datePart = new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date)
-  const timePart = new Intl.DateTimeFormat("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(date).replace(".", ":")
-  return `${datePart}, ${timePart}`
-}
-
+/** Format Mata Uang: "Rp 10.000" */
 export function formatCurrency(
   value?: string | number | null,
   fallback = "-"
@@ -162,6 +163,9 @@ export function purchasedQuantityInUnit(
   return qty
 }
 
+/** Alias export untuk kompatibilitas */
+export const formatPurchasedQuantityInUnit = purchasedQuantityInUnit
+
 export function formatStartDate(date: Date): string {
   return `${toDateOnly(date)}T00:00:00Z`
 }
@@ -177,9 +181,9 @@ function toDateOnly(date: Date): string {
   return `${yyyy}-${mm}-${dd}`
 }
 
-export function formatDateToYYYYMMDD(dateStr?: string | null): string {
+export function formatDateToYYYYMMDD(dateStr?: string | Date | null): string {
   if (!dateStr) return ""
-  const date = new Date(dateStr)
-  if (Number.isNaN(date.getTime())) return ""
+  const date = parseDate(dateStr)
+  if (!date) return ""
   return toDateOnly(date)
 }
