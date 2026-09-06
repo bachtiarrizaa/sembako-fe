@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Receipt,
+  Package,
   ShoppingCart,
-  Bell,
+  Receipt,
   Grid,
 } from "lucide-react";
 import { CashierMenuSheet } from "./CashierMenuSheet";
@@ -28,9 +28,9 @@ export function CashierBottomBar() {
       icon: LayoutDashboard,
     },
     {
-      label: "Riwayat",
-      href: "/cashier/history",
-      icon: Receipt,
+      label: "Produk",
+      href: "/cashier/products",
+      icon: Package,
     },
     {
       label: "Transaksi",
@@ -38,9 +38,9 @@ export function CashierBottomBar() {
       icon: ShoppingCart,
     },
     {
-      label: "Notifikasi",
-      href: "/cashier/notifications",
-      icon: Bell,
+      label: "Riwayat",
+      href: "/cashier/history",
+      icon: Receipt,
     },
   ];
 
@@ -71,7 +71,7 @@ export function CashierBottomBar() {
             );
           })()}
 
-          {/* Item 2: Riwayat */}
+          {/* Item 2: Produk */}
           {(() => {
             const item = navItems[1];
             const active = isPathActive(item.href);
@@ -125,7 +125,7 @@ export function CashierBottomBar() {
             );
           })()}
 
-          {/* Item 4: Notifikasi */}
+          {/* Item 4: Riwayat */}
           {(() => {
             const item = navItems[3];
             const active = isPathActive(item.href);

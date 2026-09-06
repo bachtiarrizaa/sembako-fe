@@ -13,10 +13,12 @@ import { CustomPagination } from "@/components/common/Pagination"
 import { Switch } from "@/components/ui/switch"
 import { ConfirmModal } from "@/components/common/ConfirmModal"
 import { usePermission } from "@/hooks/usePermission"
+import { useUserMe } from "@/features/users/hooks/useUserMe"
 import { useProducts, useUpdateProductStatus, useDeleteProduct } from "../hooks"
 import { ProductResponse } from "../types/product"
 import { ProductFormDialog } from "./ProductFormDialog"
 import { ProductDetailDialog } from "./ProductDetailDialog"
+import { CashierProductCardGrid } from "./CashierProductCardGrid"
 
 export function ProductsPage() {
   const router = useRouter()
@@ -24,13 +26,20 @@ export function ProductsPage() {
   const searchParams = useSearchParams()
 
   const { hasPermission } = usePermission()
+  const { data: userData } = useUserMe()
+  const isCashier = userData?.data?.role?.name?.toLowerCase() === "cashier"
 
   const page = Number(searchParams.get("page") ?? 1)
   const limit = Number(searchParams.get("limit") ?? 10)
   const search = searchParams.get("search") ?? ""
 
   // Queries & Mutations
-  const { data, isLoading, isFetching, isError } = useProducts({ page, limit, search })
+  const { data, isLoading, isFetching, isError } = useProducts({
+    page,
+    limit,
+    search,
+    include: "units",
+  })
   const updateStatus = useUpdateProductStatus()
   const deleteProduct = useDeleteProduct()
 
@@ -240,10 +249,16 @@ export function ProductsPage() {
     <div className="space-y-5 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Manajemen Produk</h1>
-          <p className="text-sm text-muted-foreground">Kelola data katalog produk Anda</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {isCashier ? "Daftar Produk" : "Manajemen Produk"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {isCashier
+              ? "Daftar produk dan rincian harga yang berlaku"
+              : "Kelola data katalog produk Anda"}
+          </p>
         </div>
-        {hasPermission("products:create") && (
+        {!isCashier && hasPermission("products:create") && (
           <Button
             onClick={handleAddClick}
             className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4 gap-1.5"
@@ -269,22 +284,26 @@ export function ProductsPage() {
         </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={products}
-        isLoading={isLoading}
-        isFetching={isFetching}
-        emptyMessage={search ? "Data tidak ditemukan" : "Belum ada produk"}
-        emptyIcon={
-          search ? (
-            <SearchX className="size-8 text-muted-foreground/60" />
-          ) : (
-            <Inbox className="size-8 text-muted-foreground/60" />
-          )
-        }
-        page={page}
-        limit={limit}
-      />
+      {isCashier ? (
+        <CashierProductCardGrid products={products} isLoading={isLoading} />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={products}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          emptyMessage={search ? "Data tidak ditemukan" : "Belum ada produk"}
+          emptyIcon={
+            search ? (
+              <SearchX className="size-8 text-muted-foreground/60" />
+            ) : (
+              <Inbox className="size-8 text-muted-foreground/60" />
+            )
+          }
+          page={page}
+          limit={limit}
+        />
+      )}
 
       {pagination && (
         <CustomPagination pagination={pagination} onPageChange={handlePageChange} />
