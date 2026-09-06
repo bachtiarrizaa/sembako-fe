@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-import { Pencil, Trash2, SearchX, Inbox } from "lucide-react"
+import { Pencil, Trash2, SearchX, Inbox, Plus } from "lucide-react"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
@@ -120,24 +120,35 @@ export function CustomersPage() {
   const columns: Column<CustomerResponse>[] = [
     {
       header: "Nama Customer",
-      className: "w-[20%]",
-      cell: (item) => item.name || "-",
+      className: "w-[22%]",
+      cell: (item) => <span className="font-semibold text-foreground">{item.name || "-"}</span>,
     },
     {
       header: "No Telp/Hp",
-      className: "w-[18%]",
+      className: "w-[16%]",
       cell: (item) => item.phoneNumber || "-",
     },
     {
       header: "Alamat",
-      className: "w-[32%]",
+      className: "w-[28%]",
       cell: (item) => (
         <div className="whitespace-normal break-words leading-snug">{item.address || "-"}</div>
       ),
     },
     {
-      header: "Status",
+      header: "Total Poin",
       className: "w-[14%] text-center",
+      cell: (item) => (
+        <span className="font-bold text-foreground">
+          {item.totalPoints !== undefined && item.totalPoints !== null
+            ? item.totalPoints.toLocaleString("id-ID")
+            : 0}
+        </span>
+      ),
+    },
+    {
+      header: "Status",
+      className: "w-[10%] text-center",
       cell: (item) => {
         const isPendingThis = updateStatus.isPending && updateStatus.variables?.id === item.id
         return (
@@ -154,7 +165,7 @@ export function CustomersPage() {
     },
     {
       header: "Aksi",
-      className: "w-28 text-center",
+      className: "w-24 text-center",
       cell: (item) => (
         <div className="flex justify-center gap-1">
           <Button
@@ -192,7 +203,7 @@ export function CustomersPage() {
           <p className="text-sm text-muted-foreground">Kelola data customer & pembeli barang</p>
         </div>
         <Button
-          className="w-full sm:w-auto cursor-pointer font-medium px-3 py-4"
+          className="hidden sm:inline-flex cursor-pointer font-medium px-4 py-2"
           onClick={handleAdd}
         >
           Tambah
@@ -200,9 +211,17 @@ export function CustomersPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs text-muted-foreground">Tampilkan:</span>
-          <LimitSelect value={limit} onChange={handleLimitChange} />
+        <div className="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Tampilkan:</span>
+            <LimitSelect value={limit} onChange={handleLimitChange} />
+          </div>
+          <Button
+            className="sm:hidden cursor-pointer font-medium px-3.5 h-9 text-xs shrink-0"
+            onClick={handleAdd}
+          >
+            Tambah
+          </Button>
         </div>
         <div className="relative w-full sm:max-w-sm">
           <SearchBar
