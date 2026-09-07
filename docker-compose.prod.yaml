@@ -11,28 +11,5 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=/api
-      - BACKEND_URL=http://sembako-be:8080
-    depends_on:
-      - sembako-be
-    networks:
-      - sembako-net
+      - BACKEND_URL=${BACKEND_URL}
     restart: unless-stopped
-
-  # ─── Backend — PRODUCTION ───────────────────────────────────────────────────
-  sembako-be:
-    container_name: sembako-be-prod
-    image: sembako-be:main
-    # build:
-    #   context: ../sembako-be
-    #   dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - APP_ENV=production
-    networks:
-      - sembako-net
-    restart: unless-stopped
-
-networks:
-  sembako-net:
-    driver: bridge

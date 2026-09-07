@@ -8,32 +8,8 @@ services:
       target: staging
     ports:
       - "3000:3000"
-    # volumes tidak diperlukan di staging
     environment:
       - NODE_ENV=staging
       - NEXT_PUBLIC_API_URL=/api
-      - BACKEND_URL=http://sembako-be:8080
-    depends_on:
-      - sembako-be
-    networks:
-      - sembako-net
+      - BACKEND_URL=${BACKEND_URL}
     restart: unless-stopped
-
-  # ─── Backend — STAGING ──────────────────────────────────────────────────────
-  sembako-be:
-    container_name: sembako-be-staging
-    image: sembako-be:develop
-    # build:
-    #   context: ../sembako-be
-    #   dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - APP_ENV=staging
-    networks:
-      - sembako-net
-    restart: unless-stopped
-
-networks:
-  sembako-net:
-    driver: bridge
