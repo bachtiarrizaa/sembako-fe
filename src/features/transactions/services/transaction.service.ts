@@ -27,6 +27,14 @@ export const transactionService = {
     }
   },
 
+  exportTransactions: async (filters: Partial<TransactionSearch>): Promise<Blob> => {
+    const res = await apiClient.get<Blob>("/transactions/export", {
+      params: buildListParams({ page: 1, limit: 10 }, filters),
+      responseType: "blob",
+    });
+    return res.data;
+  },
+
   getTransactionById: async (id: string): Promise<TransactionResponse | null> => {
     try {
       const res = await apiClient.get<ApiResponse<TransactionResponse>>(`/transactions/${id}`)

@@ -4,22 +4,23 @@ import { useState, useEffect, useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { DataTable } from "@/components/common/DataTable"
 import type { Column } from "@/components/common/DataTable"
-import { SearchX, Inbox, Eye, X } from "lucide-react"
+import { SearchX, Inbox, Eye, X, FileSpreadsheet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LimitSelect } from "@/components/common/LimitSelect"
 import { SearchBar } from "@/components/common/SearchBar"
 import { useDebouncedValue } from "@/hooks/useDebounceValue"
 import { CustomPagination } from "@/components/common/Pagination"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatTransactionDate } from "@/utils/format"
+import { formatCurrency, formatDate } from "@/utils/format"
 import {
   PAYMENT_METHOD_LABELS,
   TRANSACTION_STATUSES,
 } from "../constants/transaction.constant"
-import { useTransactions } from "../hooks"
-import type { TransactionResponse, PaymentMethod } from "../types/transaction"
+import { useTransactions, useExportTransactions } from "../hooks"
+import type { TransactionResponse, PaymentMethod, TransactionStatus } from "../types/transaction"
 import { TransactionDetailDialog } from "./TransactionDetailDialog"
 import { VoidTransactionDialog } from "./VoidTransactionDialog"
+import { TransactionFilterBar, type TransactionFilterValues } from "./TransactionFilterBar"
 import { useUserMe } from "@/features/users/hooks/useUserMe"
 
 export function TransactionsPage() {
@@ -34,8 +35,36 @@ export function TransactionsPage() {
   const page = Number(searchParams.get("page") ?? 1)
   const limit = Number(searchParams.get("limit") ?? 10)
   const search = searchParams.get("search") ?? ""
+  const startDate = searchParams.get("startDate") ?? ""
+  const endDate = searchParams.get("endDate") ?? ""
+  const paymentMethod = searchParams.get("paymentMethod") ?? ""
+  const status = searchParams.get("status") ?? ""
 
-  const { data, isLoading, isFetching, isError } = useTransactions({ page, limit, search })
+  const hasActiveFilters = Boolean(
+    search || startDate || endDate || paymentMethod || status
+  )
+
+  const { data, isLoading, isFetching, isError } = useTransactions({
+    page,
+    limit,
+    search: search || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+    paymentMethod: (paymentMethod as PaymentMethod) || undefined,
+    status: (status as TransactionStatus) || undefined,
+  })
+
+  const { exportExcel, isExporting } = useExportTransactions()
+
+  const handleExport = () => {
+    exportExcel({
+      search: search || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      paymentMethod: (paymentMethod as PaymentMethod) || undefined,
+      status: (status as TransactionStatus) || undefined,
+    })
+  }
 
   const handleLimitChange = useCallback(
     (newLimit: number) => {
@@ -57,6 +86,27 @@ export function TransactionsPage() {
     },
     [searchParams, pathname, router]
   )
+
+  const handleFilterChange = useCallback(
+    (key: keyof TransactionFilterValues, value: string | undefined) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (value) {
+        params.set(key, value)
+      } else {
+        params.delete(key)
+      }
+      params.set("page", "1")
+      router.replace(`${pathname}?${params.toString()}`)
+    },
+    [searchParams, pathname, router]
+  )
+
+  const handleResetFilters = useCallback(() => {
+    const params = new URLSearchParams()
+    if (limit !== 10) params.set("limit", limit.toString())
+    router.replace(`${pathname}?${params.toString()}`)
+    setSearchInput("")
+  }, [limit, pathname, router])
 
   const [searchInput, setSearchInput] = useState(search)
   const [prevSearch, setPrevSearch] = useState(search)
@@ -146,7 +196,7 @@ export function TransactionsPage() {
     },
     {
       header: "Tanggal Transaksi",
-      cell: (item) => formatTransactionDate(item.createdAt),
+      cell: (item) => formatDate(item.createdAt),
     },
     {
       header: "Kasir",
@@ -248,6 +298,15 @@ export function TransactionsPage() {
               : "Daftar seluruh transaksi penjualan toko"}
           </p>
         </div>
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          disabled={isExporting}
+          className="w-full sm:w-auto cursor-pointer font-medium border-emerald-600/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
+        >
+          <FileSpreadsheet className="size-4 mr-2 text-emerald-600 dark:text-emerald-400" />
+          {isExporting ? "Mengunduh..." : "Export Excel"}
+        </Button>
       </div>
 
       <div className="flex flex-row items-center justify-between gap-2.5 sm:gap-4">
@@ -266,14 +325,24 @@ export function TransactionsPage() {
         </div>
       </div>
 
+      <TransactionFilterBar
+        startDate={startDate}
+        endDate={endDate}
+        paymentMethod={paymentMethod}
+        status={status}
+        hasActiveFilters={hasActiveFilters}
+        onFilterChange={handleFilterChange}
+        onResetFilters={handleResetFilters}
+      />
+
       <DataTable
         columns={columns}
         data={transactions}
         isLoading={isLoading}
         isFetching={isFetching}
-        emptyMessage={search ? "Transaksi tidak ditemukan" : "Belum ada transaksi"}
+        emptyMessage={hasActiveFilters ? "Transaksi tidak ditemukan" : "Belum ada transaksi"}
         emptyIcon={
-          search ? (
+          hasActiveFilters ? (
             <SearchX className="size-8 text-muted-foreground/60" />
           ) : (
             <Inbox className="size-8 text-muted-foreground/60" />
