@@ -1,0 +1,31 @@
+name: Deploy Staging (develop)
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Staging
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            set -e
+            echo "Deploying sembako-fe (staging)..."
+            cd ~/sembako/sembako-fe-dev
+            git checkout develop
+            git pull origin develop
+            docker compose down --remove-orphans
+            docker compose up -d --build
+            echo "Staging deployed successfully"
+          EOF
