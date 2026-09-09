@@ -15,11 +15,13 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+          if [ -n "${{ secrets.PROD_HOST }}" ]; then
+            ssh-keyscan -H "${{ secrets.PROD_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          fi
 
       - name: Deploy to Production
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
             set -e
             echo "Deploying sembako-fe (production)..."
             cd ~/sembako-fe
