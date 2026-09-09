@@ -13,13 +13,15 @@ jobs:
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.DEV_DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+          if [ -n "${{ secrets.DEV_DEPLOY_HOST }}" ]; then
+            ssh-keyscan -H "${{ secrets.DEV_DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          fi
 
       - name: Deploy to Staging
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.DEV_DEPLOY_USER }}@${{ secrets.DEV_DEPLOY_HOST }} << 'EOF'
             set -e
             echo "Deploying sembako-fe (staging)..."
             cd ~/sembako/sembako-fe-dev
