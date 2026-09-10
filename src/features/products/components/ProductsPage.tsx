@@ -33,17 +33,16 @@ export function ProductsPage() {
   const limit = Number(searchParams.get("limit") ?? 10)
   const search = searchParams.get("search") ?? ""
 
-  // Queries & Mutations
   const { data, isLoading, isFetching, isError } = useProducts({
     page,
     limit,
     search,
     include: "units",
+    is_active: isCashier ? true : undefined,
   })
   const updateStatus = useUpdateProductStatus()
   const deleteProduct = useDeleteProduct()
 
-  // State
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null)
 
@@ -53,7 +52,6 @@ export function ProductsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null)
 
-  // Search logic
   const handleLimitChange = useCallback(
     (newLimit: number) => {
       const params = new URLSearchParams(searchParams.toString())
@@ -317,12 +315,14 @@ export function ProductsPage() {
       />
 
       {/* Main product form dialog (Add/Edit) */}
-      <ProductFormDialog
-        key={selectedProductId ?? (formDialogOpen ? "create" : "closed")}
-        open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
-        productId={selectedProductId}
-      />
+      {!isCashier && (
+        <ProductFormDialog
+          key={selectedProductId ?? (formDialogOpen ? "create" : "closed")}
+          open={formDialogOpen}
+          onOpenChange={setFormDialogOpen}
+          productId={selectedProductId}
+        />
+      )}
 
       {/* Product deletion confirmation dialog */}
       <ConfirmModal

@@ -50,9 +50,9 @@ export function ProductFormDialog({ open, onOpenChange, productId }: ProductForm
   const { data: detailResponse, isLoading: isDetailLoading } = useProductDetails(productId)
   const product = detailResponse?.data
 
-  // Fetch categories & master units
-  const { data: categoriesData, isLoading: isCategoriesLoading } = useCategories({ page: 1, limit: 100 })
-  const { data: unitsData, isLoading: isUnitsLoading } = useUnits({ page: 1, limit: 100 })
+  // Fetch categories & master units (only when modal is open)
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useCategories({ page: 1, limit: 100 }, { enabled: open })
+  const { data: unitsData, isLoading: isUnitsLoading } = useUnits({ page: 1, limit: 100 }, { enabled: open })
   const categories = categoriesData?.items ?? []
   const masterUnits = unitsData?.items ?? []
 
