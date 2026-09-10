@@ -43,10 +43,9 @@ export function PosProductCatalog({
     selectedDiscountFilter === "WITH_DISCOUNT"
       ? true
       : selectedDiscountFilter === "NO_DISCOUNT"
-      ? false
-      : undefined;
+        ? false
+        : undefined;
 
-  // Real API Queries with include: "units", category_id, search, has_discount
   const { data: productsData, isLoading: isProductsLoading } = useProducts(
     {
       page: 1,
@@ -55,9 +54,10 @@ export function PosProductCatalog({
       category_id: selectedCategoryId !== "ALL" ? selectedCategoryId : undefined,
       search: debouncedSearch ? debouncedSearch : undefined,
       has_discount: hasDiscountParam,
+      is_active: true,
     },
     {
-      staleTime: 1000 * 30, // 30s cache for POS catalog
+      staleTime: 1000 * 30,
     }
   );
   const { data: categoriesData, isLoading: isCategoriesLoading } = useCategories({
@@ -70,7 +70,6 @@ export function PosProductCatalog({
     ...(categoriesData?.items || []),
   ];
 
-  // Map real API products to PosProduct format
   const apiProducts: PosProduct[] = (productsData?.items || []).map((p) => ({
     id: p.id,
     name: p.name,
@@ -82,22 +81,22 @@ export function PosProductCatalog({
     units:
       p.units && p.units.length > 0
         ? p.units.map((u) => ({
-            id: u.id,
-            name: u.unit?.name || "Unit",
-            price: u.discountedPrice && u.discountedPrice > 0 ? u.discountedPrice : u.sellingPrice,
-            originalPrice: u.discountedPrice && u.discountedPrice > 0 && u.discountedPrice < u.sellingPrice ? u.sellingPrice : undefined,
-            stock: p.stock ?? 0,
-            allowDecimal: ["kg", "liter", "l", "gram", "g"].includes(u.unit?.name?.toLowerCase() || ""),
-          }))
+          id: u.id,
+          name: u.unit?.name || "Unit",
+          price: u.discountedPrice && u.discountedPrice > 0 ? u.discountedPrice : u.sellingPrice,
+          originalPrice: u.discountedPrice && u.discountedPrice > 0 && u.discountedPrice < u.sellingPrice ? u.sellingPrice : undefined,
+          stock: p.stock ?? 0,
+          allowDecimal: ["kg", "liter", "l", "gram", "g"].includes(u.unit?.name?.toLowerCase() || ""),
+        }))
         : [
-            {
-              id: p.id,
-              name: p.baseUnit?.name || "Pcs",
-              price: 0,
-              stock: p.stock ?? 0,
-              allowDecimal: false,
-            },
-          ],
+          {
+            id: p.id,
+            name: p.baseUnit?.name || "Pcs",
+            price: 0,
+            stock: p.stock ?? 0,
+            allowDecimal: false,
+          },
+        ],
   }));
 
   const filteredProducts = apiProducts.filter((p) => {
@@ -195,11 +194,10 @@ export function PosProductCatalog({
             return (
               <div
                 key={product.id}
-                className={`group bg-white p-2.5 sm:p-3 rounded-2xl border transition-all flex flex-col justify-between relative hover:shadow-md h-fit w-full ${
-                  qtyInCart > 0
-                    ? "border-primary ring-2 ring-primary/20 bg-teal-50/20"
-                    : "border-slate-200/80 hover:border-slate-300"
-                }`}
+                className={`group bg-white p-2.5 sm:p-3 rounded-2xl border transition-all flex flex-col justify-between relative hover:shadow-md h-fit w-full ${qtyInCart > 0
+                  ? "border-primary ring-2 ring-primary/20 bg-teal-50/20"
+                  : "border-slate-200/80 hover:border-slate-300"
+                  }`}
               >
                 {/* Cart Count Badge */}
                 {qtyInCart > 0 && (
@@ -219,9 +217,8 @@ export function PosProductCatalog({
                     </Badge>
 
                     <span
-                      className={`text-[9.5px] sm:text-[10px] font-medium text-right shrink-0 ${
-                        product.stock <= 5 ? "text-amber-600 font-bold" : "text-slate-500 font-medium"
-                      }`}
+                      className={`text-[9.5px] sm:text-[10px] font-medium text-right shrink-0 ${product.stock <= 5 ? "text-amber-600 font-bold" : "text-slate-500 font-medium"
+                        }`}
                     >
                       Stok: {product.stock} {product.baseUnitName}
                     </span>
@@ -245,13 +242,11 @@ export function PosProductCatalog({
                               e.stopPropagation();
                               setSelectedUnits((prev) => ({ ...prev, [product.id]: unit.id }));
                             }}
-                            className={`shrink-0 whitespace-nowrap px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[9.5px] sm:text-[10.5px] font-bold transition-all cursor-pointer text-center ${
-                              product.units.length <= 2 ? "flex-1" : ""
-                            } ${
-                              isSelected
+                            className={`shrink-0 whitespace-nowrap px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[9.5px] sm:text-[10.5px] font-bold transition-all cursor-pointer text-center ${product.units.length <= 2 ? "flex-1" : ""
+                              } ${isSelected
                                 ? "bg-white text-primary shadow-2xs border border-primary/30 font-extrabold"
                                 : "text-slate-500 hover:text-slate-800 border border-transparent"
-                            }`}
+                              }`}
                           >
                             {unit.name}
                           </button>
@@ -300,11 +295,10 @@ export function PosProductCatalog({
                         e.stopPropagation();
                         onAddToCart(product, currentUnit);
                       }}
-                      className={`size-7 sm:size-8 rounded-lg sm:rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-                        qtyInCart > 0
-                          ? "bg-primary text-white shadow-xs hover:bg-primary/90"
-                          : "bg-slate-100 text-slate-700 hover:bg-primary hover:text-white"
-                      }`}
+                      className={`size-7 sm:size-8 rounded-lg sm:rounded-xl flex items-center justify-center transition-all cursor-pointer active:scale-95 ${qtyInCart > 0
+                        ? "bg-primary text-white shadow-xs hover:bg-primary/90"
+                        : "bg-slate-100 text-slate-700 hover:bg-primary hover:text-white"
+                        }`}
                       title={`Tambah (${currentUnit.name})`}
                     >
                       <Plus className="w-3.5 h-3.5" />

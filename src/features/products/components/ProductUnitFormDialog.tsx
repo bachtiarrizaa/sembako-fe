@@ -46,18 +46,13 @@ export function ProductUnitFormDialog({
   onSubmit,
 }: ProductUnitFormDialogProps) {
   const isEdit = Boolean(productUnit)
-
-  // Fetch master units for dropdown select
-  const { data: unitsData, isLoading: isUnitsLoading } = useUnits({ page: 1, limit: 100 })
+  const { data: unitsData, isLoading: isUnitsLoading } = useUnits({ page: 1, limit: 100 }, { enabled: open })
   const masterUnits = unitsData?.items ?? []
 
-  // Filter out master units that are already added to this product (unless it's the one we are editing)
   const availableUnits = masterUnits.filter((mu) => {
     if (isEdit && (productUnit?.unitId === mu.id || productUnit?.unit?.id === mu.id)) return true
     return !existingUnitIds.includes(mu.id)
   })
-
-  // Find the selected unit's name for display in read-only mode
   const selectedUnit = masterUnits.find((mu) => mu.id === (productUnit?.unitId || productUnit?.unit?.id))
   const displayUnitName = selectedUnit?.name || productUnit?.unit?.name || ""
 

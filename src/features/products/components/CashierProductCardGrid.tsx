@@ -33,7 +33,9 @@ export function CashierProductCardGrid({ products, isLoading }: CashierProductCa
     )
   }
 
-  if (products.length === 0) {
+  const activeProducts = products.filter((product) => product.isActive !== false)
+
+  if (activeProducts.length === 0) {
     return (
       <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center space-y-3 shadow-2xs">
         <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
@@ -51,7 +53,7 @@ export function CashierProductCardGrid({ products, isLoading }: CashierProductCa
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-      {products.map((product) => {
+      {activeProducts.map((product) => {
         const imageUrl = resolveStaticUrl(product.image)
         const isLowStock =
           product.minimumStock !== undefined &&
